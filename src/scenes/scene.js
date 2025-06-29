@@ -20,6 +20,11 @@ class Scene {
         this.isDragging = false;
         this.prevMouse = { x: 0, y: 0 };
         this.orbit = { azimuth: 0, polar: Math.PI / 4, radius: 8 }; // Camera spherical coords
+        this.targetAzimuth = this.orbit.azimuth; // Add this line
+
+        // For smooth rotation
+        this.targetRotationY = 0;
+        this.rotationLerpSpeed = 0.15;
     }
 
     init() {
@@ -59,6 +64,9 @@ class Scene {
         this.cube.position.y = 0.5;
         this.scene.add(this.cube);
 
+        // Set initial target rotation to match cube's rotation
+        this.targetRotationY = this.cube.rotation.y;
+
         // Add the floor
         const floorGeometry = new THREE.PlaneGeometry(10, 10);
         const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
@@ -88,19 +96,19 @@ class Scene {
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    // Turn the cube to the left (rotate around y axis)
-                    // Allow rotation even while jumping
                     if (this.cube) {
-                        this.cube.rotation.y += Math.PI / 18; // 10 degrees per key press
+                        const delta = Math.PI / 18; // 10 degrees per key press
+                        this.targetRotationY += delta;
+                        this.targetAzimuth += delta; // Use targetAzimuth for smooth camera
                     }
                     break;
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    // Turn the cube to the right (rotate around y axis)
-                    // Allow rotation even while jumping
                     if (this.cube) {
-                        this.cube.rotation.y -= Math.PI / 18; // 10 degrees per key press
+                        const delta = Math.PI / 18; // 10 degrees per key press
+                        this.targetRotationY -= delta;
+                        this.targetAzimuth -= delta; // Use targetAzimuth for smooth camera
                     }
                     break;
                 case ' ':
@@ -140,8 +148,9 @@ class Scene {
             this.prevMouse.x = e.clientX;
             this.prevMouse.y = e.clientY;
 
-            // Adjust azimuth and polar angles
+            // Adjust azimuth and polar angles for camera only (do NOT update targetRotationY or targetAzimuth for cube)
             this.orbit.azimuth -= deltaX * 0.01;
+            this.targetAzimuth = this.orbit.azimuth; // Keep targetAzimuth in sync with manual camera movement
             this.orbit.polar -= deltaY * 0.01;
             // Clamp polar angle to avoid flipping
             this.orbit.polar = Math.max(0.1, Math.min(Math.PI - 0.1, this.orbit.polar));
@@ -178,6 +187,12 @@ class Scene {
         requestAnimationFrame(() => this.animate());
 
         if (this.cube) {
+            // Smoothly interpolate rotation
+            this.cube.rotation.y += (this.targetRotationY - this.cube.rotation.y) * this.rotationLerpSpeed;
+
+            // Smoothly interpolate camera azimuth
+            this.orbit.azimuth += (this.targetAzimuth - this.orbit.azimuth) * this.rotationLerpSpeed;
+
             // Allow movement while jumping (no change needed, just remove any restriction that disables movement during jump)
             // Move forward/backward based on cube's facing direction
             if (this.movement.z !== 0) {
