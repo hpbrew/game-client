@@ -32,6 +32,13 @@ class Scene {
         const cubeGeometry = new THREE.BoxGeometry();
         const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+        // Add a black border using EdgesGeometry and LineSegments
+        const edges = new THREE.EdgesGeometry(cubeGeometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
+        const line = new THREE.LineSegments(edges, lineMaterial);
+        this.cube.add(line);
+
         this.cube.position.y = 0.5;
         this.scene.add(this.cube);
 
