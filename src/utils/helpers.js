@@ -1,11 +1,18 @@
-export function createCube(size, color) {
-    const geometry = new THREE.BoxGeometry(size, size, size);
-    const material = new THREE.MeshBasicMaterial({ color: color });
+import * as THREE from 'three';
+
+export function createBoxGeometry(width, height, depth) {
+    return new THREE.BoxGeometry(width, height, depth);
+}
+
+export function createMesh(material, geometry) {
     return new THREE.Mesh(geometry, material);
 }
 
-export function createSphere(radius, color) {
-    const geometry = new THREE.SphereGeometry(radius, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: color });
-    return new THREE.Mesh(geometry, material);
+export function createBasicMaterial(color) {
+    return new THREE.MeshBasicMaterial({ color });
+}
+
+export function animate(callback) {
+    requestAnimationFrame(animate.bind(null, callback));
+    callback();
 }

@@ -1,54 +1,59 @@
-# Game Client
+# Three.js Web Application
 
-This project is a simple game client built using Three.js, a popular JavaScript library for creating 3D graphics in the browser. The game client initializes a 3D scene, sets up a camera and renderer, and provides basic functionalities to create and manipulate 3D objects.
+This project is a simple web application built using Three.js, a popular JavaScript library for creating 3D graphics in the browser. The application serves as a starting point for developing 3D visualizations and interactive experiences.
 
 ## Project Structure
 
 ```
-game-client
+threejs-web-app
+├── public
+│   ├── index.html        # Main HTML document
+│   └── styles.css       # Styles for the web application
 ├── src
-│   ├── index.js          # Entry point of the application
+│   ├── main.js          # Entry point for JavaScript code
 │   ├── scenes
-│   │   └── mainScene.js  # Main scene setup
-│   ├── components
-│   │   └── renderer.js    # Rendering logic
-│   └── utils
-│       └── helpers.js     # Utility functions for geometry creation
-├── package.json           # NPM configuration file
-└── README.md              # Project documentation
+│   │   └── scene.js     # Scene setup and management
+│   ├── utils
+│   │   └── helpers.js    # Utility functions
+│   └── assets
+│       └── README.md    # Documentation for assets
+├── package.json          # npm configuration file
+├── vite.config.js        # Vite configuration file
+└── README.md             # Project documentation
 ```
 
 ## Getting Started
 
-To get started with the game-client project, follow these steps:
+To get started with this project, follow these steps:
 
-1. **Clone the repository** (if applicable):
-   ```bash
+1. **Clone the repository:**
+   ```
    git clone <repository-url>
-   cd game-client
+   cd threejs-web-app
    ```
 
-2. **Install dependencies**:
-   Make sure you have Node.js and npm installed. Then run:
-   ```bash
+2. **Install dependencies:**
+   ```
    npm install
    ```
 
-3. **Run the application**:
-   You can start the application using:
-   ```bash
-   npm start
+3. **Run the application:**
+   ```
+   npm run dev
    ```
 
-## Dependencies
+4. **Open your browser:**
+   Navigate to `http://localhost:3000` (or the port specified in your terminal) to view the application.
 
-This project uses the following dependencies:
+## Features
 
-- Three.js: A JavaScript library for creating 3D graphics.
+- Basic Three.js scene setup
+- Customizable geometries and materials
+- Animation loop for rendering
 
 ## Contributing
 
-If you would like to contribute to this project, please fork the repository and submit a pull request. 
+Feel free to submit issues or pull requests if you have suggestions or improvements for the project.
 
 ## License
 
