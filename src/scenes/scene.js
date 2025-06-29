@@ -129,18 +129,18 @@ class Scene {
             this.cube.position.x += this.movement.x;
             this.cube.position.y += this.movement.y;
 
-            // Handle jumping and gravity
+            // Handle jumping and gravity (on y axis)
             if (this.isJumping) {
-                this.cube.position.z += this.jumpVelocity;
+                this.cube.position.y += this.jumpVelocity;
                 this.jumpVelocity += this.gravity;
-                if (this.cube.position.z <= 0.5) {
-                    this.cube.position.z = 0.5;
+                if (this.cube.position.y <= 0.5) {
+                    this.cube.position.y = 0.5;
                     this.isJumping = false;
                     this.jumpVelocity = 0;
                 }
             }
-            if (this.cube.position.z < 0.5) {
-                this.cube.position.z = 0.5;
+            if (this.cube.position.y < 0.5) {
+                this.cube.position.y = 0.5;
                 this.isJumping = false;
                 this.jumpVelocity = 0;
             }
