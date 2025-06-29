@@ -8,18 +8,20 @@ class Scene {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
 
-        this.cube = null; // Reference to the cube
-        this.floor = null; // Reference to the floor
-        this.movement = { x: 0, y: 0 }; // Movement state
-        this.isJumping = false; // Track if the cube is jumping
-        this.jumpVelocity = 0; // Velocity for the jump
-        this.gravity = -0.01; // Simulated gravity
+        this.cube = null;
+        this.floor = null;
+        this.movement = { x: 0, y: 0 };
+        this.isJumping = false;
+        this.jumpVelocity = 0;
+        this.gravity = -0.01;
+
+        // Camera orbit controls state
+        this.isDragging = false;
+        this.prevMouse = { x: 0, y: 0 };
+        this.orbit = { azimuth: 0, polar: Math.PI / 4, radius: 8 }; // Camera spherical coords
     }
 
     init() {
-        this.camera.position.z = 5;
-        this.camera.position.y = 5; // Raise the camera to look down at the floor
-        this.camera.lookAt(0, 0, 0); // Make the camera look at the center of the scene
         this.addObjects();
         this.addEventListeners();
         this.animate();
@@ -30,15 +32,18 @@ class Scene {
         const cubeGeometry = new THREE.BoxGeometry();
         const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        this.cube.position.y = 0.5; // Raise the cube slightly above the floor
+        this.cube.position.y = 0.5;
         this.scene.add(this.cube);
 
         // Add the floor
         const floorGeometry = new THREE.PlaneGeometry(10, 10);
         const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
         this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        this.floor.rotation.x = -Math.PI / 2; // Rotate the floor to lie flat
+        this.floor.rotation.x = -Math.PI / 2;
         this.scene.add(this.floor);
+
+        // Set initial camera position using spherical coordinates
+        this.updateCameraPosition();
     }
 
     addEventListeners() {
@@ -56,10 +61,10 @@ class Scene {
                 case 'ArrowRight':
                     this.movement.x = 0.1;
                     break;
-                case ' ': // Spacebar
+                case ' ':
                     if (!this.isJumping) {
                         this.isJumping = true;
-                        this.jumpVelocity = 0.2; // Initial jump velocity
+                        this.jumpVelocity = 0.2;
                     }
                     break;
             }
@@ -77,6 +82,43 @@ class Scene {
                     break;
             }
         });
+
+        // Mouse controls for camera orbit
+        this.renderer.domElement.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            this.prevMouse.x = e.clientX;
+            this.prevMouse.y = e.clientY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+            const deltaX = e.clientX - this.prevMouse.x;
+            const deltaY = e.clientY - this.prevMouse.y;
+            this.prevMouse.x = e.clientX;
+            this.prevMouse.y = e.clientY;
+
+            // Adjust azimuth and polar angles
+            this.orbit.azimuth -= deltaX * 0.01;
+            this.orbit.polar -= deltaY * 0.01;
+            // Clamp polar angle to avoid flipping
+            this.orbit.polar = Math.max(0.1, Math.min(Math.PI - 0.1, this.orbit.polar));
+            this.updateCameraPosition();
+        });
+
+        window.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+    }
+
+    updateCameraPosition() {
+        if (!this.cube) return;
+        // Spherical to Cartesian conversion
+        const { azimuth, polar, radius } = this.orbit;
+        const x = this.cube.position.x + radius * Math.sin(polar) * Math.sin(azimuth);
+        const y = this.cube.position.y + radius * Math.cos(polar);
+        const z = this.cube.position.z + radius * Math.sin(polar) * Math.cos(azimuth);
+        this.camera.position.set(x, y, z);
+        this.camera.lookAt(this.cube.position);
     }
 
     animate() {
@@ -89,23 +131,22 @@ class Scene {
 
             // Handle jumping and gravity
             if (this.isJumping) {
-                this.cube.position.z += this.jumpVelocity; // Move cube upward
-                this.jumpVelocity += this.gravity; // Apply gravity
-
-                // Stop jumping when the cube lands back on the floor
-                if (this.cube.position.z <= 0.5) { // Floor level is 0.5 (cube's bottom)
+                this.cube.position.z += this.jumpVelocity;
+                this.jumpVelocity += this.gravity;
+                if (this.cube.position.z <= 0.5) {
                     this.cube.position.z = 0.5;
                     this.isJumping = false;
                     this.jumpVelocity = 0;
                 }
             }
-
-            // Prevent the cube from going below the floor
             if (this.cube.position.z < 0.5) {
                 this.cube.position.z = 0.5;
                 this.isJumping = false;
                 this.jumpVelocity = 0;
             }
+
+            // Always update camera to follow the cube
+            this.updateCameraPosition();
         }
 
         this.render();
@@ -115,5 +156,5 @@ class Scene {
         this.renderer.render(this.scene, this.camera);
     }
 }
-``
+
 export default Scene;
