@@ -10,7 +10,7 @@ class Scene {
 
         this.cube = null;
         this.floor = null;
-        this.movement = { x: 0, y: 0 };
+        this.movement = { x: 0, y: 0, z: 0 };
         this.isJumping = false;
         this.jumpVelocity = 0;
         this.gravity = -0.01;
@@ -50,10 +50,10 @@ class Scene {
         window.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case 'ArrowUp':
-                    this.movement.y = 0.1;
+                    this.movement.z = -0.1; // Move forward on z axis
                     break;
                 case 'ArrowDown':
-                    this.movement.y = -0.1;
+                    this.movement.z = 0.1; // Move backward on z axis
                     break;
                 case 'ArrowLeft':
                     this.movement.x = -0.1;
@@ -74,7 +74,7 @@ class Scene {
             switch (event.key) {
                 case 'ArrowUp':
                 case 'ArrowDown':
-                    this.movement.y = 0;
+                    this.movement.z = 0;
                     break;
                 case 'ArrowLeft':
                 case 'ArrowRight':
@@ -127,7 +127,7 @@ class Scene {
         // Update cube position based on movement
         if (this.cube) {
             this.cube.position.x += this.movement.x;
-            this.cube.position.y += this.movement.y;
+            this.cube.position.z += this.movement.z; // Move on z axis
 
             // Handle jumping and gravity (on y axis)
             if (this.isJumping) {
