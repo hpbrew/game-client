@@ -50,15 +50,23 @@ class Scene {
         window.addEventListener('keydown', (event) => {
             switch (event.key) {
                 case 'ArrowUp':
+                case 'w':
+                case 'W':
                     this.movement.z = -0.1; // Move forward on z axis
                     break;
                 case 'ArrowDown':
+                case 's':
+                case 'S':
                     this.movement.z = 0.1; // Move backward on z axis
                     break;
                 case 'ArrowLeft':
+                case 'a':
+                case 'A':
                     this.movement.x = -0.1;
                     break;
                 case 'ArrowRight':
+                case 'd':
+                case 'D':
                     this.movement.x = 0.1;
                     break;
                 case ' ':
@@ -74,10 +82,18 @@ class Scene {
             switch (event.key) {
                 case 'ArrowUp':
                 case 'ArrowDown':
+                case 'w':
+                case 'W':
+                case 's':
+                case 'S':
                     this.movement.z = 0;
                     break;
                 case 'ArrowLeft':
                 case 'ArrowRight':
+                case 'a':
+                case 'A':
+                case 'd':
+                case 'D':
                     this.movement.x = 0;
                     break;
             }
