@@ -124,6 +124,16 @@ class Scene {
         window.addEventListener('mouseup', () => {
             this.isDragging = false;
         });
+
+        // Add scroll wheel zoom for camera
+        this.renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            // Zoom in/out by changing the orbit radius
+            const zoomSpeed = 0.5;
+            this.orbit.radius += e.deltaY * 0.01 * zoomSpeed;
+            this.orbit.radius = Math.max(2, Math.min(50, this.orbit.radius)); // Clamp zoom
+            this.updateCameraPosition();
+        }, { passive: false });
     }
 
     updateCameraPosition() {
