@@ -1,5 +1,5 @@
 {
-  "name": "threejs-web-app",
+  "name": "game-client",
   "version": "1.0.0",
   "description": "A web application using Three.js for 3D graphics.",
   "main": "src/main.js",
