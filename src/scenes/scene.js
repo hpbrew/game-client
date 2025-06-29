@@ -59,22 +59,32 @@ class Scene {
                 case 'ArrowUp':
                 case 'w':
                 case 'W':
-                    this.movement.z = -0.1; // Move forward on z axis
+                    // Move forward in the direction the cube is facing
+                    this.movement.z = -0.1;
                     break;
                 case 'ArrowDown':
                 case 's':
                 case 'S':
-                    this.movement.z = 0.1; // Move backward on z axis
+                    // Move backward in the direction the cube is facing
+                    this.movement.z = 0.1;
                     break;
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    this.movement.x = -0.1;
+                    // Turn the cube to the left (rotate around y axis)
+                    // Allow rotation even while jumping
+                    if (this.cube) {
+                        this.cube.rotation.y += Math.PI / 18; // 10 degrees per key press
+                    }
                     break;
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    this.movement.x = 0.1;
+                    // Turn the cube to the right (rotate around y axis)
+                    // Allow rotation even while jumping
+                    if (this.cube) {
+                        this.cube.rotation.y -= Math.PI / 18; // 10 degrees per key press
+                    }
                     break;
                 case ' ':
                     if (!this.isJumping) {
@@ -95,14 +105,7 @@ class Scene {
                 case 'S':
                     this.movement.z = 0;
                     break;
-                case 'ArrowLeft':
-                case 'ArrowRight':
-                case 'a':
-                case 'A':
-                case 'd':
-                case 'D':
-                    this.movement.x = 0;
-                    break;
+                // No need to reset anything for left/right rotation keys
             }
         });
 
@@ -157,10 +160,22 @@ class Scene {
     animate() {
         requestAnimationFrame(() => this.animate());
 
-        // Update cube position based on movement
         if (this.cube) {
-            this.cube.position.x += this.movement.x;
-            this.cube.position.z += this.movement.z; // Move on z axis
+            // Allow movement while jumping (no change needed, just remove any restriction that disables movement during jump)
+            // Move forward/backward based on cube's facing direction
+            if (this.movement.z !== 0) {
+                const angle = this.cube.rotation.y;
+                this.cube.position.x += Math.sin(angle) * this.movement.z;
+                this.cube.position.z += Math.cos(angle) * this.movement.z;
+            }
+
+            // (Optional) Remove or keep strafe movement if desired
+            if (this.movement.x !== 0) {
+                // Strafe left/right relative to cube's facing direction
+                const angle = this.cube.rotation.y - Math.PI / 2;
+                this.cube.position.x += Math.sin(angle) * this.movement.x;
+                this.cube.position.z += Math.cos(angle) * this.movement.x;
+            }
 
             // Handle jumping and gravity (on y axis)
             if (this.isJumping) {
