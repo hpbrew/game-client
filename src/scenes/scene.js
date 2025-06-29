@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getSmileyTexture } from './smileyTexture';
 
 class Scene {
     constructor() {
@@ -30,8 +31,24 @@ class Scene {
     addObjects() {
         // Add the cube
         const cubeGeometry = new THREE.BoxGeometry();
-        const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        // Create materials for each face
+        const materials = [];
+
+        // Get the smiley texture from the helper function
+        const smileyTexture = getSmileyTexture();
+
+        // Assign materials: [right, left, top, bottom, front, back]
+        for (let i = 0; i < 6; i++) {
+            if (i === 5) {
+                // Back face (smiley)
+                materials.push(new THREE.MeshBasicMaterial({ map: smileyTexture }));
+            } else {
+                // Other faces (green)
+                materials.push(new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
+            }
+        }
+
+        this.cube = new THREE.Mesh(cubeGeometry, materials);
 
         // Add a black border using EdgesGeometry and LineSegments
         const edges = new THREE.EdgesGeometry(cubeGeometry);
