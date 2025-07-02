@@ -84,32 +84,22 @@ class Scene {
                 case 'ArrowUp':
                 case 'w':
                 case 'W':
-                    // Move forward in the direction the cube is facing
                     this.movement.z = -0.1;
                     break;
                 case 'ArrowDown':
                 case 's':
                 case 'S':
-                    // Move backward in the direction the cube is facing
                     this.movement.z = 0.1;
                     break;
                 case 'ArrowLeft':
                 case 'a':
                 case 'A':
-                    if (this.cube) {
-                        const delta = Math.PI / 18; // 10 degrees per key press
-                        this.targetRotationY += delta;
-                        this.targetAzimuth += delta; // Use targetAzimuth for smooth camera
-                    }
+                    this.movement.y = 0.045; // Start rotating left (slower)
                     break;
                 case 'ArrowRight':
                 case 'd':
                 case 'D':
-                    if (this.cube) {
-                        const delta = Math.PI / 18; // 10 degrees per key press
-                        this.targetRotationY -= delta;
-                        this.targetAzimuth -= delta; // Use targetAzimuth for smooth camera
-                    }
+                    this.movement.y = -0.045; // Start rotating right (slower)
                     break;
                 case ' ':
                     if (!this.isJumping) {
@@ -119,11 +109,11 @@ class Scene {
                     break;
                 case 'q':
                 case 'Q':
-                    this.movement.x = 0.1; // Strafe right (was left)
+                    this.movement.x = 0.1;
                     break;
                 case 'e':
                 case 'E':
-                    this.movement.x = -0.1; // Strafe left (was right)
+                    this.movement.x = -0.1;
                     break;
             }
         });
@@ -138,13 +128,20 @@ class Scene {
                 case 'S':
                     this.movement.z = 0;
                     break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    this.movement.y = 0; // Stop rotating
+                    break;
                 case 'q':
                 case 'Q':
                 case 'e':
                 case 'E':
-                    this.movement.x = 0; // Stop strafing
+                    this.movement.x = 0;
                     break;
-                // No need to reset anything for left/right rotation keys
             }
         });
 
@@ -201,13 +198,18 @@ class Scene {
         requestAnimationFrame(() => this.animate());
 
         if (this.cube) {
+            // Continuous rotation if movement.y is set
+            if (this.movement.y !== 0) {
+                this.targetRotationY += this.movement.y;
+                this.targetAzimuth += this.movement.y;
+            }
+
             // Smoothly interpolate rotation
             this.cube.rotation.y += (this.targetRotationY - this.cube.rotation.y) * this.rotationLerpSpeed;
 
             // Smoothly interpolate camera azimuth
             this.orbit.azimuth += (this.targetAzimuth - this.orbit.azimuth) * this.rotationLerpSpeed;
 
-            // Allow movement while jumping (no change needed, just remove any restriction that disables movement during jump)
             // Move forward/backward based on cube's facing direction
             if (this.movement.z !== 0) {
                 const angle = this.cube.rotation.y;
@@ -215,15 +217,14 @@ class Scene {
                 this.cube.position.z += Math.cos(angle) * this.movement.z;
             }
 
-            // (Optional) Remove or keep strafe movement if desired
+            // Strafe left/right relative to cube's facing direction
             if (this.movement.x !== 0) {
-                // Strafe left/right relative to cube's facing direction
                 const angle = this.cube.rotation.y - Math.PI / 2;
                 this.cube.position.x += Math.sin(angle) * this.movement.x;
                 this.cube.position.z += Math.cos(angle) * this.movement.x;
             }
 
-            // Handle jumping and gravity (on y axis)
+            // Handle jumping and gravity
             if (this.isJumping) {
                 this.cube.position.y += this.jumpVelocity;
                 this.jumpVelocity += this.gravity;
