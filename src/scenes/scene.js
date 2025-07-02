@@ -13,6 +13,7 @@ class Scene {
         this.floor = null;
         this.movement = { x: 0, y: 0, z: 0 };
         this.isJumping = false;
+        this.canDoubleJump = false; // Add this line
         this.jumpVelocity = 0;
         this.gravity = -0.01;
 
@@ -106,13 +107,20 @@ class Scene {
                     break;
                 case ' ':
                     if (!this.isJumping) {
+                        // First jump
                         this.isJumping = true;
+                        this.canDoubleJump = true; // Allow double jump after first jump
                         this.jumpVelocity = 0.2;
-                        // Capture current movement direction for jump
                         const angle = this.cube.rotation.y;
-                        // Use current movement.z for forward/backward, movement.x for strafe
                         this.jumpHorizontal.x = Math.sin(angle) * this.movement.z + Math.sin(angle - Math.PI / 2) * this.movement.x;
                         this.jumpHorizontal.z = Math.cos(angle) * this.movement.z + Math.cos(angle - Math.PI / 2) * this.movement.x;
+                    } else if (this.canDoubleJump) {
+                        // Double jump
+                        this.jumpVelocity = 0.2;
+                        const angle = this.cube.rotation.y;
+                        this.jumpHorizontal.x = Math.sin(angle) * this.movement.z + Math.sin(angle - Math.PI / 2) * this.movement.x;
+                        this.jumpHorizontal.z = Math.cos(angle) * this.movement.z + Math.cos(angle - Math.PI / 2) * this.movement.x;
+                        this.canDoubleJump = false; // Only allow one double jump
                     }
                     break;
                 case 'q':
@@ -241,6 +249,7 @@ class Scene {
                 if (this.cube.position.y <= 0.5) {
                     this.cube.position.y = 0.5;
                     this.isJumping = false;
+                    this.canDoubleJump = false; // Reset double jump on landing
                     this.jumpVelocity = 0;
                     this.jumpHorizontal.x = 0;
                     this.jumpHorizontal.z = 0;
@@ -249,6 +258,7 @@ class Scene {
             if (this.cube.position.y < 0.5) {
                 this.cube.position.y = 0.5;
                 this.isJumping = false;
+                this.canDoubleJump = false; // Reset double jump on landing
                 this.jumpVelocity = 0;
                 this.jumpHorizontal.x = 0;
                 this.jumpHorizontal.z = 0;
