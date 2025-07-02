@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { getSmileyTexture } from './smileyTexture';
+import { createNearbyBox } from '../objects';
 
 class Scene {
     constructor() {
@@ -11,6 +12,7 @@ class Scene {
 
         this.cube = null;
         this.floor = null;
+        this.nearbyBox = null; // Store reference to the nearby box
         this.movement = { x: 0, y: 0, z: 0 };
         this.isJumping = false;
         this.canDoubleJump = false; // Add this line
@@ -58,7 +60,6 @@ class Scene {
         }
 
         this.cube = new THREE.Mesh(cubeGeometry, materials);
-
         // Add a black border using EdgesGeometry and LineSegments
         const edges = new THREE.EdgesGeometry(cubeGeometry);
         const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
@@ -67,6 +68,10 @@ class Scene {
 
         this.cube.position.y = 0.5;
         this.scene.add(this.cube);
+
+        // Add the nearby box from the objects module
+        this.nearbyBox = createNearbyBox();
+        this.scene.add(this.nearbyBox);
 
         // Set initial target rotation to match cube's rotation
         this.targetRotationY = this.cube.rotation.y;
@@ -263,6 +268,54 @@ class Scene {
                 this.jumpHorizontal.x = 0;
                 this.jumpHorizontal.z = 0;
             }
+
+            // --- Collision detection between cube and nearby box ---
+            if (this.nearbyBox) {
+                const cubeBox = new THREE.Box3().setFromObject(this.cube);
+                const otherBox = new THREE.Box3().setFromObject(this.nearbyBox);
+
+                if (cubeBox.intersectsBox(otherBox)) {
+                    // Check vertical overlap
+                    const cubeBottom = this.cube.position.y - 0.5;
+                    const cubeTop = this.cube.position.y + 0.5;
+                    const boxBottom = this.nearbyBox.position.y - 0.5;
+                    const boxTop = this.nearbyBox.position.y + 0.5;
+
+                    // If the cube is falling onto the box (from above)
+                    if (
+                        this.jumpVelocity <= 0 && // falling
+                        cubeBottom < boxTop && cubeTop > boxTop && // cube is above box
+                        Math.abs(this.cube.position.x - this.nearbyBox.position.x) < 0.9 &&
+                        Math.abs(this.cube.position.z - this.nearbyBox.position.z) < 0.9
+                    ) {
+                        // Snap cube to top of box
+                        this.cube.position.y = boxTop + 0.5;
+                        this.isJumping = false;
+                        this.canDoubleJump = false;
+                        this.jumpVelocity = 0;
+                        this.jumpHorizontal.x = 0;
+                        this.jumpHorizontal.z = 0;
+                    } else {
+                        // Otherwise, block horizontal movement as before
+                        if (this.movement.z !== 0) {
+                            const angle = this.cube.rotation.y;
+                            this.cube.position.x -= Math.sin(angle) * this.movement.z;
+                            this.cube.position.z -= Math.cos(angle) * this.movement.z;
+                        }
+                        if (this.movement.x !== 0) {
+                            const angle = this.cube.rotation.y - Math.PI / 2;
+                            this.cube.position.x -= Math.sin(angle) * this.movement.x;
+                            this.cube.position.z -= Math.cos(angle) * this.movement.x;
+                        }
+                        // Prevent moving into the box while jumping horizontally
+                        if (this.isJumping) {
+                            this.cube.position.x -= this.jumpHorizontal.x;
+                            this.cube.position.z -= this.jumpHorizontal.z;
+                        }
+                    }
+                }
+            }
+            // --- end collision detection ---
 
             // Always update camera to follow the cube
             this.updateCameraPosition();
