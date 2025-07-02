@@ -16,6 +16,9 @@ class Scene {
         this.jumpVelocity = 0;
         this.gravity = -0.01;
 
+        // Add for jump movement
+        this.jumpHorizontal = { x: 0, z: 0 };
+
         // Camera orbit controls state
         this.isDragging = false;
         this.prevMouse = { x: 0, y: 0 };
@@ -105,6 +108,11 @@ class Scene {
                     if (!this.isJumping) {
                         this.isJumping = true;
                         this.jumpVelocity = 0.2;
+                        // Capture current movement direction for jump
+                        const angle = this.cube.rotation.y;
+                        // Use current movement.z for forward/backward, movement.x for strafe
+                        this.jumpHorizontal.x = Math.sin(angle) * this.movement.z + Math.sin(angle - Math.PI / 2) * this.movement.x;
+                        this.jumpHorizontal.z = Math.cos(angle) * this.movement.z + Math.cos(angle - Math.PI / 2) * this.movement.x;
                     }
                     break;
                 case 'q':
@@ -227,17 +235,23 @@ class Scene {
             // Handle jumping and gravity
             if (this.isJumping) {
                 this.cube.position.y += this.jumpVelocity;
+                this.cube.position.x += this.jumpHorizontal.x;
+                this.cube.position.z += this.jumpHorizontal.z;
                 this.jumpVelocity += this.gravity;
                 if (this.cube.position.y <= 0.5) {
                     this.cube.position.y = 0.5;
                     this.isJumping = false;
                     this.jumpVelocity = 0;
+                    this.jumpHorizontal.x = 0;
+                    this.jumpHorizontal.z = 0;
                 }
             }
             if (this.cube.position.y < 0.5) {
                 this.cube.position.y = 0.5;
                 this.isJumping = false;
                 this.jumpVelocity = 0;
+                this.jumpHorizontal.x = 0;
+                this.jumpHorizontal.z = 0;
             }
 
             // Always update camera to follow the cube
