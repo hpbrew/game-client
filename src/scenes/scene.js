@@ -117,6 +117,14 @@ class Scene {
                         this.jumpVelocity = 0.2;
                     }
                     break;
+                case 'q':
+                case 'Q':
+                    this.movement.x = 0.1; // Strafe right (was left)
+                    break;
+                case 'e':
+                case 'E':
+                    this.movement.x = -0.1; // Strafe left (was right)
+                    break;
             }
         });
 
@@ -129,6 +137,12 @@ class Scene {
                 case 's':
                 case 'S':
                     this.movement.z = 0;
+                    break;
+                case 'q':
+                case 'Q':
+                case 'e':
+                case 'E':
+                    this.movement.x = 0; // Stop strafing
                     break;
                 // No need to reset anything for left/right rotation keys
             }
