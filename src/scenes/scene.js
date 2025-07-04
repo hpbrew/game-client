@@ -85,6 +85,24 @@ class Scene {
 
         // Set initial camera position using spherical coordinates
         this.updateCameraPosition();
+
+        // Set a darker gradient skybox as the scene background
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Create vertical gradient (darker blue to gray)
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#274472'); // Dark blue
+        gradient.addColorStop(0.7, '#4b6584'); // Muted blue-gray
+        gradient.addColorStop(1, '#b2bec3'); // Light gray
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        this.scene.background = texture;
     }
 
     addEventListeners() {
