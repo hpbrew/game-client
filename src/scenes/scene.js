@@ -193,6 +193,13 @@ class Scene {
             this.isDragging = true;
             this.prevMouse.x = e.clientX;
             this.prevMouse.y = e.clientY;
+
+            // Request pointer lock on double mouse down (both buttons)
+            if (this.mouseButtons.left && this.mouseButtons.right) {
+                if (document.pointerLockElement !== this.renderer.domElement) {
+                    this.renderer.domElement.requestPointerLock();
+                }
+            }
         });
 
         window.addEventListener('mouseup', (e) => {
@@ -202,15 +209,24 @@ class Scene {
 
             // Stop moving the cube when either mouse button is released
             this.movement.z = 0;
+
+            // Exit pointer lock if no buttons are pressed
+            if (!this.mouseButtons.left && !this.mouseButtons.right && document.pointerLockElement === this.renderer.domElement) {
+                document.exitPointerLock();
+            }
         });
 
         // Mouse move event for dragging
         window.addEventListener('mousemove', (e) => {
             if (!this.isDragging) return;
-            const deltaX = e.clientX - this.prevMouse.x;
-            const deltaY = e.clientY - this.prevMouse.y;
-            this.prevMouse.x = e.clientX;
-            this.prevMouse.y = e.clientY;
+
+            // Use movementX/Y if pointer is locked, otherwise fallback to delta calculation
+            const deltaX = document.pointerLockElement === this.renderer.domElement ? e.movementX : e.clientX - this.prevMouse.x;
+            const deltaY = document.pointerLockElement === this.renderer.domElement ? e.movementY : e.clientY - this.prevMouse.y;
+            if (document.pointerLockElement !== this.renderer.domElement) {
+                this.prevMouse.x = e.clientX;
+                this.prevMouse.y = e.clientY;
+            }
 
             // Always allow camera movement
             this.orbit.azimuth -= deltaX * 0.01;
@@ -222,7 +238,7 @@ class Scene {
             // If both mouse buttons are held, keep cube's front facing the camera and move forward
             if (this.mouseButtons.left && this.mouseButtons.right) {
                 this.targetRotationY = this.orbit.azimuth;
-                this.movement.z = -0.1; // Move forward in the direction the cube is facing (toward camera)
+                this.movement.z = -0.1;
             }
         });
 
