@@ -235,18 +235,18 @@ class Scene {
     window.addEventListener("mouseup", (e) => {
       if (e.button === 0) this.mouseButtons.left = false
       if (e.button === 2) this.mouseButtons.right = false
-      this.isDragging = false
 
       // Stop moving the cube when either mouse button is released
       this.movement.z = 0
 
-      // Exit pointer lock if no buttons are pressed
-      if (
-        !this.mouseButtons.left &&
-        !this.mouseButtons.right &&
-        document.pointerLockElement === this.renderer.domElement
-      ) {
-        document.exitPointerLock()
+      // Only stop dragging if both buttons are released
+      if (!this.mouseButtons.left && !this.mouseButtons.right) {
+        this.isDragging = false
+
+        // Exit pointer lock if no buttons are pressed
+        if (document.pointerLockElement === this.renderer.domElement) {
+          document.exitPointerLock()
+        }
       }
     })
 
