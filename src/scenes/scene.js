@@ -235,6 +235,9 @@ class Scene {
             this.orbit.radius = Math.max(2, Math.min(50, this.orbit.radius)); // Clamp zoom
             this.updateCameraPosition();
         }, { passive: false });
+
+        // Prevent default right-click context menu on the renderer
+        this.renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
     updateCameraPosition() {
