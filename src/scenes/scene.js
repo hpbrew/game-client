@@ -188,6 +188,14 @@ class Scene {
         case "E":
           this.movement.x = -0.1
           break
+        case "c":
+        case "C":
+          this.movement.x = 0.1 // Strafe left
+          break
+        case "v":
+        case "V":
+          this.movement.x = -0.1 // Strafe right
+          break
       }
     })
 
@@ -214,6 +222,12 @@ class Scene {
         case "e":
         case "E":
           this.movement.x = 0
+          break
+        case "c":
+        case "C":
+        case "v":
+        case "V":
+          this.movement.x = 0 // Stop strafing
           break
       }
     })
