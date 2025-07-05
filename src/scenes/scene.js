@@ -239,6 +239,17 @@ class Scene {
                 this.cube.rotation.y = this.orbit.azimuth; // Instantly sync cube rotation with camera
                 this.movement.z = -0.1;
             }
+            // If only right mouse button is held, rotate the cube with the camera once past 90 degrees
+            else if (this.mouseButtons.right && !this.mouseButtons.left) {
+                // Calculate the difference between camera azimuth and cube rotation
+                let diff = Math.abs(
+                    ((this.orbit.azimuth - this.cube.rotation.y + Math.PI) % (2 * Math.PI)) - Math.PI
+                );
+                // If the difference is greater than 90 degrees (PI/2), rotate the cube with the camera
+                if (diff > Math.PI / 2) {
+                    this.targetRotationY = this.orbit.azimuth;
+                }
+            }
         });
 
         // Add scroll wheel zoom for camera
