@@ -31,6 +31,8 @@ class Scene {
         // For smooth rotation
         this.targetRotationY = 0;
         this.rotationLerpSpeed = 0.15;
+
+        this.mouseButtons = { left: false, right: false }; // Track mouse button states
     }
 
     init() {
@@ -186,11 +188,23 @@ class Scene {
 
         // Mouse controls for camera orbit
         this.renderer.domElement.addEventListener('mousedown', (e) => {
+            if (e.button === 0) this.mouseButtons.left = true;
+            if (e.button === 2) this.mouseButtons.right = true;
             this.isDragging = true;
             this.prevMouse.x = e.clientX;
             this.prevMouse.y = e.clientY;
         });
 
+        window.addEventListener('mouseup', (e) => {
+            if (e.button === 0) this.mouseButtons.left = false;
+            if (e.button === 2) this.mouseButtons.right = false;
+            this.isDragging = false;
+
+            // Stop moving the cube when either mouse button is released
+            this.movement.z = 0;
+        });
+
+        // Mouse move event for dragging
         window.addEventListener('mousemove', (e) => {
             if (!this.isDragging) return;
             const deltaX = e.clientX - this.prevMouse.x;
@@ -198,17 +212,18 @@ class Scene {
             this.prevMouse.x = e.clientX;
             this.prevMouse.y = e.clientY;
 
-            // Adjust azimuth and polar angles for camera only (do NOT update targetRotationY or targetAzimuth for cube)
+            // Always allow camera movement
             this.orbit.azimuth -= deltaX * 0.01;
-            this.targetAzimuth = this.orbit.azimuth; // Keep targetAzimuth in sync with manual camera movement
+            this.targetAzimuth = this.orbit.azimuth;
             this.orbit.polar -= deltaY * 0.01;
-            // Clamp polar angle to avoid flipping
             this.orbit.polar = Math.max(0.1, Math.min(Math.PI - 0.1, this.orbit.polar));
             this.updateCameraPosition();
-        });
 
-        window.addEventListener('mouseup', () => {
-            this.isDragging = false;
+            // If both mouse buttons are held, keep cube's front facing the camera and move forward
+            if (this.mouseButtons.left && this.mouseButtons.right) {
+                this.targetRotationY = this.orbit.azimuth;
+                this.movement.z = -0.1; // Move forward in the direction the cube is facing (toward camera)
+            }
         });
 
         // Add scroll wheel zoom for camera
