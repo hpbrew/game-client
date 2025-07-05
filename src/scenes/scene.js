@@ -194,11 +194,9 @@ class Scene {
             this.prevMouse.x = e.clientX;
             this.prevMouse.y = e.clientY;
 
-            // Request pointer lock on double mouse down (both buttons)
-            if (this.mouseButtons.left && this.mouseButtons.right) {
-                if (document.pointerLockElement !== this.renderer.domElement) {
-                    this.renderer.domElement.requestPointerLock();
-                }
+            // Request pointer lock on either left or right mouse down
+            if (document.pointerLockElement !== this.renderer.domElement) {
+                this.renderer.domElement.requestPointerLock();
             }
         });
 
@@ -235,9 +233,10 @@ class Scene {
             this.orbit.polar = Math.max(0.1, Math.min(Math.PI - 0.1, this.orbit.polar));
             this.updateCameraPosition();
 
-            // If both mouse buttons are held, keep cube's front facing the camera and move forward
+            // If both mouse buttons are held, make the cube rotate immediately with the camera
             if (this.mouseButtons.left && this.mouseButtons.right) {
                 this.targetRotationY = this.orbit.azimuth;
+                this.cube.rotation.y = this.orbit.azimuth; // Instantly sync cube rotation with camera
                 this.movement.z = -0.1;
             }
         });
