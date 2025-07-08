@@ -1,15 +1,28 @@
 import * as THREE from "three"
 
+// Simple height function: hills using sine/cosine, can be replaced with noise for more realism
+function getHeight(x, z) {
+  // Example: rolling hills
+  return (
+    Math.sin(x * 0.08) * 2 +
+    Math.cos(z * 0.08) * 2 +
+    Math.sin((x + z) * 0.04) * 1.5
+  )
+}
+
 class QuadtreeTile extends THREE.Mesh {
   constructor(size, segments, x, z) {
     const geometry = new THREE.PlaneGeometry(size, size, segments, segments)
     geometry.rotateX(-Math.PI / 2)
-    // Quantize vertices for a stylized look
+    // Quantize vertices for a stylized look and apply height
     const step = size / segments
     for (let i = 0; i < geometry.attributes.position.count; i++) {
-      geometry.attributes.position.setY(i, 0)
-      geometry.attributes.position.setX(i, Math.round(geometry.attributes.position.getX(i) / step) * step)
-      geometry.attributes.position.setZ(i, Math.round(geometry.attributes.position.getZ(i) / step) * step)
+      const vx = Math.round(geometry.attributes.position.getX(i) / step) * step + x
+      const vz = Math.round(geometry.attributes.position.getZ(i) / step) * step + z
+      const vy = getHeight(vx, vz)
+      geometry.attributes.position.setX(i, vx - x)
+      geometry.attributes.position.setY(i, vy)
+      geometry.attributes.position.setZ(i, vz - z)
     }
     geometry.attributes.position.needsUpdate = true
 
@@ -76,9 +89,12 @@ export class QuadtreeFloor extends THREE.Group {
         newGeom.rotateX(-Math.PI / 2)
         const step = tile.size / segments
         for (let i = 0; i < newGeom.attributes.position.count; i++) {
-          newGeom.attributes.position.setY(i, 0)
-          newGeom.attributes.position.setX(i, Math.round(newGeom.attributes.position.getX(i) / step) * step)
-          newGeom.attributes.position.setZ(i, Math.round(newGeom.attributes.position.getZ(i) / step) * step)
+          const vx = Math.round(newGeom.attributes.position.getX(i) / step) * step + tile.position.x
+          const vz = Math.round(newGeom.attributes.position.getZ(i) / step) * step + tile.position.z
+          const vy = getHeight(vx, vz)
+          newGeom.attributes.position.setX(i, vx - tile.position.x)
+          newGeom.attributes.position.setY(i, vy)
+          newGeom.attributes.position.setZ(i, vz - tile.position.z)
         }
         newGeom.attributes.position.needsUpdate = true
         tile.geometry.dispose()
