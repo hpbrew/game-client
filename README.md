@@ -27,23 +27,26 @@ threejs-web-app
 To get started with this project, follow these steps:
 
 1. **Clone the repository:**
+
    ```
    git clone <repository-url>
    cd threejs-web-app
    ```
 
 2. **Install dependencies:**
+
    ```
    npm install
    ```
 
 3. **Run the application:**
+
    ```
    npm run dev
    ```
 
 4. **Open your browser:**
-   Navigate to `http://localhost:3000` (or the port specified in your terminal) to view the application.
+   Navigate to `http://127.0.0.1:5173/` (or the port specified in your terminal) to view the application.
 
 ## Features
 

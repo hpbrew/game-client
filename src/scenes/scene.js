@@ -1,6 +1,7 @@
 import * as THREE from "three"
 import { getSmileyTexture } from "./smileyTexture"
 import { createNearbyBox } from "../objects"
+import { QuadtreeFloor } from "../objects/quadtreeFloor"
 
 class Scene {
   constructor() {
@@ -86,14 +87,14 @@ class Scene {
     // Set initial target rotation to match cube's rotation
     this.targetRotationY = this.cube.rotation.y
 
-    // Add the floor
-    const floorGeometry = new THREE.PlaneGeometry(10, 10)
-    const floorMaterial = new THREE.MeshBasicMaterial({
-      color: 0x808080,
-      side: THREE.DoubleSide,
+    // Replace old floor with quadtree LOD floor
+    this.floor = new QuadtreeFloor({
+      worldSize: 200, // Make the floor large
+      minTileSize: 10, // Each tile is 10x10 units
+      maxSegments: 64, // Highest LOD segments per tile
+      minSegments: 8, // Lowest LOD segments per tile
+      lodDistances: [20, 40, 80, 160], // LOD switch distances
     })
-    this.floor = new THREE.Mesh(floorGeometry, floorMaterial)
-    this.floor.rotation.x = -Math.PI / 2
     this.scene.add(this.floor)
 
     // Set initial camera position using spherical coordinates
@@ -453,6 +454,11 @@ class Scene {
 
       // Always update camera to follow the cube
       this.updateCameraPosition()
+    }
+
+    // Update floor LOD based on camera position
+    if (this.floor && this.floor.updateLOD) {
+      this.floor.updateLOD(this.camera)
     }
 
     this.render()
