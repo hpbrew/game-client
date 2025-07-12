@@ -46,7 +46,8 @@ export class QuadtreeFloor extends THREE.Group {
     minTileSize = 10,
     maxSegments = 64,
     minSegments = 8,
-    lodDistances = [20, 40, 80, 160]
+    lodDistances = [20, 40, 80, 160],
+    mapResolution = 201 // Number of grid points per side
   } = {}) {
     super()
     this.worldSize = worldSize
@@ -55,7 +56,25 @@ export class QuadtreeFloor extends THREE.Group {
     this.minSegments = minSegments
     this.lodDistances = lodDistances
     this.tiles = []
+    this.mapResolution = mapResolution
+    this.terrainMap = this._generateTerrainMap()
     this._createTiles()
+  }
+
+  _generateTerrainMap() {
+    // Create a 2D array of heights
+    const map = []
+    const step = this.worldSize / (this.mapResolution - 1)
+    const half = this.worldSize / 2
+    for (let i = 0; i < this.mapResolution; i++) {
+      map[i] = []
+      for (let j = 0; j < this.mapResolution; j++) {
+        const x = -half + i * step
+        const z = -half + j * step
+        map[i][j] = getHeight(x, z)
+      }
+    }
+    return map
   }
 
   _createTiles() {
@@ -102,5 +121,31 @@ export class QuadtreeFloor extends THREE.Group {
         tile.segments = segments
       }
     }
+  }
+
+  getHeightAt(x, z) {
+    const half = this.worldSize / 2
+    const step = this.worldSize / (this.mapResolution - 1)
+    const fx = (x + half) / step
+    const fz = (z + half) / step
+
+    const ix = Math.floor(fx)
+    const iz = Math.floor(fz)
+    const tx = fx - ix
+    const tz = fz - iz
+
+    // Clamp indices
+    const ix1 = Math.min(ix + 1, this.mapResolution - 1)
+    const iz1 = Math.min(iz + 1, this.mapResolution - 1)
+
+    // Bilinear interpolation
+    const h00 = this.terrainMap[ix][iz]
+    const h10 = this.terrainMap[ix1][iz]
+    const h01 = this.terrainMap[ix][iz1]
+    const h11 = this.terrainMap[ix1][iz1]
+
+    const h0 = h00 * (1 - tx) + h10 * tx
+    const h1 = h01 * (1 - tx) + h11 * tx
+    return h0 * (1 - tz) + h1 * tz
   }
 }
