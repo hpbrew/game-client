@@ -466,6 +466,19 @@ class Scene {
             }
             // --- end collision detection ---
 
+            // Reset cube to original start position if it falls below y = 1000
+            if (this.cube && this.cube.position.y < -200) {
+                this.cube.position.set(0, 0.5, 0)
+                this.cube.rotation.set(0, 0, 0)
+                this.isJumping = false
+                this.canDoubleJump = false
+                this.jumpVelocity = 0
+                this.jumpHorizontal.x = 0
+                this.jumpHorizontal.z = 0
+                this.targetRotationY = 0
+                this.targetAzimuth = 0
+            }
+
             // Always update camera to follow the cube
             this.updateCameraPosition()
         }
