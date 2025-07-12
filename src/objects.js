@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export function createNearbyBox() {
+export function createNearbyBox(floor = null) {
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshBasicMaterial({ color: 0xff8800 });
     const box = new THREE.Mesh(geometry, material);
@@ -11,6 +11,12 @@ export function createNearbyBox() {
     const outline = new THREE.LineSegments(edges, lineMaterial);
     box.add(outline);
 
-    box.position.set(2, 0.5, 0); // 2 units to the right of the starting cube
+    // Default position
+    let x = 2, z = 0;
+    let y = 0.5;
+    if (floor && typeof floor.getHeightAt === 'function') {
+        y = floor.getHeightAt(x, z) + 0.5;
+    }
+    box.position.set(x, y, z); // 2 units to the right of the starting cube
     return box;
 }

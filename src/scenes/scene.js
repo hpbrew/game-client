@@ -94,13 +94,6 @@ class Scene {
         this.cube.position.y = 0.5
         this.scene.add(this.cube)
 
-        // Add the nearby box from the objects module
-        this.nearbyBox = createNearbyBox()
-        this.scene.add(this.nearbyBox)
-
-        // Set initial target rotation to match cube's rotation
-        this.targetRotationY = this.cube.rotation.y
-
         // Replace old floor with quadtree LOD floor
         this.floor = new QuadtreeFloor({
             worldSize: 200, // Make the floor large
@@ -110,6 +103,13 @@ class Scene {
             lodDistances: [20, 40, 80, 160], // LOD switch distances
         })
         this.scene.add(this.floor)
+
+        // Add the nearby box from the objects module, using the floor for height
+        this.nearbyBox = createNearbyBox(this.floor)
+        this.scene.add(this.nearbyBox)
+
+        // Set initial target rotation to match cube's rotation
+        this.targetRotationY = this.cube.rotation.y
 
         // Set initial camera position using spherical coordinates
         this.updateCameraPosition()
