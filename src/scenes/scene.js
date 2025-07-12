@@ -39,6 +39,20 @@ class Scene {
         this.rotationLerpSpeed = 0.15
 
         this.mouseButtons = { left: false, right: false } // Track mouse button states
+
+        // Create a div for displaying cube position
+        this.positionDiv = document.createElement("div")
+        this.positionDiv.style.position = "fixed"
+        this.positionDiv.style.top = "10px"
+        this.positionDiv.style.left = "10px"
+        this.positionDiv.style.background = "rgba(0,0,0,0.7)"
+        this.positionDiv.style.color = "#fff"
+        this.positionDiv.style.padding = "6px 12px"
+        this.positionDiv.style.fontFamily = "monospace"
+        this.positionDiv.style.fontSize = "14px"
+        this.positionDiv.style.borderRadius = "6px"
+        this.positionDiv.style.zIndex = "1000"
+        document.body.appendChild(this.positionDiv)
     }
 
     init() {
@@ -478,6 +492,12 @@ class Scene {
                 this.targetRotationY = 0
                 this.targetAzimuth = 0
             }
+
+            // Update position display
+            const { x, y, z } = this.cube.position
+            this.positionDiv.textContent = `Cube Position: x=${x.toFixed(
+                2
+            )}, y=${y.toFixed(2)}, z=${z.toFixed(2)}`
 
             // Always update camera to follow the cube
             this.updateCameraPosition()
