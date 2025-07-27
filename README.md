@@ -54,6 +54,11 @@ To get started with this project, follow these steps:
 - Customizable geometries and materials
 - Animation loop for rendering
 
+## Game Client Musts
+- Character movement must not be impeded. No animation locking.
+- Stick to the basics. Start realistic then improvise.
+
+
 ## Contributing
 
 Feel free to submit issues or pull requests if you have suggestions or improvements for the project.
