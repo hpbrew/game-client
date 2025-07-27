@@ -17,7 +17,7 @@ class Scene {
         document.body.appendChild(this.renderer.domElement)
 
         this.player = null // Renamed from cube
-        this.floor = null
+        this.terrain = null // Renamed from floor
         this.nearbyBox = null // Store reference to the nearby box
         this.movement = { x: 0, y: 0, z: 0 }
         this.isJumping = false
@@ -66,16 +66,16 @@ class Scene {
         this.player = new Player()
         this.scene.add(this.player)
 
-        this.floor = new QuadtreeFloor({
-            worldSize: 200, // Make the floor large
+        this.terrain = new QuadtreeFloor({
+            worldSize: 200, // Make the terrain large
             minTileSize: 10, // Each tile is 10x10 units
             maxSegments: 64, // Highest LOD segments per tile
             minSegments: 8, // Lowest LOD segments per tile
             lodDistances: [20, 40, 80, 160], // LOD switch distances
         })
-        this.scene.add(this.floor)
+        this.scene.add(this.terrain)
 
-        this.nearbyBox = createNearbyBox(this.floor)
+        this.nearbyBox = createNearbyBox(this.terrain)
         this.scene.add(this.nearbyBox)
 
         this.targetRotationY = this.player.rotation.y
@@ -106,10 +106,7 @@ class Scene {
             frontCircleGeometry,
             frontCircleMaterial
         )
-        // Position the circle at the center of the front face (z = 0.5 for default cube)
         frontBlueCircle.position.set(0, 0, 0.501)
-        // Orient the circle to face outward from the front face
-        // (no rotation needed for the front face)
         this.player.add(frontBlueCircle)
     }
 
@@ -368,9 +365,9 @@ class Scene {
                 this.jumpVelocity += this.gravity
 
                 // --- Terrain collision using quadtree terrain map ---
-                if (this.floor && typeof this.floor.getHeightAt === "function") {
+                if (this.terrain && typeof this.terrain.getHeightAt === "function") {
                     const terrainY =
-                        this.floor.getHeightAt(this.player.position.x, this.player.position.z) +
+                        this.terrain.getHeightAt(this.player.position.x, this.player.position.z) +
                         0.5
                     if (this.player.position.y <= terrainY) {
                         this.player.position.y = terrainY
@@ -389,10 +386,10 @@ class Scene {
                     this.jumpHorizontal.x = 0
                     this.jumpHorizontal.z = 0
                 }
-            } else if (this.floor && typeof this.floor.getHeightAt === "function") {
+            } else if (this.terrain && typeof this.terrain.getHeightAt === "function") {
                 // --- Always snap cube to terrain when not jumping ---
                 const terrainY =
-                    this.floor.getHeightAt(this.player.position.x, this.player.position.z) + 0.5
+                    this.terrain.getHeightAt(this.player.position.x, this.player.position.z) + 0.5
                 this.player.position.y = terrainY
             } else if (this.player.position.y < 0.5) {
                 this.player.position.y = 0.5
@@ -470,9 +467,9 @@ class Scene {
             this.updateCameraPosition()
         }
 
-        // Update floor LOD based on camera position
-        if (this.floor && this.floor.updateLOD) {
-            this.floor.updateLOD(this.camera)
+        // Update terrain LOD based on camera position
+        if (this.terrain && this.terrain.updateLOD) {
+            this.terrain.updateLOD(this.camera)
         }
 
         this.render()
