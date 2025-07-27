@@ -1,6 +1,6 @@
 import * as THREE from "three"
-import { getSmileyTexture } from "./smileyTexture"
-import { createNearbyBox } from "../objects"
+import { Player } from "../objects/player"
+import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
 
 class Scene {
@@ -62,28 +62,8 @@ class Scene {
     }
 
     addObjects() {
-        // Add the player (was cube)
-        const playerGeometry = new THREE.BoxGeometry()
-        const materials = []
-        const smileyTexture = getSmileyTexture()
-        for (let i = 0; i < 6; i++) {
-            if (i === 5) {
-                materials.push(new THREE.MeshBasicMaterial({ map: smileyTexture }))
-            } else {
-                materials.push(new THREE.MeshBasicMaterial({ color: 0x00ff00 }))
-            }
-        }
-        this.player = new THREE.Mesh(playerGeometry, materials)
-        // Add a black border using EdgesGeometry and LineSegments
-        const edges = new THREE.EdgesGeometry(playerGeometry)
-        const lineMaterial = new THREE.LineBasicMaterial({
-            color: 0x000000,
-            linewidth: 2,
-        })
-        const line = new THREE.LineSegments(edges, lineMaterial)
-        this.player.add(line)
-
-        this.player.position.y = 0.5
+        // Use the new Player class
+        this.player = new Player()
         this.scene.add(this.player)
 
         this.floor = new QuadtreeFloor({
