@@ -16,12 +16,12 @@ class Scene {
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         document.body.appendChild(this.renderer.domElement)
 
-        this.cube = null
+        this.player = null // Renamed from cube
         this.floor = null
         this.nearbyBox = null // Store reference to the nearby box
         this.movement = { x: 0, y: 0, z: 0 }
         this.isJumping = false
-        this.canDoubleJump = false // Add this line
+        this.canDoubleJump = false
         this.jumpVelocity = 0
         this.gravity = -0.01
 
@@ -40,7 +40,7 @@ class Scene {
 
         this.mouseButtons = { left: false, right: false } // Track mouse button states
 
-        // Create a div for displaying cube position
+        // Create a div for displaying player position
         this.positionDiv = document.createElement("div")
         this.positionDiv.style.position = "fixed"
         this.positionDiv.style.top = "10px"
@@ -62,39 +62,30 @@ class Scene {
     }
 
     addObjects() {
-        // Add the cube
-        const cubeGeometry = new THREE.BoxGeometry()
-        // Create materials for each face
+        // Add the player (was cube)
+        const playerGeometry = new THREE.BoxGeometry()
         const materials = []
-
-        // Get the smiley texture from the helper function
         const smileyTexture = getSmileyTexture()
-
-        // Assign materials: [right, left, top, bottom, front, back]
         for (let i = 0; i < 6; i++) {
             if (i === 5) {
-                // Back face (smiley)
                 materials.push(new THREE.MeshBasicMaterial({ map: smileyTexture }))
             } else {
-                // Other faces (green)
                 materials.push(new THREE.MeshBasicMaterial({ color: 0x00ff00 }))
             }
         }
-
-        this.cube = new THREE.Mesh(cubeGeometry, materials)
+        this.player = new THREE.Mesh(playerGeometry, materials)
         // Add a black border using EdgesGeometry and LineSegments
-        const edges = new THREE.EdgesGeometry(cubeGeometry)
+        const edges = new THREE.EdgesGeometry(playerGeometry)
         const lineMaterial = new THREE.LineBasicMaterial({
             color: 0x000000,
             linewidth: 2,
         })
         const line = new THREE.LineSegments(edges, lineMaterial)
-        this.cube.add(line)
+        this.player.add(line)
 
-        this.cube.position.y = 0.5
-        this.scene.add(this.cube)
+        this.player.position.y = 0.5
+        this.scene.add(this.player)
 
-        // Replace old floor with quadtree LOD floor
         this.floor = new QuadtreeFloor({
             worldSize: 200, // Make the floor large
             minTileSize: 10, // Each tile is 10x10 units
@@ -104,14 +95,10 @@ class Scene {
         })
         this.scene.add(this.floor)
 
-        // Add the nearby box from the objects module, using the floor for height
         this.nearbyBox = createNearbyBox(this.floor)
         this.scene.add(this.nearbyBox)
 
-        // Set initial target rotation to match cube's rotation
-        this.targetRotationY = this.cube.rotation.y
-
-        // Set initial camera position using spherical coordinates
+        this.targetRotationY = this.player.rotation.y
         this.updateCameraPosition()
 
         // Set a darker gradient skybox as the scene background
@@ -143,7 +130,7 @@ class Scene {
         frontBlueCircle.position.set(0, 0, 0.501)
         // Orient the circle to face outward from the front face
         // (no rotation needed for the front face)
-        this.cube.add(frontBlueCircle)
+        this.player.add(frontBlueCircle)
     }
 
     addEventListeners() {
@@ -175,7 +162,7 @@ class Scene {
                         this.isJumping = true
                         this.canDoubleJump = true // Allow double jump after first jump
                         this.jumpVelocity = 0.2
-                        const angle = this.cube.rotation.y
+                        const angle = this.player.rotation.y
                         this.jumpHorizontal.x =
                             Math.sin(angle) * this.movement.z +
                             Math.sin(angle - Math.PI / 2) * this.movement.x
@@ -185,7 +172,7 @@ class Scene {
                     } else if (this.canDoubleJump) {
                         // Double jump
                         this.jumpVelocity = 0.2
-                        const angle = this.cube.rotation.y
+                        const angle = this.player.rotation.y
                         this.jumpHorizontal.x =
                             Math.sin(angle) * this.movement.z +
                             Math.sin(angle - Math.PI / 2) * this.movement.x
@@ -310,14 +297,14 @@ class Scene {
             // If both mouse buttons are held, make the cube rotate immediately with the camera
             if (this.mouseButtons.left && this.mouseButtons.right) {
                 this.targetRotationY = this.orbit.azimuth
-                this.cube.rotation.y = this.orbit.azimuth // Instantly sync cube rotation with camera
+                this.player.rotation.y = this.orbit.azimuth // Instantly sync cube rotation with camera
                 this.movement.z = -0.1
             }
             // If only right mouse button is held, rotate the cube with the camera once past 90 degrees
             else if (this.mouseButtons.right && !this.mouseButtons.left) {
                 // Calculate the difference between camera azimuth and cube rotation
                 let diff = Math.abs(
-                    ((this.orbit.azimuth - this.cube.rotation.y + Math.PI) %
+                    ((this.orbit.azimuth - this.player.rotation.y + Math.PI) %
                         (2 * Math.PI)) -
                     Math.PI
                 )
@@ -349,22 +336,22 @@ class Scene {
     }
 
     updateCameraPosition() {
-        if (!this.cube) return
+        if (!this.player) return
         // Spherical to Cartesian conversion
         const { azimuth, polar, radius } = this.orbit
         const x =
-            this.cube.position.x + radius * Math.sin(polar) * Math.sin(azimuth)
-        const y = this.cube.position.y + radius * Math.cos(polar)
+            this.player.position.x + radius * Math.sin(polar) * Math.sin(azimuth)
+        const y = this.player.position.y + radius * Math.cos(polar)
         const z =
-            this.cube.position.z + radius * Math.sin(polar) * Math.cos(azimuth)
+            this.player.position.z + radius * Math.sin(polar) * Math.cos(azimuth)
         this.camera.position.set(x, y, z)
-        this.camera.lookAt(this.cube.position)
+        this.camera.lookAt(this.player.position)
     }
 
     animate() {
         requestAnimationFrame(() => this.animate())
 
-        if (this.cube) {
+        if (this.player) {
             // Continuous rotation if movement.y is set
             if (this.movement.y !== 0) {
                 this.targetRotationY += this.movement.y
@@ -372,8 +359,8 @@ class Scene {
             }
 
             // Smoothly interpolate rotation
-            this.cube.rotation.y +=
-                (this.targetRotationY - this.cube.rotation.y) * this.rotationLerpSpeed
+            this.player.rotation.y +=
+                (this.targetRotationY - this.player.rotation.y) * this.rotationLerpSpeed
 
             // Smoothly interpolate camera azimuth
             this.orbit.azimuth +=
@@ -381,41 +368,41 @@ class Scene {
 
             // Move forward/backward based on cube's facing direction
             if (this.movement.z !== 0) {
-                const angle = this.cube.rotation.y
-                this.cube.position.x += Math.sin(angle) * this.movement.z * 3 // Triple speed
-                this.cube.position.z += Math.cos(angle) * this.movement.z * 3 // Triple speed
+                const angle = this.player.rotation.y
+                this.player.position.x += Math.sin(angle) * this.movement.z * 3 // Triple speed
+                this.player.position.z += Math.cos(angle) * this.movement.z * 3 // Triple speed
             }
 
             // Strafe left/right relative to cube's facing direction
             if (this.movement.x !== 0) {
-                const angle = this.cube.rotation.y - Math.PI / 2
-                this.cube.position.x += Math.sin(angle) * this.movement.x * 3 // Triple speed
-                this.cube.position.z += Math.cos(angle) * this.movement.x * 3 // Triple speed
+                const angle = this.player.rotation.y - Math.PI / 2
+                this.player.position.x += Math.sin(angle) * this.movement.x * 3 // Triple speed
+                this.player.position.z += Math.cos(angle) * this.movement.x * 3 // Triple speed
             }
 
             // Handle jumping and gravity
             if (this.isJumping) {
-                this.cube.position.y += this.jumpVelocity
-                this.cube.position.x += this.jumpHorizontal.x
-                this.cube.position.z += this.jumpHorizontal.z
+                this.player.position.y += this.jumpVelocity
+                this.player.position.x += this.jumpHorizontal.x
+                this.player.position.z += this.jumpHorizontal.z
                 this.jumpVelocity += this.gravity
 
                 // --- Terrain collision using quadtree terrain map ---
                 if (this.floor && typeof this.floor.getHeightAt === "function") {
                     const terrainY =
-                        this.floor.getHeightAt(this.cube.position.x, this.cube.position.z) +
+                        this.floor.getHeightAt(this.player.position.x, this.player.position.z) +
                         0.5
-                    if (this.cube.position.y <= terrainY) {
-                        this.cube.position.y = terrainY
+                    if (this.player.position.y <= terrainY) {
+                        this.player.position.y = terrainY
                         this.isJumping = false
                         this.canDoubleJump = false // Reset double jump on landing
                         this.jumpVelocity = 0
                         this.jumpHorizontal.x = 0
                         this.jumpHorizontal.z = 0
                     }
-                } else if (this.cube.position.y <= 0.5) {
+                } else if (this.player.position.y <= 0.5) {
                     // Fallback if no terrain
-                    this.cube.position.y = 0.5
+                    this.player.position.y = 0.5
                     this.isJumping = false
                     this.canDoubleJump = false
                     this.jumpVelocity = 0
@@ -425,34 +412,34 @@ class Scene {
             } else if (this.floor && typeof this.floor.getHeightAt === "function") {
                 // --- Always snap cube to terrain when not jumping ---
                 const terrainY =
-                    this.floor.getHeightAt(this.cube.position.x, this.cube.position.z) + 0.5
-                this.cube.position.y = terrainY
-            } else if (this.cube.position.y < 0.5) {
-                this.cube.position.y = 0.5
+                    this.floor.getHeightAt(this.player.position.x, this.player.position.z) + 0.5
+                this.player.position.y = terrainY
+            } else if (this.player.position.y < 0.5) {
+                this.player.position.y = 0.5
             }
 
             // --- Collision detection between cube and nearby box ---
             if (this.nearbyBox) {
-                const cubeBox = new THREE.Box3().setFromObject(this.cube)
+                const playerBox = new THREE.Box3().setFromObject(this.player)
                 const otherBox = new THREE.Box3().setFromObject(this.nearbyBox)
 
-                if (cubeBox.intersectsBox(otherBox)) {
+                if (playerBox.intersectsBox(otherBox)) {
                     // Check vertical overlap
-                    const cubeBottom = this.cube.position.y - 0.5
-                    const cubeTop = this.cube.position.y + 0.5
+                    const playerBottom = this.player.position.y - 0.5
+                    const playerTop = this.player.position.y + 0.5
                     const boxBottom = this.nearbyBox.position.y - 0.5
                     const boxTop = this.nearbyBox.position.y + 0.5
 
                     // If the cube is falling onto the box (from above)
                     if (
                         this.jumpVelocity <= 0 && // falling
-                        cubeBottom < boxTop &&
-                        cubeTop > boxTop && // cube is above box
-                        Math.abs(this.cube.position.x - this.nearbyBox.position.x) < 0.9 &&
-                        Math.abs(this.cube.position.z - this.nearbyBox.position.z) < 0.9
+                        playerBottom < boxTop &&
+                        playerTop > boxTop && // cube is above box
+                        Math.abs(this.player.position.x - this.nearbyBox.position.x) < 0.9 &&
+                        Math.abs(this.player.position.z - this.nearbyBox.position.z) < 0.9
                     ) {
                         // Snap cube to top of box
-                        this.cube.position.y = boxTop + 0.5
+                        this.player.position.y = boxTop + 0.5
                         this.isJumping = false
                         this.canDoubleJump = false
                         this.jumpVelocity = 0
@@ -461,19 +448,19 @@ class Scene {
                     } else {
                         // Otherwise, block horizontal movement as before
                         if (this.movement.z !== 0) {
-                            const angle = this.cube.rotation.y
-                            this.cube.position.x -= Math.sin(angle) * this.movement.z
-                            this.cube.position.z -= Math.cos(angle) * this.movement.z
+                            const angle = this.player.rotation.y
+                            this.player.position.x -= Math.sin(angle) * this.movement.z
+                            this.player.position.z -= Math.cos(angle) * this.movement.z
                         }
                         if (this.movement.x !== 0) {
-                            const angle = this.cube.rotation.y - Math.PI / 2
-                            this.cube.position.x -= Math.sin(angle) * this.movement.x
-                            this.cube.position.z -= Math.cos(angle) * this.movement.x
+                            const angle = this.player.rotation.y - Math.PI / 2
+                            this.player.position.x -= Math.sin(angle) * this.movement.x
+                            this.player.position.z -= Math.cos(angle) * this.movement.x
                         }
                         // Prevent moving into the box while jumping horizontally
                         if (this.isJumping) {
-                            this.cube.position.x -= this.jumpHorizontal.x
-                            this.cube.position.z -= this.jumpHorizontal.z
+                            this.player.position.x -= this.jumpHorizontal.x
+                            this.player.position.z -= this.jumpHorizontal.z
                         }
                     }
                 }
@@ -481,9 +468,9 @@ class Scene {
             // --- end collision detection ---
 
             // Reset cube to original start position if it falls below y = 1000
-            if (this.cube && this.cube.position.y < -200) {
-                this.cube.position.set(0, 0.5, 0)
-                this.cube.rotation.set(0, 0, 0)
+            if (this.player && this.player.position.y < -200) {
+                this.player.position.set(0, 0.5, 0)
+                this.player.rotation.set(0, 0, 0)
                 this.isJumping = false
                 this.canDoubleJump = false
                 this.jumpVelocity = 0
@@ -494,8 +481,8 @@ class Scene {
             }
 
             // Update position display
-            const { x, y, z } = this.cube.position
-            this.positionDiv.textContent = `Cube Position: x=${x.toFixed(
+            const { x, y, z } = this.player.position
+            this.positionDiv.textContent = `Player Position: x=${x.toFixed(
                 2
             )}, y=${y.toFixed(2)}, z=${z.toFixed(2)}`
 
