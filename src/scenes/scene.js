@@ -134,30 +134,7 @@ class Scene {
                     this.movement.y = -0.045 // Start rotating right (slower)
                     break
                 case " ":
-                    if (!this.isJumping) {
-                        // First jump
-                        this.isJumping = true
-                        this.canDoubleJump = true // Allow double jump after first jump
-                        this.jumpVelocity = 0.2
-                        const angle = this.player.rotation.y
-                        this.jumpHorizontal.x =
-                            Math.sin(angle) * this.movement.z +
-                            Math.sin(angle - Math.PI / 2) * this.movement.x
-                        this.jumpHorizontal.z =
-                            Math.cos(angle) * this.movement.z +
-                            Math.cos(angle - Math.PI / 2) * this.movement.x
-                    } else if (this.canDoubleJump) {
-                        // Double jump
-                        this.jumpVelocity = 0.2
-                        const angle = this.player.rotation.y
-                        this.jumpHorizontal.x =
-                            Math.sin(angle) * this.movement.z +
-                            Math.sin(angle - Math.PI / 2) * this.movement.x
-                        this.jumpHorizontal.z =
-                            Math.cos(angle) * this.movement.z +
-                            Math.cos(angle - Math.PI / 2) * this.movement.x
-                        this.canDoubleJump = false // Only allow one double jump
-                    }
+                    this.player.startJump(this.player.rotation.y, this.movement)
                     break
                 case "q":
                 case "Q":
@@ -358,36 +335,22 @@ class Scene {
             }
 
             // Handle jumping and gravity
-            if (this.isJumping) {
-                this.player.position.y += this.jumpVelocity
-                this.player.position.x += this.jumpHorizontal.x
-                this.player.position.z += this.jumpHorizontal.z
-                this.jumpVelocity += this.gravity
+            this.player.applyJump()
 
-                // --- Terrain collision using quadtree terrain map ---
+            // --- Terrain collision using quadtree terrain map ---
+            if (this.player.isJumping) {
                 if (this.terrain && typeof this.terrain.getHeightAt === "function") {
                     const terrainY =
-                        this.terrain.getHeightAt(this.player.position.x, this.player.position.z) +
-                        0.5
+                        this.terrain.getHeightAt(this.player.position.x, this.player.position.z) + 0.5
                     if (this.player.position.y <= terrainY) {
                         this.player.position.y = terrainY
-                        this.isJumping = false
-                        this.canDoubleJump = false // Reset double jump on landing
-                        this.jumpVelocity = 0
-                        this.jumpHorizontal.x = 0
-                        this.jumpHorizontal.z = 0
+                        this.player.resetJump()
                     }
                 } else if (this.player.position.y <= 0.5) {
-                    // Fallback if no terrain
                     this.player.position.y = 0.5
-                    this.isJumping = false
-                    this.canDoubleJump = false
-                    this.jumpVelocity = 0
-                    this.jumpHorizontal.x = 0
-                    this.jumpHorizontal.z = 0
+                    this.player.resetJump()
                 }
             } else if (this.terrain && typeof this.terrain.getHeightAt === "function") {
-                // --- Always snap cube to terrain when not jumping ---
                 const terrainY =
                     this.terrain.getHeightAt(this.player.position.x, this.player.position.z) + 0.5
                 this.player.position.y = terrainY
