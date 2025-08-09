@@ -40,7 +40,7 @@ class Scene {
 
         this.mouseButtons = { left: false, right: false } // Track mouse button states
 
-        // Create a div for displaying player position
+        // Create a div for displaying player position and FPS
         this.positionDiv = document.createElement("div")
         this.positionDiv.style.position = "fixed"
         this.positionDiv.style.top = "10px"
@@ -53,6 +53,10 @@ class Scene {
         this.positionDiv.style.borderRadius = "6px"
         this.positionDiv.style.zIndex = "1000"
         document.body.appendChild(this.positionDiv)
+
+        // FPS counter state
+        this.lastFrameTime = performance.now()
+        this.fps = 0
     }
 
     init() {
@@ -305,6 +309,12 @@ class Scene {
     animate() {
         requestAnimationFrame(() => this.animate())
 
+        // FPS calculation
+        const now = performance.now()
+        const delta = now - this.lastFrameTime
+        this.fps = 1000 / delta
+        this.lastFrameTime = now
+
         if (this.player) {
             // Continuous rotation if movement.y is set
             if (this.movement.y !== 0) {
@@ -420,13 +430,13 @@ class Scene {
                 this.targetAzimuth = 0
             }
 
-            // Update position display
+            // Update position and FPS display
             const { x, y, z } = this.player.position
-            this.positionDiv.textContent = `Player Position: x=${x.toFixed(
-                2
-            )}, y=${y.toFixed(2)}, z=${z.toFixed(2)}`
+            this.positionDiv.innerHTML =
+                `FPS: ${this.fps.toFixed(1)}<br>` +
+                `Player Position: x=${x.toFixed(2)}, y=${y.toFixed(2)}, z=${z.toFixed(2)}`
 
-            // Always update camera to follow the cube
+            // Always update camera to follow the player
             this.updateCameraPosition()
         }
 
