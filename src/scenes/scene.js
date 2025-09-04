@@ -112,6 +112,13 @@ class Scene {
         )
         frontBlueCircle.position.set(0, 0, 0.501)
         this.player.add(frontBlueCircle)
+
+        // Add lighting for FBX models
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+        this.scene.add(ambientLight)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+        directionalLight.position.set(10, 20, 10)
+        this.scene.add(directionalLight)
     }
 
     addEventListeners() {
