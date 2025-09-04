@@ -299,9 +299,16 @@ class Scene {
         const { azimuth, polar, radius } = this.orbit
         const x =
             this.player.position.x + radius * Math.sin(polar) * Math.sin(azimuth)
-        const y = this.player.position.y + radius * Math.cos(polar)
+        let y = this.player.position.y + radius * Math.cos(polar)
         const z =
             this.player.position.z + radius * Math.sin(polar) * Math.cos(azimuth)
+
+        // Prevent camera from going below the terrain
+        if (this.terrain && typeof this.terrain.getHeightAt === "function") {
+            const terrainY = this.terrain.getHeightAt(x, z) + 0.2 // small offset above ground
+            if (y < terrainY) y = terrainY
+        }
+
         this.camera.position.set(x, y, z)
         this.camera.lookAt(this.player.position)
     }
