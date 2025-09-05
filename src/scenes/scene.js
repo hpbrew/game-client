@@ -12,9 +12,20 @@ class Scene {
             0.1,
             1000
         )
-        this.renderer = new THREE.WebGLRenderer()
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
         this.renderer.setSize(window.innerWidth, window.innerHeight)
+        this.renderer.outputEncoding = THREE.sRGBEncoding
+        this.renderer.shadowMap.enabled = true
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+        this.renderer.setPixelRatio(window.devicePixelRatio)
+
         document.body.appendChild(this.renderer.domElement)
+        
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight
+            this.camera.updateProjectionMatrix()
+            this.renderer.setSize(window.innerWidth, window.innerHeight)
+        }, false)
 
         this.player = null // Renamed from cube
         this.terrain = null // Renamed from floor
@@ -116,9 +127,26 @@ class Scene {
         // Add lighting for FBX models
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
         this.scene.add(ambientLight)
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0)
         directionalLight.position.set(10, 20, 10)
+        directionalLight.position.set(-100, 100, 100);
+        directionalLight.target.position.set(0, 0, 0);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.bias = -0.001;
+        directionalLight.shadow.mapSize.width = 4096;
+        directionalLight.shadow.mapSize.height = 4096;
+        directionalLight.shadow.camera.near = 0.1;
+        directionalLight.shadow.camera.far = 500.0;
+        directionalLight.shadow.camera.near = 0.5;
+        directionalLight.shadow.camera.far = 500.0;
+        directionalLight.shadow.camera.left = 50;
+        directionalLight.shadow.camera.right = -50;
+        directionalLight.shadow.camera.top = 50;
+        directionalLight.shadow.camera.bottom = -50;
         this.scene.add(directionalLight)
+
+        // directionalLight = new THREE.AmbientLight(0xFFFFFF, 0.25);
+        // this.scene.add(directionalLight);
     }
 
     addEventListeners() {
@@ -127,41 +155,41 @@ class Scene {
                 case "ArrowUp":
                 case "w":
                 case "W":
-                    this.movement.z = -0.1
+                    this.movement.z = 0.1
                     break
                 case "ArrowDown":
                 case "s":
                 case "S":
-                    this.movement.z = 0.1
+                    this.movement.z = -0.1
                     break
                 case "ArrowLeft":
                 case "a":
                 case "A":
-                    this.movement.y = 0.045 // Start rotating left (slower)
+                    this.movement.y = -0.045 // Start rotating left (slower)
                     break
                 case "ArrowRight":
                 case "d":
                 case "D":
-                    this.movement.y = -0.045 // Start rotating right (slower)
+                    this.movement.y = 0.045 // Start rotating right (slower)
                     break
                 case " ":
                     this.player.startJump(this.player.rotation.y, this.movement)
                     break
                 case "q":
                 case "Q":
-                    this.movement.x = 0.1
+                    this.movement.x = -0.1
                     break
                 case "e":
                 case "E":
-                    this.movement.x = -0.1
+                    this.movement.x = 0.1
                     break
                 case "c":
                 case "C":
-                    this.movement.x = 0.1 // Strafe left
+                    this.movement.x = -0.1 // Strafe left
                     break
                 case "v":
                 case "V":
-                    this.movement.x = -0.1 // Strafe right
+                    this.movement.x = 0.1 // Strafe right
                     break
             }
         })
@@ -263,7 +291,7 @@ class Scene {
             if (this.mouseButtons.left && this.mouseButtons.right) {
                 this.targetRotationY = this.orbit.azimuth
                 this.player.rotation.y = this.orbit.azimuth // Instantly sync cube rotation with camera
-                this.movement.z = -0.1
+                this.movement.z = 0.1
             }
             // If only right mouse button is held, rotate the cube with the camera once past 90 degrees
             else if (this.mouseButtons.right && !this.mouseButtons.left) {
@@ -304,11 +332,15 @@ class Scene {
         if (!this.player) return
         // Spherical to Cartesian conversion
         const { azimuth, polar, radius } = this.orbit
+
+        // Invert the azimuth to move the camera to the opposite side of the player
+        const oppositeAzimuth = azimuth + Math.PI
+
         const x =
-            this.player.position.x + radius * Math.sin(polar) * Math.sin(azimuth)
+            this.player.position.x + radius * Math.sin(polar) * Math.sin(oppositeAzimuth)
         let y = this.player.position.y + radius * Math.cos(polar)
         const z =
-            this.player.position.z + radius * Math.sin(polar) * Math.cos(azimuth)
+            this.player.position.z + radius * Math.sin(polar) * Math.cos(oppositeAzimuth)
 
         // Prevent camera from going below the terrain
         if (this.terrain && typeof this.terrain.getHeightAt === "function") {
