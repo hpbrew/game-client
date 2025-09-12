@@ -31,7 +31,11 @@ export class Player extends THREE.Group {
                 console.error("Error loading FBX:", error)
             }
         )
-
+        loader.setPath('models/');
+        // loader.load('walk.fbx', (a) => { _OnLoad('walk', a); });
+        // loader.load('run.fbx', (a) => { _OnLoad('run', a); });
+        loader.load('Orc_Idle.fbx', (a) => { _OnLoad('idle', a); });
+        // loader.load('dance.fbx', (a) => { _OnLoad('dance', a); });
         this.position.y = 0.5
     }
 
