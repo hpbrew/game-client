@@ -12,7 +12,7 @@ class Scene {
             0.1,
             1000
         )
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+        this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false })
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         this.renderer.outputEncoding = THREE.sRGBEncoding
         this.renderer.shadowMap.enabled = true
@@ -20,7 +20,7 @@ class Scene {
         this.renderer.setPixelRatio(window.devicePixelRatio)
 
         document.body.appendChild(this.renderer.domElement)
-        
+
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight
             this.camera.updateProjectionMatrix()
@@ -165,12 +165,12 @@ class Scene {
                 case "ArrowLeft":
                 case "a":
                 case "A":
-                    this.movement.y = -0.045 // Start rotating left (slower)
+                    this.movement.y = 0.045 // Start rotating left (slower)
                     break
                 case "ArrowRight":
                 case "d":
                 case "D":
-                    this.movement.y = 0.045 // Start rotating right (slower)
+                    this.movement.y = -0.045 // Start rotating right (slower)
                     break
                 case " ":
                     this.player.startJump(this.player.rotation.y, this.movement)
