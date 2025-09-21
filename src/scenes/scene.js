@@ -15,9 +15,9 @@ class Scene {
         this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false })
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         this.renderer.outputEncoding = THREE.sRGBEncoding
-        this.renderer.shadowMap.enabled = true
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-        this.renderer.setPixelRatio(window.devicePixelRatio)
+        // this.renderer.shadowMap.enabled = true
+        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+        // this.renderer.setPixelRatio(window.devicePixelRatio)
 
         document.body.appendChild(this.renderer.domElement)
 
@@ -83,9 +83,9 @@ class Scene {
 
         this.terrain = new QuadtreeFloor({
             worldSize: 200, // Make the terrain large
-            minTileSize: 10, // Each tile is 10x10 units
+            minTileSize: 64, // Each tile is 10x10 units
             maxSegments: 64, // Highest LOD segments per tile
-            minSegments: 8, // Lowest LOD segments per tile
+            minSegments: 16, // Lowest LOD segments per tile
             lodDistances: [20, 40, 80, 160], // LOD switch distances
         })
         this.scene.add(this.terrain)
