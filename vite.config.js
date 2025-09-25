@@ -2,7 +2,7 @@ import { defineConfig } from "vite"
 import { createHtmlPlugin } from "vite-plugin-html"
 
 export default defineConfig({
-  base: process.env.NODE_ENV === "production" ? "/game-client" : "/",
+  base: process.env.NODE_ENV === "production" ? "/game-client/" : "/",
   plugins: [
     createHtmlPlugin({
       inject: {
