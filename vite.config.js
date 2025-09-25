@@ -2,7 +2,7 @@ import { defineConfig } from "vite"
 import { createHtmlPlugin } from "vite-plugin-html"
 
 export default defineConfig({
-  base: "game-client",
+  base: "/game-client",
   plugins: [
     createHtmlPlugin({
       inject: {
