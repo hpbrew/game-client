@@ -55,9 +55,9 @@ To get started with this project, follow these steps:
 - Animation loop for rendering
 
 ## Game Client Musts
+
 - Character movement must not be impeded. No animation locking.
 - Stick to the basics. Start realistic then improvise.
-
 
 ## Contributing
 
@@ -66,3 +66,10 @@ Feel free to submit issues or pull requests if you have suggestions or improveme
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
+
+# Github Pages site
+
+- Use git subtree push --prefix dist origin gh-pages
+
+- This will create or override the gh-pages branch with the updated dist folder output
+- Using this allows for us to build and deploy the site with the branch
