@@ -80,7 +80,8 @@ export class TerrainChunkManager extends entity.Component {
       const fi1 = s.fragmentShader.search("#include <lights_physical_fragment>")
       s.fragmentShader = [
         s.fragmentShader.slice(0, fi1) +
-          terrain_shader.PS2 +
+          // TODO: fix this
+          // terrain_shader.PS2 +  // This is commented out because it's crashing need to fix
           s.fragmentShader.slice(fi1),
       ].join("")
 
@@ -219,15 +220,16 @@ export class TerrainChunkManager extends entity.Component {
     return this.heightGenerator_.Get(pos.x, 0.0, pos.z)
   }
 
+  getHeightAt(x, z) {
+    return this.heightGenerator_.Get(x, 0.0, z)[0]
+  }
+
   GetBiomeAt(pos) {
     return this._biomes.Get(pos.x, 0.0, pos.z)
   }
 
   Update(_) {
     const target = this._params.target //this.FindEntity(this._params.target)
-    if (!target) {
-      return
-    }
 
     this._builder.Update()
     if (!this._builder.Busy) {
@@ -235,10 +237,10 @@ export class TerrainChunkManager extends entity.Component {
     }
 
     for (let k in this._chunks) {
-      this._chunks[k].chunk.Update(target.Position)
+      this._chunks[k].chunk.Update(target.position)
     }
     for (let c of this._builder._old) {
-      c.chunk.Update(target.Position)
+      c.chunk.Update(target.position)
     }
 
     // this._params.scattering.uniforms.planetRadius.value = terrain_constants.PLANET_RADIUS;
@@ -254,7 +256,7 @@ export class TerrainChunkManager extends entity.Component {
       radius: terrain_constants.PLANET_RADIUS,
       min_node_size: terrain_constants.QT_MIN_CELL_SIZE,
     })
-    q.Insert(target.Position)
+    q.Insert(target.position)
 
     const sides = q.GetChildren()
 

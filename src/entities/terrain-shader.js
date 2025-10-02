@@ -1,5 +1,4 @@
-export const terrain_shader = (function() {
-
+export const terrain_shader = (function () {
   const _VS_1 = `
 
 // Triplanar Attributes
@@ -12,16 +11,15 @@ out vec4 vWeights1;
 out vec4 vWeights2;
 
 
-`;
+`
 
-
-    const _VS_2 = `
+  const _VS_2 = `
 
 vCoords = transformed.xyz;
 vWeights1 = weights1;
 vWeights2 = weights2;
 
-`;
+`
 
   const _VS = `
 
@@ -50,8 +48,7 @@ void main(){
   vWeights1 = weights1;
   vWeights2 = weights2;
 }
-  `;
-  
+  `
 
   const _PS = `
 
@@ -257,8 +254,7 @@ void main() {
   gl_FragColor = vec4(finalColour, 1);
 }
 
-  `;
-
+  `
 
   const _PS_1 = `
 
@@ -423,9 +419,9 @@ vec4 _TriplanarN(vec3 pos, vec3 normal, float texSlice, sampler2DArray tex) {
   return vec4(worldNormal, 0.0);
 }
 
-  `;
-  
-    const _PS_2 = `
+  `
+
+  const _PS_2 = `
 
 {
   vec3 worldPosition = vCoords;
@@ -461,15 +457,14 @@ vec4 _TriplanarN(vec3 pos, vec3 normal, float texSlice, sampler2DArray tex) {
   // normal = normalBlended.xyz;
 }
 
-    `;
+    `
 
-    return {
-      VS: _VS,
-      PS: _PS,
-      VS1: _VS_1,
-      VS2: _VS_2,
-      PS1: _PS_1,
-      PS2: _PS_2,
-    };
-  })();
-  
+  return {
+    VS: _VS,
+    PS: _PS,
+    VS1: _VS_1,
+    VS2: _VS_2,
+    PS1: _PS_1,
+    PS2: _PS_2,
+  }
+})()

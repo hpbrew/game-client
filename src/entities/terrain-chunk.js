@@ -1,4 +1,4 @@
-import { BufferGeometry, Mesh } from "three"
+import { BufferGeometry, Mesh, Float32BufferAttribute } from "three"
 
 export const terrain_chunk = (function () {
   class TerrainChunk {
@@ -42,27 +42,27 @@ export const terrain_chunk = (function () {
     RebuildMeshFromData(data) {
       this._geometry.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(data.positions, 3)
+        new Float32BufferAttribute(data.positions, 3)
       )
       this._geometry.setAttribute(
         "color",
-        new THREE.Float32BufferAttribute(data.colours, 3)
+        new Float32BufferAttribute(data.colours, 3)
       )
       this._geometry.setAttribute(
         "normal",
-        new THREE.Float32BufferAttribute(data.normals, 3)
+        new Float32BufferAttribute(data.normals, 3)
       )
       this._geometry.setAttribute(
         "coords",
-        new THREE.Float32BufferAttribute(data.coords, 3)
+        new Float32BufferAttribute(data.coords, 3)
       )
       this._geometry.setAttribute(
         "weights1",
-        new THREE.Float32BufferAttribute(data.weights1, 4)
+        new Float32BufferAttribute(data.weights1, 4)
       )
       this._geometry.setAttribute(
         "weights2",
-        new THREE.Float32BufferAttribute(data.weights2, 4)
+        new Float32BufferAttribute(data.weights2, 4)
       )
       this._geometry.computeBoundingBox()
     }

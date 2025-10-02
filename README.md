@@ -73,3 +73,4 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 
 - This will create or override the gh-pages branch with the updated dist folder output
 - Using this allows for us to build and deploy the site with the branch
+- URL: https://hpbrew.github.io/game-client/

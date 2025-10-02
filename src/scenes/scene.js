@@ -20,9 +20,11 @@ class Scene {
     this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false })
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     this.renderer.outputEncoding = THREE.sRGBEncoding
-    // this.renderer.shadowMap.enabled = true
-    // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    // this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer.gammaFactor = 2.2
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    this.renderer.setPixelRatio(window.devicePixelRatio)
+    this.renderer.setSize(window.innerWidth, window.innerHeight)
 
     document.body.appendChild(this.renderer.domElement)
 
@@ -36,8 +38,11 @@ class Scene {
       false
     )
     // this.entityManager_ = new entity_manager.EntityManager()
-    this.player = null // Renamed from cube
-    this.terrain = null // Renamed from floor
+    // Use the new Player class
+    this.player = new Player()
+    this.scene.add(this.player)
+
+    // this.terrain = null // Renamed from floor
     this.nearbyBox = null // Store reference to the nearby box
     this.isJumping = false
     this.canDoubleJump = false
@@ -58,6 +63,20 @@ class Scene {
     this.rotationLerpSpeed = 0.15
 
     this.mouseButtons = { left: false, right: false } // Track mouse button states
+
+    const guiParams = {
+      general: {},
+    }
+    const gui = new GUI()
+    gui.addFolder("General")
+    gui.close()
+    this.terrainChunkManager = new TerrainChunkManager({
+      scene: this.scene,
+      target: this.player,
+      gui,
+      guiParams,
+      threejs: this.renderer,
+    })
 
     // Create a div for displaying player position and FPS
     this.positionDiv = document.createElement("div")
@@ -85,39 +104,23 @@ class Scene {
   }
 
   addObjects() {
-    // Use the new Player class
-    this.player = new Player()
-    this.scene.add(this.player)
-    const guiParams = {
-      general: {},
-    }
-    const gui = new GUI()
-    gui.addFolder("General")
-    gui.close()
-
     // const threejs = new entity.Entity()
     // threejs.AddComponent(new threejs_component.ThreeJSController())
     // this.entityManager_.Add(threejs)
 
     // const threejs_ = threejs.GetComponent("ThreeJSController").threejs_
 
-    // new TerrainChunkManager({
-    //   scene: this.scene,
-    //   target: this.player,
-    //   gui,
-    //   guiParams,
-    //   // threejs: threejs_,
+    // this.scene.add(terrainChunkManager)
+    // this.terrain = new QuadtreeFloor({
+    //   worldSize: 400, // Make the terrain large
+    //   minTileSize: 64, // Each tile is 10x10 units
+    //   maxSegments: 64, // Highest LOD segments per tile
+    //   minSegments: 16, // Lowest LOD segments per tile
+    //   lodDistances: [20, 40, 80, 160], // LOD switch distances
     // })
-    this.terrain = new QuadtreeFloor({
-      worldSize: 400, // Make the terrain large
-      minTileSize: 64, // Each tile is 10x10 units
-      maxSegments: 64, // Highest LOD segments per tile
-      minSegments: 16, // Lowest LOD segments per tile
-      lodDistances: [20, 40, 80, 160], // LOD switch distances
-    })
-    this.scene.add(this.terrain)
+    // this.scene.add(this.terrain)
 
-    this.nearbyBox = createNearbyBox(this.terrain)
+    this.nearbyBox = createNearbyBox(this.terrainChunkManager)
     this.scene.add(this.nearbyBox)
 
     this.targetRotationY = this.player.rotation.y
@@ -372,8 +375,11 @@ class Scene {
       radius * Math.sin(polar) * Math.cos(oppositeAzimuth)
 
     // Prevent camera from going below the terrain
-    if (this.terrain && typeof this.terrain.getHeightAt === "function") {
-      const terrainY = this.terrain.getHeightAt(x, z) + 0.2 // small offset above ground
+    if (
+      this.terrainChunkManager &&
+      typeof this.terrainChunkManager.getHeightAt === "function"
+    ) {
+      const terrainY = this.terrainChunkManager.getHeightAt(x, z) + 0.2 // small offset above ground
       if (y < terrainY) y = terrainY
     }
 
@@ -395,6 +401,9 @@ class Scene {
       this.player.update(delta / 1000)
     }
 
+    if (this.terrainChunkManager) {
+      this.terrainChunkManager.Update(delta / 1000)
+    }
     if (this.player) {
       // Continuous rotation if movement.y is set
       if (this.player.movement.y !== 0) {
@@ -429,9 +438,12 @@ class Scene {
 
       // --- Terrain collision using quadtree terrain map ---
       if (this.player.isJumping) {
-        if (this.terrain && typeof this.terrain.getHeightAt === "function") {
+        if (
+          this.terrainChunkManager &&
+          typeof this.terrainChunkManager.getHeightAt === "function"
+        ) {
           const terrainY =
-            this.terrain.getHeightAt(
+            this.terrainChunkManager.getHeightAt(
               this.player.position.x,
               this.player.position.z
             ) + 0.5
@@ -444,11 +456,11 @@ class Scene {
           this.player.resetJump()
         }
       } else if (
-        this.terrain &&
-        typeof this.terrain.getHeightAt === "function"
+        this.terrainChunkManager &&
+        typeof this.terrainChunkManager.getHeightAt === "function"
       ) {
         const terrainY =
-          this.terrain.getHeightAt(
+          this.terrainChunkManager.getHeightAt(
             this.player.position.x,
             this.player.position.z
           ) + 0.5
@@ -533,9 +545,9 @@ class Scene {
     }
 
     // Update terrain LOD based on camera position
-    if (this.terrain && this.terrain.updateLOD) {
-      this.terrain.updateLOD(this.camera)
-    }
+    // if (this.terrain && this.terrain.updateLOD) {
+    //   this.terrain.updateLOD(this.camera)
+    // }
 
     this.render()
   }
