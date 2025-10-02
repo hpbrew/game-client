@@ -1,9 +1,11 @@
 import * as THREE from "three"
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 export class Player extends THREE.Group {
   constructor() {
     super()
+
+    // Movement / jump state
     this.isJumping = false
     this.canDoubleJump = false
     this.jumpVelocity = 0
@@ -11,33 +13,97 @@ export class Player extends THREE.Group {
     this.jumpHorizontal = { x: 0, z: 0 }
     this.movement = { x: 0, y: 0, z: 0 }
 
-    // Load FBX model
-    const loader = new FBXLoader()
+    this.model = null
+    this.mixer = null
 
+    this.actions = {
+      idle: null,
+      run: null,
+      dance: null,
+      death: null,
+      walk: null,
+      attack: null,
+    }
+    this._activeActionName = null
+
+    // Load GLB model (guard.glb)
+    const loader = new GLTFLoader()
+    const url = `${
+      import.meta.env.BASE_URL
+    }not_my_resources/characters/guard.glb`
     loader.load(
-      `${import.meta.env.BASE_URL}models/castle_guard_01.fbx`,
-      (fbx) => {
-        fbx.scale.set(0.01, 0.01, 0.01)
-        // Force all mesh materials to a visible color for debugging
-        fbx.traverse((child) => {
+      url,
+      (gltf) => {
+        const model = gltf.scene || gltf.scenes?.[0]
+        if (!model) return
+
+        // Ensure visible materials for debugging and enable shadows
+        model.traverse((child) => {
           if (child.isMesh) {
-            child.material.color.set(0xcccccc)
-            child.material.needsUpdate = true
+            child.castShadow = true
+            child.receiveShadow = true
+            if (child.material) {
+              if (!("map" in child.material) || !child.material.map) {
+                child.material = new THREE.MeshStandardMaterial({
+                  color: 0xcccccc,
+                })
+              }
+              child.material.needsUpdate = true
+            } else {
+              child.material = new THREE.MeshStandardMaterial({
+                color: 0xcccccc,
+              })
+            }
           }
         })
-        this.add(fbx)
+
+        this.model = model
+        this.add(model)
+
+        // Animation setup: create mixer and prepare idle/run actions
+        if (gltf.animations && gltf.animations.length > 0) {
+          this.mixer = new THREE.AnimationMixer(model)
+          const findClip = (re) => gltf.animations.find((a) => re.test(a.name))
+
+          // prefer explicit names, fallback to sensible alternatives
+          const idleClip =
+            findClip(/idle/i) || findClip(/stand|rest/i) || gltf.animations[0]
+          const runClip =
+            findClip(/run/i) || findClip(/walk/i) || gltf.animations[0]
+          const danceClip = findClip(/dance/i) || gltf.animations[0]
+          const deathClip = findClip(/death|die/i) || gltf.animations[0]
+          const attackClip = findClip(/attack|hit/i) || gltf.animations[0]
+          const walkClip = findClip(/walk/i) || gltf.animations[0]
+
+          this.actions.dance = danceClip
+            ? this.mixer.clipAction(danceClip)
+            : null
+          this.actions.death = deathClip
+            ? this.mixer.clipAction(deathClip)
+            : null
+          this.actions.attack = attackClip
+            ? this.mixer.clipAction(attackClip)
+            : null
+          this.actions.walk = walkClip ? this.mixer.clipAction(walkClip) : null
+          this.actions.idle = idleClip ? this.mixer.clipAction(idleClip) : null
+          this.actions.run = runClip ? this.mixer.clipAction(runClip) : null
+
+          // Ensure actions exist and are looped
+          if (this.idleAction) {
+            this.idleAction.reset()
+            this.idleAction.play()
+            this._activeActionName = "idle"
+          }
+          if (this.runAction) {
+            this.runAction.loop = THREE.LoopRepeat
+          }
+        }
       },
       undefined,
-      (error) => {
-        console.error("Error loading FBX:", error)
+      (err) => {
+        console.error("Failed to load guard.glb:", err)
       }
     )
-    // loader.setPath('models/');
-    // loader.load('walk.fbx', (a) => { _OnLoad('walk', a); });
-    // loader.load('run.fbx', (a) => { _OnLoad('run', a); });
-    // loader.load('Orc_Idle.fbx', (a) => { _OnLoad('idle', a); });
-    // loader.load('dance.fbx', (a) => { _OnLoad('dance', a); });
-    this.position.y = 0.5
   }
 
   setMovement(axis, value) {
@@ -82,5 +148,53 @@ export class Player extends THREE.Group {
     this.jumpVelocity = 0
     this.jumpHorizontal.x = 0
     this.jumpHorizontal.z = 0
+  }
+
+  // switch animations with a short crossfade
+  setAction(name) {
+    if (!this.mixer) return
+    if (this._activeActionName === name) return
+
+    const fadeDuration = 0.2
+
+    const next = this.actions[name]
+    if (!next) return
+
+    // fade out current
+    if (this._activeActionName && this.actions[this._activeActionName]) {
+      try {
+        this.actions[this._activeActionName].fadeOut(fadeDuration)
+      } catch (e) {
+        this.actions[this._activeActionName].stop &&
+          this.actions[this._activeActionName].stop()
+      }
+    }
+
+    // fade in next
+    next.reset()
+    next.fadeIn(fadeDuration)
+    next.play()
+    this._activeActionName = name
+  }
+
+  update(deltaSeconds) {
+    // update animation mixer if present
+    if (this.mixer) {
+      this.mixer.update(deltaSeconds)
+    }
+
+    // decide which animation to play:
+    // when moving on x or y use "run", otherwise "idle"
+    const moving =
+      Math.abs(this.movement.x) > 0.0005 ||
+      Math.abs(this.movement.y) > 0.0005 ||
+      Math.abs(this.movement.z) > 0.0005
+
+    // Idle, Walk, Run, Death, Attack, Dance
+    if (moving) {
+      this.setAction("run")
+    } else {
+      this.setAction("idle")
+    }
   }
 }

@@ -2,6 +2,11 @@ import * as THREE from "three"
 import { Player } from "../objects/player"
 import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
+import { TerrainChunkManager } from "../entities/terrain"
+import { GUI } from "dat.gui"
+// import { entity } from "../entities/entity"
+// import { entity_manager } from "../entities/entity-manager"
+// import { threejs_component } from "../entities/threejs_component"
 
 class Scene {
   constructor() {
@@ -30,11 +35,10 @@ class Scene {
       },
       false
     )
-
+    // this.entityManager_ = new entity_manager.EntityManager()
     this.player = null // Renamed from cube
     this.terrain = null // Renamed from floor
     this.nearbyBox = null // Store reference to the nearby box
-    this.movement = { x: 0, y: 0, z: 0 }
     this.isJumping = false
     this.canDoubleJump = false
     this.jumpVelocity = 0
@@ -84,7 +88,26 @@ class Scene {
     // Use the new Player class
     this.player = new Player()
     this.scene.add(this.player)
+    const guiParams = {
+      general: {},
+    }
+    const gui = new GUI()
+    gui.addFolder("General")
+    gui.close()
 
+    // const threejs = new entity.Entity()
+    // threejs.AddComponent(new threejs_component.ThreeJSController())
+    // this.entityManager_.Add(threejs)
+
+    // const threejs_ = threejs.GetComponent("ThreeJSController").threejs_
+
+    // new TerrainChunkManager({
+    //   scene: this.scene,
+    //   target: this.player,
+    //   gui,
+    //   guiParams,
+    //   // threejs: threejs_,
+    // })
     this.terrain = new QuadtreeFloor({
       worldSize: 400, // Make the terrain large
       minTileSize: 64, // Each tile is 10x10 units
@@ -159,41 +182,41 @@ class Scene {
         case "ArrowUp":
         case "w":
         case "W":
-          this.movement.z = 0.1
+          this.player.setMovement("z", 0.1)
           break
         case "ArrowDown":
         case "s":
         case "S":
-          this.movement.z = -0.1
+          this.player.setMovement("z", -0.1)
           break
         case "ArrowLeft":
         case "a":
         case "A":
-          this.movement.y = 0.045 // Start rotating left (slower)
+          this.player.setMovement("y", 0.045) // Start rotating left (slower)
           break
         case "ArrowRight":
         case "d":
         case "D":
-          this.movement.y = -0.045 // Start rotating right (slower)
+          this.player.setMovement("y", -0.045) // Start rotating right (slower)
           break
         case " ":
-          this.player.startJump(this.player.rotation.y, this.movement)
+          this.player.startJump(this.player.rotation.y, this.player.movement)
           break
         case "q":
         case "Q":
-          this.movement.x = -0.1
+          this.player.setMovement("x", -0.1)
           break
         case "e":
         case "E":
-          this.movement.x = 0.1
+          this.player.setMovement("x", 0.1)
           break
         case "c":
         case "C":
-          this.movement.x = -0.1 // Strafe left
+          this.player.setMovement("x", -0.1) // Strafe left
           break
         case "v":
         case "V":
-          this.movement.x = 0.1 // Strafe right
+          this.player.setMovement("x", 0.1) // Strafe right
           break
       }
     })
@@ -206,7 +229,7 @@ class Scene {
         case "W":
         case "s":
         case "S":
-          this.movement.z = 0
+          this.player.setMovement("z", 0)
           break
         case "ArrowLeft":
         case "a":
@@ -214,19 +237,19 @@ class Scene {
         case "ArrowRight":
         case "d":
         case "D":
-          this.movement.y = 0 // Stop rotating
+          this.player.setMovement("y", 0) // Stop rotating
           break
         case "q":
         case "Q":
         case "e":
         case "E":
-          this.movement.x = 0
+          this.player.setMovement("x", 0)
           break
         case "c":
         case "C":
         case "v":
         case "V":
-          this.movement.x = 0 // Stop strafing
+          this.player.setMovement("x", 0) // Stop strafing
           break
       }
     })
@@ -250,7 +273,7 @@ class Scene {
       if (e.button === 2) this.mouseButtons.right = false
 
       // Stop moving the cube when either mouse button is released
-      this.movement.z = 0
+      this.player.setMovement("z", 0)
 
       // Only stop dragging if both buttons are released
       if (!this.mouseButtons.left && !this.mouseButtons.right) {
@@ -295,7 +318,7 @@ class Scene {
       if (this.mouseButtons.left && this.mouseButtons.right) {
         this.targetRotationY = this.orbit.azimuth
         this.player.rotation.y = this.orbit.azimuth // Instantly sync cube rotation with camera
-        this.movement.z = 0.1
+        this.player.setMovement("z", 0.1)
       }
       // If only right mouse button is held, rotate the cube with the camera once past 90 degrees
       else if (this.mouseButtons.right && !this.mouseButtons.left) {
@@ -367,11 +390,16 @@ class Scene {
     this.fps = 1000 / delta
     this.lastFrameTime = now
 
+    // update player animations (delta in seconds)
+    if (this.player && typeof this.player.update === "function") {
+      this.player.update(delta / 1000)
+    }
+
     if (this.player) {
       // Continuous rotation if movement.y is set
-      if (this.movement.y !== 0) {
-        this.targetRotationY += this.movement.y
-        this.targetAzimuth += this.movement.y
+      if (this.player.movement.y !== 0) {
+        this.targetRotationY += this.player.movement.y
+        this.targetAzimuth += this.player.movement.y
       }
 
       // Smoothly interpolate rotation
@@ -383,17 +411,17 @@ class Scene {
         (this.targetAzimuth - this.orbit.azimuth) * this.rotationLerpSpeed
 
       // Move forward/backward based on cube's facing direction
-      if (this.movement.z !== 0) {
+      if (this.player.movement.z !== 0) {
         const angle = this.player.rotation.y
-        this.player.position.x += Math.sin(angle) * this.movement.z * 3 // Triple speed
-        this.player.position.z += Math.cos(angle) * this.movement.z * 3 // Triple speed
+        this.player.position.x += Math.sin(angle) * this.player.movement.z * 3 // Triple speed
+        this.player.position.z += Math.cos(angle) * this.player.movement.z * 3 // Triple speed
       }
 
       // Strafe left/right relative to cube's facing direction
-      if (this.movement.x !== 0) {
+      if (this.player.movement.x !== 0) {
         const angle = this.player.rotation.y - Math.PI / 2
-        this.player.position.x += Math.sin(angle) * this.movement.x * 3 // Triple speed
-        this.player.position.z += Math.cos(angle) * this.movement.x * 3 // Triple speed
+        this.player.position.x += Math.sin(angle) * this.player.movement.x * 3 // Triple speed
+        this.player.position.z += Math.cos(angle) * this.player.movement.x * 3 // Triple speed
       }
 
       // Handle jumping and gravity
@@ -459,15 +487,15 @@ class Scene {
             this.jumpHorizontal.z = 0
           } else {
             // Otherwise, block horizontal movement as before
-            if (this.movement.z !== 0) {
+            if (this.player.movement.z !== 0) {
               const angle = this.player.rotation.y
-              this.player.position.x -= Math.sin(angle) * this.movement.z
-              this.player.position.z -= Math.cos(angle) * this.movement.z
+              this.player.position.x -= Math.sin(angle) * this.player.movement.z
+              this.player.position.z -= Math.cos(angle) * this.player.movement.z
             }
-            if (this.movement.x !== 0) {
+            if (this.player.movement.x !== 0) {
               const angle = this.player.rotation.y - Math.PI / 2
-              this.player.position.x -= Math.sin(angle) * this.movement.x
-              this.player.position.z -= Math.cos(angle) * this.movement.x
+              this.player.position.x -= Math.sin(angle) * this.player.movement.x
+              this.player.position.z -= Math.cos(angle) * this.player.movement.x
             }
             // Prevent moving into the box while jumping horizontally
             if (this.isJumping) {

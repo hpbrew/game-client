@@ -2,17 +2,19 @@
   "name": "game-client",
   "version": "1.0.0",
   "description": "A web application using Three.js for 3D graphics.",
-  "main": "src/main.js",
+  "main": "src/entities/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview"
   },
   "dependencies": {
+    "socket.io-client": "^4.8.1",
     "three": "^0.150.0",
     "vite-plugin-html": "^3.2.2"
   },
   "devDependencies": {
+    "dat.gui": "^0.7.9",
     "vite": "^7.1.7"
   },
   "keywords": [

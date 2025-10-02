@@ -26,8 +26,21 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      "/shared": "/src/shared",
+      "/entities": "/src/entities",
+      "/objects": "/src/objects",
+      "/scenes": "/src/scenes",
+      "/resources": "/src/not_my_resources",
+    },
+  },
   server: {
     open: true,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
   },
   build: {
     outDir: "dist",
