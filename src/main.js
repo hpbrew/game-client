@@ -5,21 +5,21 @@ import Scene from "./scenes/scene"
 
 const scene = new Scene()
 // const renderer = new THREE.WebGLRenderer()
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-)
+// const camera = new THREE.PerspectiveCamera(
+//   75,
+//   window.innerWidth / window.innerHeight,
+//   0.1,
+//   1000
+// )
 window.scene = scene
 // renderer.setSize(window.innerWidth, window.innerHeight)
 // document.body.appendChild(renderer.domElement)
-
-camera.position.z = 5
+//
+// camera.position.z = 5
 
 function animate() {
   requestAnimationFrame(animate)
-  scene.render(camera)
+  // scene.render(camera)
 }
 
 scene.init()
