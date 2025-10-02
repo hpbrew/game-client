@@ -70,6 +70,7 @@ class Scene {
     const gui = new GUI()
     gui.addFolder("General")
     gui.close()
+
     this.terrainChunkManager = new TerrainChunkManager({
       scene: this.scene,
       target: this.player,
@@ -435,7 +436,7 @@ class Scene {
 
       // Handle jumping and gravity
       this.player.applyJump()
-
+      const overlapValue = 0.01
       // --- Terrain collision using quadtree terrain map ---
       if (this.player.isJumping) {
         if (
@@ -446,13 +447,13 @@ class Scene {
             this.terrainChunkManager.getHeightAt(
               this.player.position.x,
               this.player.position.z
-            ) + 0.5
+            ) + overlapValue
           if (this.player.position.y <= terrainY) {
             this.player.position.y = terrainY
             this.player.resetJump()
           }
-        } else if (this.player.position.y <= 0.5) {
-          this.player.position.y = 0.5
+        } else if (this.player.position.y <= overlapValue) {
+          this.player.position.y = overlapValue
           this.player.resetJump()
         }
       } else if (
@@ -463,10 +464,10 @@ class Scene {
           this.terrainChunkManager.getHeightAt(
             this.player.position.x,
             this.player.position.z
-          ) + 0.5
+          ) + overlapValue
         this.player.position.y = terrainY
-      } else if (this.player.position.y < 0.5) {
-        this.player.position.y = 0.5
+      } else if (this.player.position.y < overlapValue) {
+        this.player.position.y = overlapValue
       }
 
       // --- Collision detection between cube and nearby box ---
@@ -476,10 +477,12 @@ class Scene {
 
         if (playerBox.intersectsBox(otherBox)) {
           // Check vertical overlap
-          const playerBottom = this.player.position.y - 0.5
-          const playerTop = this.player.position.y + 0.5
-          const boxBottom = this.nearbyBox.position.y - 0.5
-          const boxTop = this.nearbyBox.position.y + 0.5
+          const playerBottom = this.player.position.y - overlapValue
+          const playerTop = this.player.position.y + overlapValue
+          const boxBottom = this.nearbyBox.position.y - overlapValue
+          const boxTop =
+            this.nearbyBox.position.y +
+            this.nearbyBox.geometry.parameters.height
 
           // If the cube is falling onto the box (from above)
           if (
@@ -487,11 +490,12 @@ class Scene {
             playerBottom < boxTop &&
             playerTop > boxTop && // cube is above box
             Math.abs(this.player.position.x - this.nearbyBox.position.x) <
-              0.9 &&
-            Math.abs(this.player.position.z - this.nearbyBox.position.z) < 0.9
+              overlapValue &&
+            Math.abs(this.player.position.z - this.nearbyBox.position.z) <
+              overlapValue
           ) {
             // Snap cube to top of box
-            this.player.position.y = boxTop + 0.5
+            this.player.position.y = boxTop + overlapValue
             this.isJumping = false
             this.canDoubleJump = false
             this.jumpVelocity = 0
