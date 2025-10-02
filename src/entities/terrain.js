@@ -5,6 +5,7 @@ import {
   BackSide,
   Group,
   Vector3,
+  Raycaster,
 } from "three"
 
 import { entity } from "./entity.js"
@@ -214,6 +215,37 @@ export class TerrainChunkManager extends entity.Component {
     }
 
     return this._builder.AllocateChunk(params)
+  }
+
+  raycastSelect(event, camera) {
+    const mouse = {
+      x: (event.clientX / window.innerWidth) * 2 - 1,
+      y: -(event.clientY / window.innerHeight) * 2 + 1,
+    }
+
+    const raycaster = new Raycaster()
+    raycaster.setFromCamera(mouse, camera)
+    const intersects = raycaster.intersectObjects(
+      Object.values(this._chunks).map((c) => c.chunk._plane)
+    )
+    if (intersects.length > 0) {
+      const p = intersects[0].point
+      console.log(
+        `Clicked on terrain at ${p.x.toFixed(2)}, ${p.y.toFixed(
+          2
+        )}, ${p.z.toFixed(2)} (height: ${this.getHeightAt(p.x, p.z).toFixed(
+          2
+        )})`
+      )
+
+      return {
+        x: p.x,
+        y: this.getHeightAt(p.x, p.z),
+        z: p.z,
+      }
+    }
+
+    return undefined
   }
 
   GetHeight(pos) {

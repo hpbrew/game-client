@@ -181,6 +181,14 @@ class Scene {
   }
 
   addEventListeners() {
+    window.addEventListener("pointerdown", (e) => {
+      if (!e.shiftKey) return
+
+      const pos = this.terrainChunkManager?.raycastSelect(e, this.camera)
+      if (!pos) return
+      console.log("Clicked terrain at ", pos)
+      this.player.position.set(pos.x, pos.y + 0.1, pos.z)
+    })
     window.addEventListener("keydown", (event) => {
       switch (event.key) {
         case "ArrowUp":
