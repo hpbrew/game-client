@@ -71,34 +71,34 @@ class Scene {
     gui.addFolder("General")
     gui.close()
 
-    this.terrainChunkManager = new TerrainChunkManager({
-      scene: this.scene,
-      target: this.player,
-      gui,
-      guiParams,
-      threejs: this.renderer,
-    })
-
-    //   new QuadtreeFloor({
-    //     worldSize: 400, // Make the terrain large
-    //     minTileSize: 64, // Each tile is 10x10 units
-    //     maxSegments: 64, // Highest LOD segments per tile
-    //     minSegments: 16, // Lowest LOD segments per tile
-    //     lodDistances: [20, 40, 80, 160], // LOD switch distances
-    //     caves: [{ x: 20, z: 20, radius: 16, depth: 16, falloff: 0.5 }],
-    //   })
-    // this.scene.add(this.terrainChunkManager)
-    // const floors = new Map()
-    // const f1 = new QuadtreeFloor({
-    //   worldSize: 40, // Make the terrain large
-    //   minTileSize: 64, // Each tile is 10x10 units
-    //   maxSegments: 64, // Highest LOD segments per tile
-    //   minSegments: 16, // Lowest LOD segments per tile
-    //   lodDistances: [20, 40, 80, 160], // LOD switch distances
-    //   caves: [{ x: 0, z: 0, radius: 16, depth: -16, falloff: 0.5 }],
+    // this.terrainChunkManager = new TerrainChunkManager({
+    //   scene: this.scene,
+    //   target: this.player,
+    //   gui,
+    //   guiParams,
+    //   threejs: this.renderer,
     // })
-    // floors.set("f1", f1)
-    // this.scene.add(f1)
+
+    this.terrainChunkManager = new QuadtreeFloor({
+      worldSize: 400, // Make the terrain large
+      minTileSize: 64, // Each tile is 10x10 units
+      maxSegments: 64, // Highest LOD segments per tile
+      minSegments: 16, // Lowest LOD segments per tile
+      lodDistances: [20, 40, 80, 160], // LOD switch distances
+      caves: [{ x: 20, z: 20, radius: 16, depth: 16, falloff: 0.5 }],
+    })
+    this.scene.add(this.terrainChunkManager)
+    const floors = new Map()
+    const f1 = new QuadtreeFloor({
+      worldSize: 40, // Make the terrain large
+      minTileSize: 64, // Each tile is 10x10 units
+      maxSegments: 64, // Highest LOD segments per tile
+      minSegments: 16, // Lowest LOD segments per tile
+      lodDistances: [20, 40, 80, 160], // LOD switch distances
+      caves: [{ x: 0, z: 0, radius: 16, depth: -16, falloff: 0.5 }],
+    })
+    floors.set("f1", f1)
+    this.scene.add(f1)
 
     // Create a div for displaying player position and FPS
     this.positionDiv = document.createElement("div")
