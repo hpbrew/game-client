@@ -69,38 +69,38 @@ export class TerrainChunkManager extends entity.Component {
       vertexColors: true,
     })
 
-    this._material.onBeforeCompile = (s) => {
-      let a = 0
-      let vsh = s.vertexShader
-      vsh = terrain_shader.VS1 + s.vertexShader
-      const vi1 = vsh.search("#include <fog_vertex>")
-      vsh = [vsh.slice(0, vi1) + terrain_shader.VS2 + vsh.slice(vi1)].join("")
-      s.vertexShader = vsh
+    // this._material.onBeforeCompile = (s) => {
+    //   let a = 0
+    //   let vsh = s.vertexShader
+    //   vsh = terrain_shader.VS1 + s.vertexShader
+    //   const vi1 = vsh.search("#include <fog_vertex>")
+    //   vsh = [vsh.slice(0, vi1) + terrain_shader.VS2 + vsh.slice(vi1)].join("")
+    //   s.vertexShader = vsh
 
-      s.fragmentShader = terrain_shader.PS1 + s.fragmentShader
-      const fi1 = s.fragmentShader.search("#include <lights_physical_fragment>")
-      s.fragmentShader = [
-        s.fragmentShader.slice(0, fi1) +
-          // TODO: fix this
-          // terrain_shader.PS2 +  // This is commented out because it's crashing need to fix
-          s.fragmentShader.slice(fi1),
-      ].join("")
+    //   s.fragmentShader = terrain_shader.PS1 + s.fragmentShader
+    //   const fi1 = s.fragmentShader.search("#include <lights_physical_fragment>")
+    //   s.fragmentShader = [
+    //     s.fragmentShader.slice(0, fi1) +
+    //       // TODO: fix this
+    //       // terrain_shader.PS2 + // This is commented out because it's crashing need to fix
+    //       s.fragmentShader.slice(fi1),
+    //   ].join("")
 
-      s.uniforms.TRIPLANAR_normalMap = { value: normal.Info["normal"].atlas }
-      s.uniforms.TRIPLANAR_diffuseMap = {
-        value: diffuse.Info["diffuse"].atlas,
-      }
-      s.uniforms.TRIPLANAR_noiseMap = { value: noiseTexture }
+    //   s.uniforms.TRIPLANAR_normalMap = { value: normal.Info["normal"].atlas }
+    //   s.uniforms.TRIPLANAR_diffuseMap = {
+    //     value: diffuse.Info["diffuse"].atlas,
+    //   }
+    //   s.uniforms.TRIPLANAR_noiseMap = { value: noiseTexture }
 
-      diffuse.onLoad = () => {
-        s.uniforms.TRIPLANAR_diffuseMap.value = diffuse.Info["diffuse"].atlas
-      }
-      normal.onLoad = () => {
-        s.uniforms.TRIPLANAR_normalMap.value = normal.Info["normal"].atlas
-      }
+    //   diffuse.onLoad = () => {
+    //     s.uniforms.TRIPLANAR_diffuseMap.value = diffuse.Info["diffuse"].atlas
+    //   }
+    //   normal.onLoad = () => {
+    //     s.uniforms.TRIPLANAR_normalMap.value = normal.Info["normal"].atlas
+    //   }
 
-      // s.fragmentShader += 'poop';
-    }
+    //   // s.fragmentShader += 'poop';
+    // }
 
     this._builder =
       new terrain_builder_threaded.TerrainChunkRebuilder_Threaded()
