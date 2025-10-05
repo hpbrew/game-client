@@ -74,10 +74,13 @@ export const terrain_builder_threaded = (function () {
       this._pool = {}
       this._old = []
 
-      this._workerPool = new WorkerThreadPool(
-        _NUM_WORKERS,
-        "src/entities/terrain-builder-threaded-worker.js"
-      )
+      const url = new URL(
+        "./terrain-builder-threaded-worker.js",
+        import.meta.url,
+        { type: "module" }
+      ).href
+
+      this._workerPool = new WorkerThreadPool(_NUM_WORKERS, url)
 
       this._params = params
     }
