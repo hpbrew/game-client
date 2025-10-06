@@ -1,17 +1,17 @@
-import * as THREE from "three"
+import { Vector3 } from "three"
 
 import { texture_splatter } from "./texture-splatter.js"
 
-import { math } from "/shared/math.mjs"
-import { noise } from "/shared/noise.mjs"
-import { terrain_height } from "/shared/terrain-height.mjs"
+import { math } from "../shared/math.mjs"
+import { noise } from "../shared/noise.mjs"
+import { terrain_height } from "../shared/terrain-height.mjs"
 
 class _TerrainBuilderThreadedWorker {
   constructor() {}
 
   Init(params) {
     this._params = params
-    this._params.offset = new THREE.Vector3(
+    this._params.offset = new Vector3(
       params.offset[0],
       params.offset[1],
       params.offset[2]
@@ -32,19 +32,19 @@ class _TerrainBuilderThreadedWorker {
   }
 
   Rebuild() {
-    const _D = new THREE.Vector3()
-    const _D1 = new THREE.Vector3()
-    const _D2 = new THREE.Vector3()
-    const _P = new THREE.Vector3()
-    const _H = new THREE.Vector3()
-    const _W = new THREE.Vector3()
-    const _S = new THREE.Vector3()
-    const _C = new THREE.Vector3()
+    const _D = new Vector3()
+    const _D1 = new Vector3()
+    const _D2 = new Vector3()
+    const _P = new Vector3()
+    const _H = new Vector3()
+    const _W = new Vector3()
+    const _S = new Vector3()
+    const _C = new Vector3()
 
-    const _N = new THREE.Vector3()
-    const _N1 = new THREE.Vector3()
-    const _N2 = new THREE.Vector3()
-    const _N3 = new THREE.Vector3()
+    const _N = new Vector3()
+    const _N1 = new Vector3()
+    const _N2 = new Vector3()
+    const _N3 = new Vector3()
 
     const positions = []
     const colors = []

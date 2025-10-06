@@ -7,7 +7,9 @@ export const terrain_builder_threaded = (function () {
 
   class WorkerThread {
     constructor(s) {
-      this._worker = new Worker(s, { type: "module" })
+      this._worker = new Worker(s, {
+        type: "module",
+      })
       this._worker.onmessage = (e) => {
         this._OnMessage(e)
       }
