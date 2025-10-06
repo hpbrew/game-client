@@ -1,4 +1,5 @@
 import { terrain_chunk } from "./terrain-chunk.js"
+import TerrainWorker from "./terrain-builder-threaded-worker.js?worker"
 
 export const terrain_builder_threaded = (function () {
   const _NUM_WORKERS = 4
@@ -7,9 +8,11 @@ export const terrain_builder_threaded = (function () {
 
   class WorkerThread {
     constructor(s) {
-      this._worker = new Worker(s, {
-        type: "module",
-      })
+      this._worker = new TerrainWorker()
+      
+      //new Worker(s, {
+        //type: "module",
+      //})
       this._worker.onmessage = (e) => {
         this._OnMessage(e)
       }
