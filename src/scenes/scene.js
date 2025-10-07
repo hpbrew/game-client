@@ -58,6 +58,9 @@ class Scene {
     this.orbit = { azimuth: 0, polar: Math.PI / 4, radius: 8 } // Camera spherical coords
     this.targetAzimuth = this.orbit.azimuth // Add this line
 
+    // Camera target offset (so we look at player's head/center instead of feet)
+    this.cameraTargetOffset = new THREE.Vector3(0, 1, 0)
+
     // For smooth rotation
     this.targetRotationY = 0
     this.rotationLerpSpeed = 0.15
@@ -554,7 +557,11 @@ class Scene {
       this.player.position.z +
       radius * Math.sin(polar) * Math.cos(oppositeAzimuth)
 
-    // Prevent camera from going below the terrain
+    // Compute the actual target we want the camera to look at (player + offset)
+    const target = new THREE.Vector3()
+    target.copy(this.player.position).add(this.cameraTargetOffset)
+
+    // Prevent camera from going below the terrain relative to the target
     if (
       this.terrainChunkManager &&
       typeof this.terrainChunkManager.getHeightAt === "function"
@@ -564,7 +571,7 @@ class Scene {
     }
 
     this.camera.position.set(x, y, z)
-    this.camera.lookAt(this.player.position)
+    this.camera.lookAt(target)
   }
 
   animate() {
