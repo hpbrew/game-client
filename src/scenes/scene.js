@@ -411,6 +411,9 @@ class Scene {
       { passive: true }
     )
 
+    // Double-tap detection state for moving player
+    this._lastTap = { time: 0, x: 0, y: 0 }
+
     this.renderer.domElement.addEventListener(
       "touchmove",
       (e) => {
@@ -477,6 +480,53 @@ class Scene {
         // End single-touch drag when no touches remain
         if (!e.touches || e.touches.length === 0) {
           this.isDragging = false
+        }
+
+        // Double-tap detection: if a quick second tap occurs near the first, move player
+        try {
+          const now = performance.now()
+          // Use changedTouches if present to get the last touch that ended
+          const touch =
+            (e.changedTouches && e.changedTouches[0]) ||
+            (e.touches && e.touches[0])
+          if (touch) {
+            const dt = now - this._lastTap.time
+            const dx = touch.clientX - this._lastTap.x
+            const dy = touch.clientY - this._lastTap.y
+            const dist = Math.hypot(dx, dy)
+            const DOUBLE_TAP_MAX_MS = 300
+            const DOUBLE_TAP_MAX_DIST = 30 // pixels
+            if (
+              dt > 0 &&
+              dt <= DOUBLE_TAP_MAX_MS &&
+              dist <= DOUBLE_TAP_MAX_DIST
+            ) {
+              // It's a double-tap: perform raycast and move player
+              const rect = this.renderer.domElement.getBoundingClientRect()
+              // Convert touch coords to client coords
+              const clientX = touch.clientX - rect.left
+              const clientY = touch.clientY - rect.top
+              const fakeEvent = {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+              }
+              const pos = this.terrainChunkManager?.raycastSelect(
+                fakeEvent,
+                this.camera
+              )
+              if (pos) {
+                console.log("Double-tap move to", pos)
+                this.player.position.set(pos.x, pos.y + 0.1, pos.z)
+              }
+            }
+
+            // store last tap info
+            this._lastTap.time = now
+            this._lastTap.x = touch.clientX
+            this._lastTap.y = touch.clientY
+          }
+        } catch (err) {
+          // ignore
         }
       },
       { passive: true }
