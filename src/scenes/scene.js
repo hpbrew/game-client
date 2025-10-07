@@ -400,6 +400,12 @@ class Scene {
           this._touchZoom.active = true
           this._touchZoom.startDist = dist
           this._touchZoom.lastDist = dist
+        } else if (e.touches && e.touches.length === 1) {
+          // Begin single-touch orbit drag
+          const t = e.touches[0]
+          this.isDragging = true
+          this.prevMouse.x = t.clientX
+          this.prevMouse.y = t.clientY
         }
       },
       { passive: true }
@@ -408,25 +414,50 @@ class Scene {
     this.renderer.domElement.addEventListener(
       "touchmove",
       (e) => {
-        if (!this._touchZoom.active) return
-        if (e.touches && e.touches.length === 2) {
-          const dx = e.touches[0].clientX - e.touches[1].clientX
-          const dy = e.touches[0].clientY - e.touches[1].clientY
-          const dist = Math.hypot(dx, dy)
+        // Prioritize pinch-to-zoom when active
+        if (this._touchZoom.active) {
+          if (e.touches && e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX
+            const dy = e.touches[0].clientY - e.touches[1].clientY
+            const dist = Math.hypot(dx, dy)
 
-          // Calculate scale factor relative to last distance
-          const delta = dist - this._touchZoom.lastDist
+            // Calculate scale factor relative to last distance
+            const delta = dist - this._touchZoom.lastDist
 
-          // Tune sensitivity: convert pixel delta into radius change
-          const pinchSpeed = 0.02
-          this.orbit.radius -= delta * pinchSpeed // pinch together (dist decreases) => radius decreases (zoom in)
-          this.orbit.radius = Math.max(2, Math.min(50, this.orbit.radius))
-          this._touchZoom.lastDist = dist
+            // Tune sensitivity: convert pixel delta into radius change
+            const pinchSpeed = 0.02
+            this.orbit.radius -= delta * pinchSpeed // pinch together (dist decreases) => radius decreases (zoom in)
+            this.orbit.radius = Math.max(2, Math.min(50, this.orbit.radius))
+            this._touchZoom.lastDist = dist
 
-          // Update camera immediately for responsive feel
+            // Update camera immediately for responsive feel
+            this.updateCameraPosition()
+
+            // Prevent page scroll while pinching
+            e.preventDefault()
+          }
+          return
+        }
+
+        // Single-touch orbit drag
+        if (e.touches && e.touches.length === 1 && this.isDragging) {
+          const t = e.touches[0]
+          const deltaX = t.clientX - this.prevMouse.x
+          const deltaY = t.clientY - this.prevMouse.y
+
+          // Adjust sensitivity to feel similar to mouse dragging
+          this.orbit.azimuth -= deltaX * 0.01
+          this.targetAzimuth = this.orbit.azimuth
+          this.orbit.polar -= deltaY * 0.01
+          this.orbit.polar = Math.max(
+            0.1,
+            Math.min(Math.PI - 0.1, this.orbit.polar)
+          )
+
+          this.prevMouse.x = t.clientX
+          this.prevMouse.y = t.clientY
+
           this.updateCameraPosition()
-
-          // Prevent page scroll while pinching
           e.preventDefault()
         }
       },
@@ -441,6 +472,11 @@ class Scene {
           this._touchZoom.active = false
           this._touchZoom.startDist = 0
           this._touchZoom.lastDist = 0
+        }
+
+        // End single-touch drag when no touches remain
+        if (!e.touches || e.touches.length === 0) {
+          this.isDragging = false
         }
       },
       { passive: true }
