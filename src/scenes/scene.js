@@ -1,4 +1,5 @@
 import * as THREE from "three"
+import WebGPURenderer from "three/addons/renderers/webgpu/WebGPURenderer.js"
 import { Player } from "../objects/player"
 import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
@@ -17,16 +18,10 @@ class Scene {
       0.1,
       1000
     )
-    this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false })
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
-    this.renderer.outputEncoding = THREE.sRGBEncoding
-    this.renderer.gammaFactor = 2.2
-    this.renderer.shadowMap.enabled = true
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    this.renderer.setPixelRatio(window.devicePixelRatio)
-    this.renderer.setSize(window.innerWidth, window.innerHeight)
-
-    document.body.appendChild(this.renderer.domElement)
+    // Defer renderer creation until init so we can async-init WebGPU when available.
+    this.preferWebGPU = typeof navigator !== "undefined" && !!navigator.gpu
+    this.renderer = null
+    this.isWebGPU = false
 
     window.addEventListener(
       "resize",
@@ -74,13 +69,10 @@ class Scene {
     gui.addFolder("General")
     gui.close()
 
-    this.terrainChunkManager = new TerrainChunkManager({
-      scene: this.scene,
-      target: this.player,
-      gui,
-      guiParams,
-      threejs: this.renderer,
-    })
+    // TerrainChunkManager will be created during init() after renderer is available
+    this.terrainChunkManager = null
+    this.guiParams = guiParams
+    this.gui = gui
 
     // this.terrainChunkManager = new QuadtreeFloor({
     //   worldSize: 400, // Make the terrain large
@@ -122,7 +114,53 @@ class Scene {
     this.fps = 0
   }
 
-  init() {
+  async init() {
+    // Create renderer: prefer WebGPU when available
+    // try {
+    //   if (this.preferWebGPU) {
+    //     this.renderer = new WebGPURenderer({ antialias: true })
+    //     // WebGPURenderer requires async initialization
+    //     if (this.renderer.init) await this.renderer.init()
+    //     this.isWebGPU = true
+    //   }
+    // } catch (err) {
+    //   console.warn("WebGPU init failed, falling back to WebGL:", err)
+    //   this.renderer = null
+    //   this.isWebGPU = false
+    // }
+
+    if (!this.renderer) {
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+      this.renderer.shadowMap.enabled = true
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    }
+
+    // Common renderer setup
+    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    if (this.renderer.outputEncoding !== undefined)
+      this.renderer.outputEncoding = THREE.sRGBEncoding
+    this.renderer.setPixelRatio(window.devicePixelRatio || 1)
+
+    this.renderer.gammaFactor = 2.2
+
+    document.body.appendChild(this.renderer.domElement)
+
+    // Some renderers expose a domElement, ensure it's added
+    if (this.renderer.domElement && !this.renderer.domElement.parentElement) {
+      document.body.appendChild(this.renderer.domElement)
+    }
+
+    console.log("Renderer in use:", this.isWebGPU ? "WebGPU" : "WebGL")
+
+    // Now that renderer exists, create the TerrainChunkManager
+    this.terrainChunkManager = new TerrainChunkManager({
+      scene: this.scene,
+      target: this.player,
+      gui: this.gui,
+      guiParams: this.guiParams,
+      threejs: this.renderer,
+    })
+
     this.addObjects()
     this.addEventListeners()
     this.animate()

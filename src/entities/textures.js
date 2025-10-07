@@ -83,7 +83,7 @@ export const textures = (function () {
           diffuse.generateMipmaps = true
 
           const caps = this._threejs.capabilities
-          const aniso = caps.getMaxAnisotropy()
+          // const aniso = caps.getMaxAnisotropy()
 
           diffuse.anisotropy = 4
 
