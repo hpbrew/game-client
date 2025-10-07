@@ -382,6 +382,70 @@ class Scene {
       { passive: false }
     )
 
+    // Touch pinch-to-zoom support for mobile: two-finger pinch to zoom
+    this._touchZoom = {
+      active: false,
+      startDist: 0,
+      lastDist: 0,
+    }
+
+    this.renderer.domElement.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches && e.touches.length === 2) {
+          // Start pinch
+          const dx = e.touches[0].clientX - e.touches[1].clientX
+          const dy = e.touches[0].clientY - e.touches[1].clientY
+          const dist = Math.hypot(dx, dy)
+          this._touchZoom.active = true
+          this._touchZoom.startDist = dist
+          this._touchZoom.lastDist = dist
+        }
+      },
+      { passive: true }
+    )
+
+    this.renderer.domElement.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!this._touchZoom.active) return
+        if (e.touches && e.touches.length === 2) {
+          const dx = e.touches[0].clientX - e.touches[1].clientX
+          const dy = e.touches[0].clientY - e.touches[1].clientY
+          const dist = Math.hypot(dx, dy)
+
+          // Calculate scale factor relative to last distance
+          const delta = dist - this._touchZoom.lastDist
+
+          // Tune sensitivity: convert pixel delta into radius change
+          const pinchSpeed = 0.02
+          this.orbit.radius -= delta * pinchSpeed // pinch together (dist decreases) => radius decreases (zoom in)
+          this.orbit.radius = Math.max(2, Math.min(50, this.orbit.radius))
+          this._touchZoom.lastDist = dist
+
+          // Update camera immediately for responsive feel
+          this.updateCameraPosition()
+
+          // Prevent page scroll while pinching
+          e.preventDefault()
+        }
+      },
+      { passive: false }
+    )
+
+    this.renderer.domElement.addEventListener(
+      "touchend",
+      (e) => {
+        // End pinch when less than two touches remain
+        if (!e.touches || e.touches.length < 2) {
+          this._touchZoom.active = false
+          this._touchZoom.startDist = 0
+          this._touchZoom.lastDist = 0
+        }
+      },
+      { passive: true }
+    )
+
     // Prevent default right-click context menu on the renderer
     this.renderer.domElement.addEventListener("contextmenu", (e) =>
       e.preventDefault()
