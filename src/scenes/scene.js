@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import WebGPURenderer from "three/addons/renderers/webgpu/WebGPURenderer.js"
+// import WebGPURenderer from "three/addons/renderers/webgpu/WebGPURenderer.js"
 import { Player } from "../objects/player"
 import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
@@ -331,6 +331,21 @@ class Scene {
     // Mouse controls for camera orbit
     this.renderer.domElement.addEventListener("mousedown", (e) => {
       if (e.button === 0) this.mouseButtons.left = true
+      if (e.button === 1) {
+        this.mouseButtons.middle = true
+        // Prevent default middle-button behavior (auto-scroll)
+        e.preventDefault()
+        // Also treat middle-button down as a move command (raycast and move player)
+        try {
+          const pos = this.terrainChunkManager?.raycastSelect(e, this.camera)
+          if (pos) {
+            console.log("Middle-button move to", pos)
+            this.player.position.set(pos.x, pos.y + 0.1, pos.z)
+          }
+        } catch (err) {
+          console.warn("middle-button raycast error", err)
+        }
+      }
       if (e.button === 2) this.mouseButtons.right = true
       this.isDragging = true
       this.prevMouse.x = e.clientX
@@ -342,8 +357,11 @@ class Scene {
       }
     })
 
+    // (Removed non-standard 'middleclick' listener.) Use mousedown/mouseup with e.button === 1 instead.
+
     window.addEventListener("mouseup", (e) => {
       if (e.button === 0) this.mouseButtons.left = false
+      if (e.button === 1) this.mouseButtons.middle = false
       if (e.button === 2) this.mouseButtons.right = false
 
       // Stop moving the cube when either mouse button is released
