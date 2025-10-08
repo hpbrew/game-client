@@ -79,6 +79,7 @@ export class TerrainChunkManager extends entity.Component {
 
       s.fragmentShader = terrain_shader.PS1 + s.fragmentShader
       const fi1 = s.fragmentShader.search("#include <lights_physical_fragment>")
+
       s.fragmentShader = [
         s.fragmentShader.slice(0, fi1) +
           // TODO: fix this

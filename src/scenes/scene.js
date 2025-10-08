@@ -8,6 +8,7 @@ import { GUI } from "dat.gui"
 // import { entity } from "../entities/entity"
 // import { entity_manager } from "../entities/entity-manager"
 // import { threejs_component } from "../entities/threejs_component"
+import { _VS, _FS } from "./sceneShaders.js"
 
 class Scene {
   constructor() {
@@ -141,7 +142,7 @@ class Scene {
       this.renderer.outputEncoding = THREE.sRGBEncoding
     this.renderer.setPixelRatio(window.devicePixelRatio || 1)
 
-    this.renderer.gammaFactor = 2.2
+    // this.renderer.gammaFactor = 2.2
 
     document.body.appendChild(this.renderer.domElement)
 
@@ -204,9 +205,45 @@ class Scene {
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+    this.scene.fog = new THREE.FogExp2(0x89b2eb, 0.00002)
+
     const texture = new THREE.CanvasTexture(canvas)
     this.scene.background = texture
+    // const hemiLight = new THREE.HemisphereLight(0x424a75, 0x6a88b5, 0.7)
+    // // hemiLight.color.setHSL(0.6, 1, 0.4);
+    // // hemiLight.groundColor.setHSL(0.095, 1, 0.5);
+    // this.scene.add(hemiLight)
+    // const loader = new THREE.CubeTextureLoader()
+    // const texture = loader.load([
+    //   "not_my_resources/terrain/space-posx.jpg",
+    //   "not_my_resources/terrain/space-negx.jpg",
+    //   "not_my_resources/terrain/space-posy.jpg",
+    //   "not_my_resources/terrain/space-negy.jpg",
+    //   "not_my_resources/terrain/space-posz.jpg",
+    //   "not_my_resources/terrain/space-negz.jpg",
+    // ])
+    // texture.encoding = THREE.sRGBEncoding
+    // const uniforms = {
+    //   topColor: { value: new THREE.Color(0x000000) },
+    //   bottomColor: { value: new THREE.Color(0x5d679e) },
+    //   offset: { value: -500 },
+    //   exponent: { value: 0.3 },
+    //   background: { value: texture },
+    // }
 
+    // this.scene.fog.color.copy(uniforms.bottomColor.value)
+
+    // const skyGeo = new THREE.SphereGeometry(5000, 32, 15)
+    // const skyMat = new THREE.ShaderMaterial({
+    //   uniforms: uniforms,
+    //   vertexShader: _VS,
+    //   fragmentShader: _FS,
+    //   side: THREE.BackSide,
+    // })
+
+    // const sky = new THREE.Mesh(skyGeo, skyMat)
+    // this.scene.add(sky)
+    // this.scene.background = texture
     // Add a blue circle to the front side of the cube
     const frontCircleGeometry = new THREE.CircleGeometry(0.18, 32)
     const frontCircleMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff })
@@ -218,7 +255,7 @@ class Scene {
     this.player.add(frontBlueCircle)
 
     // Add lighting for FBX models
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7)
+    const ambientLight = new THREE.AmbientLight(0x101010)
     this.scene.add(ambientLight)
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0)
     directionalLight.position.set(10, 20, 10)
