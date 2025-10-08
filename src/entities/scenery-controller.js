@@ -1,11 +1,11 @@
 import * as THREE from "three"
 
-import { entity } from "./entity.js"
 import { render_component } from "./render-component.js"
 import { spatial_grid_controller } from "./spatial-grid-controller.js"
 
 import { math } from "/shared/math.mjs"
 import { noise } from "/shared/noise.mjs"
+import { createNearbyBox } from "../objects/nearbyBox.js"
 
 export const scenery_controller = (() => {
   const _SCENERY = {
@@ -90,9 +90,8 @@ export const scenery_controller = (() => {
     }
   }
 
-  class SceneryController extends entity.Component {
+  class SceneryController {
     constructor(params) {
-      super()
       this.params_ = params
 
       const noiseParams = {
@@ -112,7 +111,7 @@ export const scenery_controller = (() => {
     }
 
     InitEntity() {
-      this.SpawnClouds_()
+      // this.SpawnClouds_()
     }
 
     SpawnClouds_() {
@@ -178,55 +177,70 @@ export const scenery_controller = (() => {
           matchingScenery[Math.round(roll * (matchingScenery.length - 1))]
         ]
 
-      const e = new entity.Entity()
-      e.AddComponent(
-        new render_component.RenderComponent({
-          scene: this.params_.scene,
-          resourcePath: randomProp.resourcePath,
-          resourceName: randomProp.base,
-          textures: {
-            resourcePath: "not_my_resources/trees/Textures/",
-            names: randomProp.names,
-            wrap: true,
-          },
-          emissive: new THREE.Color(0x000000),
-          specular: new THREE.Color(0x000000),
-          scale:
-            randomProp.scale *
-            (0.8 + this.noise_.Get(spawnPos.x, 4.0, spawnPos.z) * 0.4),
-          castShadow: true,
-          receiveShadow: true,
-          onMaterial: (m) => {
-            if (m.name.search("Leaves") >= 0) {
-              m.alphaTest = 0.5
-            }
-          },
-        })
-      )
+      // const e = new entity.Entity()
+      // e.AddComponent(
+
+      // new render_component.RenderComponent(
+      const data = {
+        scene: this.params_.scene,
+        resourcePath: randomProp.resourcePath,
+        resourceName: randomProp.base,
+        textures: {
+          resourcePath: "not_my_resources/trees/Textures/",
+          names: randomProp.names,
+          wrap: true,
+        },
+        emissive: new THREE.Color(0x000000),
+        specular: new THREE.Color(0x000000),
+        scale:
+          randomProp.scale *
+          (0.8 + this.noise_.Get(spawnPos.x, 4.0, spawnPos.z) * 0.4),
+        castShadow: true,
+        receiveShadow: true,
+        onMaterial: (m) => {
+          if (m.name.search("Leaves") >= 0) {
+            m.alphaTest = 0.5
+          }
+        },
+      }
+
+      const e = createNearbyBox()
+      const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
+      e.position.copy(new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z))
+      // e.scale.setScalar(data.scale)
+      // e.updateMatrix()
+      // e.matrixAutoUpdate = false
+      this.params_.scene.add(e)
+
+      // )
+      // )
       if (randomProp.collision) {
-        e.AddComponent(
-          new spatial_grid_controller.SpatialGridController({
-            grid: this.params_.grid,
-          })
-        )
+        // e.AddComponent(
+        // new spatial_grid_controller.SpatialGridController({
+        //   grid: this.params_.grid,
+        // })
+        // )
       }
 
       const q = new THREE.Quaternion().setFromAxisAngle(
         new THREE.Vector3(0, 1, 0),
         this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
       )
-      e.SetQuaternion(q)
+      e.quaternion.copy(q)
+      e.updateMatrix()
+      e.matrixAutoUpdate = false
+      // e.SetQuaternion(q)
 
       return e
     }
 
     SpawnCrap_() {
-      const player = this.FindEntity("player")
+      const player = this.params_.player
       if (!player) {
         return
       }
 
-      const center = new THREE.Vector3().copy(player.Position)
+      const center = new THREE.Vector3().copy(player.position)
 
       center.x = Math.round(center.x / 50.0)
       center.y = 0.0
@@ -240,9 +254,10 @@ export const scenery_controller = (() => {
 
       const _P = new THREE.Vector3()
       const _V = new THREE.Vector3()
-      const terrain = this.FindEntity("terrain").GetComponent(
-        "TerrainChunkManager"
-      )
+      const terrain = this.params_.terrain
+      if (!terrain) {
+        return
+      }
 
       for (let x = -10; x <= 10; ++x) {
         for (let y = -10; y <= 10; ++y) {
@@ -251,9 +266,9 @@ export const scenery_controller = (() => {
           _P.multiplyScalar(50.0)
 
           const key = "__scenery__[" + _P.x + "][" + _P.z + "]"
-          if (this.FindEntity(key)) {
-            continue
-          }
+          // if (this.FindEntity(key)) {
+          //   continue
+          // }
 
           _V.copy(_P)
 
@@ -261,7 +276,7 @@ export const scenery_controller = (() => {
           _P.z += (this.noise_.Get(_P.x, 1.0, _P.z) * 2.0 - 1.0) * 25.0
           _P.y = terrain.GetHeight(_P)[0]
 
-          const biome = this.FindBiome_(terrain, _P)
+          const biome = "forest" //this.FindBiome_(terrain, _P)
 
           const roll = this.noise_.Get(_V.x, 2.0, _V.z)
           if (roll > _BIOMES[biome]) {
@@ -270,11 +285,11 @@ export const scenery_controller = (() => {
 
           const e = this.SpawnAt_(biome, _P)
 
-          e.SetPosition(_P)
+          // e.SetPosition(_P)
 
-          this.Manager.Add(e, key)
+          // this.Manager.Add(e, key)
 
-          e.SetActive(false)
+          // e.SetActive(false)
           this.crap_.push(e)
         }
       }

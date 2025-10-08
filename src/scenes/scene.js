@@ -9,6 +9,8 @@ import { GUI } from "dat.gui"
 // import { entity_manager } from "../entities/entity-manager"
 // import { threejs_component } from "../entities/threejs_component"
 import { _VS, _FS } from "./sceneShaders.js"
+import { spatial_hash_grid } from "/shared/spatial-hash-grid.mjs"
+import { scenery_controller } from "../entities/scenery-controller.js"
 
 class Scene {
   constructor() {
@@ -37,6 +39,14 @@ class Scene {
     // Use the new Player class
     this.player = new Player()
     this.scene.add(this.player)
+
+    this.grid = new spatial_hash_grid.SpatialHashGrid(
+      [
+        [-1000, -1000],
+        [1000, 1000],
+      ],
+      [100, 100]
+    )
 
     // this.terrain = null // Renamed from floor
     this.nearbyBox = null // Store reference to the nearby box
@@ -160,6 +170,13 @@ class Scene {
       gui: this.gui,
       guiParams: this.guiParams,
       threejs: this.renderer,
+    })
+
+    this.scenery = new scenery_controller.SceneryController({
+      scene: this.scene,
+      grid: this.grid,
+      player: this.player,
+      terrain: this.terrainChunkManager,
     })
 
     this.addObjects()
@@ -686,6 +703,9 @@ class Scene {
       typeof this.terrainChunkManager.Update === "function"
     ) {
       this.terrainChunkManager.Update(delta / 1000)
+    }
+    if (this.scenery && this.scenery.Update) {
+      this.scenery.Update(delta / 1000)
     }
     if (this.player) {
       // Continuous rotation if movement.y is set
