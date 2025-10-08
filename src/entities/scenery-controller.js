@@ -108,14 +108,8 @@ export const scenery_controller = (() => {
 
       this.center_ = null
       this.spawned = new Map()
-      // this.spawnGroup = new THREE.Group()
-      // this.params_.scene.add(this.spawnGroup)
-      // this.spawnGrid = new spatial_grid_controller.SpatialGridController({
-      //   grid: this.params_.grid,
-      //   cellSize: 20,
-      //   group: this.spawnGroup,
-      // })
-      // this.params_.scene.add(this.spawnGrid.group)
+      this.spawnGroup = new THREE.Group()
+      this.params_.scene.add(this.spawnGroup)
     }
 
     InitEntity() {
@@ -216,8 +210,8 @@ export const scenery_controller = (() => {
       const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
       e.position.copy(new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z))
       // e.scale.setScalar(data.scale)
-      this.params_.scene.add(e)
-
+      // this.params_.scene.add(e)
+      this.spawnGroup.add(e)
       // )
       // )
       if (randomProp.collision) {
@@ -270,7 +264,7 @@ export const scenery_controller = (() => {
         for (let y = -10; y <= 10; ++y) {
           _P.set(x, 0.0, y)
           _P.add(center)
-          _P.multiplyScalar(25)
+          _P.multiplyScalar(50.0)
 
           const key = "__scenery__[" + _P.x + "][" + _P.z + "]"
           activeKeys.add(key)
@@ -294,7 +288,6 @@ export const scenery_controller = (() => {
           const e = this.SpawnAt_(biome, _P)
           this.spawned.set(key, e)
           // e.SetPosition(_P)
-          console.log("spawning scenery", key, e)
           // this.Manager.Add(e, key)
 
           // e.SetActive(false)
