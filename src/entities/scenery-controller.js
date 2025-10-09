@@ -6,6 +6,7 @@ import { spatial_grid_controller } from "./spatial-grid-controller.js"
 import { math } from "/shared/math.mjs"
 import { noise } from "/shared/noise.mjs"
 import { createNearbyBox } from "../objects/nearbyBox.js"
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js"
 
 export const scenery_controller = (() => {
   const _SCENERY = {
@@ -110,6 +111,7 @@ export const scenery_controller = (() => {
       this.spawned = new Map()
       this.spawnGroup = new THREE.Group()
       this.params_.scene.add(this.spawnGroup)
+      this.models = new Map()
     }
 
     InitEntity() {
@@ -165,7 +167,7 @@ export const scenery_controller = (() => {
       }
     }
 
-    SpawnAt_(biome, spawnPos) {
+    SpawnAt_(biome, spawnPos, key) {
       const matchingScenery = []
       for (let k in _SCENERY) {
         if (_SCENERY[k].biomes.indexOf(biome) >= 0) {
@@ -200,38 +202,73 @@ export const scenery_controller = (() => {
         castShadow: true,
         receiveShadow: true,
         onMaterial: (m) => {
-          if (m.name.search("Leaves") >= 0) {
-            m.alphaTest = 0.5
-          }
+          // if (m.name.search("Leaves") >= 0) {
+          //   m.alphaTest = 0.5
+          // }
         },
       }
 
-      const e = createNearbyBox()
-      const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
-      e.position.copy(new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z))
-      // e.scale.setScalar(data.scale)
-      // this.params_.scene.add(e)
-      this.spawnGroup.add(e)
-      // )
-      // )
-      if (randomProp.collision) {
-        // e.AddComponent(
-        // new spatial_grid_controller.SpatialGridController({
-        //   grid: this.params_.grid,
-        // })
-        // )
+      const fbxName = `${data.resourcePath}${data.resourceName}`
+      if (this.models.has(fbxName)) {
+        const obj = this.models.get(fbxName).clone()
+        this.spawnGroup.add(obj)
+        const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
+        obj.position.copy(
+          new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
+        )
+        const q = new THREE.Quaternion().setFromAxisAngle(
+          new THREE.Vector3(0, 1, 0),
+          this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
+        )
+        obj.quaternion.copy(q)
+        obj.updateMatrix()
+        obj.matrixAutoUpdate = false
+        return
       }
+      const fbx = new FBXLoader()
+      fbx.setPath(data.resourcePath)
+      fbx.load(data.resourceName, (e) => {
+        e.scale.setScalar(data.scale)
+        e.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = data.castShadow
+            child.receiveShadow = data.receiveShadow
+            if (data.onMaterial) {
+              child.material.onBeforeCompile = data.onMaterial
+            }
+          }
+        })
+        this.spawnGroup.add(e)
+        this.models.set(fbxName, e)
+        // const e = createNearbyBox()
+        const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
+        e.position.copy(
+          new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
+        )
+        // e.scale.setScalar(data.scale)
+        // this.params_.scene.add(e)
+        this.spawnGroup.add(e)
+        // )
+        // )
+        if (randomProp.collision) {
+          // e.AddComponent(
+          // new spatial_grid_controller.SpatialGridController({
+          //   grid: this.params_.grid,
+          // })
+          // )
+        }
 
-      const q = new THREE.Quaternion().setFromAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
-      )
-      e.quaternion.copy(q)
-      e.updateMatrix()
-      e.matrixAutoUpdate = false
-      // e.SetQuaternion(q)
+        const q = new THREE.Quaternion().setFromAxisAngle(
+          new THREE.Vector3(0, 1, 0),
+          this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
+        )
+        e.quaternion.copy(q)
+        e.updateMatrix()
+        e.matrixAutoUpdate = false
+        // e.SetQuaternion(q)
 
-      return e
+        this.spawned.set(key, e)
+      })
     }
 
     Spawn() {
@@ -285,8 +322,8 @@ export const scenery_controller = (() => {
             continue
           }
 
-          const e = this.SpawnAt_(biome, _P)
-          this.spawned.set(key, e)
+          this.spawned.set(key, null)
+          this.SpawnAt_(biome, _P, key)
           // e.SetPosition(_P)
           // this.Manager.Add(e, key)
 
