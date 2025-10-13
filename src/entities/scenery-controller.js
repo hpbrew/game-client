@@ -7,6 +7,7 @@ import { math } from "/shared/math.mjs"
 import { noise } from "/shared/noise.mjs"
 import { createNearbyBox } from "../objects/nearbyBox.js"
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js"
+import { loadAsset, loadedAssets } from "./asset-loading-controller.js"
 
 export const scenery_controller = (() => {
   const _SCENERY = {
@@ -167,7 +168,7 @@ export const scenery_controller = (() => {
       }
     }
 
-    SpawnAt_(biome, spawnPos, key) {
+    async SpawnAt_(biome, spawnPos, key) {
       const matchingScenery = []
       for (let k in _SCENERY) {
         if (_SCENERY[k].biomes.indexOf(biome) >= 0) {
@@ -209,66 +210,72 @@ export const scenery_controller = (() => {
       }
 
       const fbxName = `${data.resourcePath}${data.resourceName}`
-      if (this.models.has(fbxName)) {
-        const obj = this.models.get(fbxName).clone()
-        this.spawnGroup.add(obj)
-        const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
-        obj.position.copy(
-          new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
-        )
-        const q = new THREE.Quaternion().setFromAxisAngle(
-          new THREE.Vector3(0, 1, 0),
-          this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
-        )
-        obj.quaternion.copy(q)
-        obj.updateMatrix()
-        obj.matrixAutoUpdate = false
-        return
-      }
-      const fbx = new FBXLoader()
-      fbx.setPath(data.resourcePath)
-      fbx.load(data.resourceName, (e) => {
-        e.scale.setScalar(data.scale)
-        e.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = data.castShadow
-            child.receiveShadow = data.receiveShadow
-            if (data.onMaterial) {
-              child.material.onBeforeCompile = data.onMaterial
-            }
+      // if (loadedAssets.has(fbxName)) {
+      //   const asset = await loadAsset(
+      //     data.resourcePath,
+      //     data.resourceName,
+      //     "fbx"
+      //   )
+      //   this.spawnGroup.add(asset)
+      //   const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
+      //   asset.position.copy(
+      //     new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
+      //   )
+      //   const q = new THREE.Quaternion().setFromAxisAngle(
+      //     new THREE.Vector3(0, 1, 0),
+      //     this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
+      //   )
+      //   asset.quaternion.copy(q)
+      //   asset.updateMatrix()
+      //   asset.matrixAutoUpdate = false
+      //   this.spawned.set(key, asset)
+      //   return
+      // }
+
+      const asset = await loadAsset(data.resourcePath, data.resourceName, "fbx")
+      console.log("loaded asset", asset, fbxName)
+      if (!asset) return
+      asset.scale.setScalar(data.scale)
+      asset.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = data.castShadow
+          child.receiveShadow = data.receiveShadow
+          if (data.onMaterial) {
+            child.material.onBeforeCompile = data.onMaterial
           }
-        })
-        this.spawnGroup.add(e)
-        this.models.set(fbxName, e)
-        // const e = createNearbyBox()
-        const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
-        e.position.copy(
-          new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
-        )
-        // e.scale.setScalar(data.scale)
-        // this.params_.scene.add(e)
-        this.spawnGroup.add(e)
-        // )
-        // )
-        if (randomProp.collision) {
-          // e.AddComponent(
-          // new spatial_grid_controller.SpatialGridController({
-          //   grid: this.params_.grid,
-          // })
-          // )
         }
-
-        const q = new THREE.Quaternion().setFromAxisAngle(
-          new THREE.Vector3(0, 1, 0),
-          this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
-        )
-        e.quaternion.copy(q)
-        e.updateMatrix()
-        e.matrixAutoUpdate = false
-        // e.SetQuaternion(q)
-
-        this.spawned.set(key, e)
       })
+      this.spawnGroup.add(asset)
+      this.models.set(fbxName, asset)
+      // const e = createNearbyBox()
+      const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
+      asset.position.copy(
+        new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
+      )
+      // asset.scale.setScalar(data.scale)
+      // this.params_.scene.add(asset)
+      this.spawnGroup.add(asset)
+      // )
+      // )
+      if (randomProp.collision) {
+        // asset.AddComponent(
+        // new spatial_grid_controller.SpatialGridController({
+        //   grid: this.params_.grid,
+        // })
+        // )
+      }
+
+      const q = new THREE.Quaternion().setFromAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
+      )
+      asset.quaternion.copy(q)
+      asset.updateMatrix()
+      asset.matrixAutoUpdate = false
+      // asset.SetQuaternion(q)
+
+      this.spawned.set(key, asset)
+      console.log("asset spawned", key, asset)
     }
 
     Spawn() {
@@ -323,7 +330,10 @@ export const scenery_controller = (() => {
           }
 
           this.spawned.set(key, null)
-          this.SpawnAt_(biome, _P, key)
+          const position = _P.clone()
+          console.log("spawning scenery", key, biome, position)
+
+          this.SpawnAt_(biome, position, key)
           // e.SetPosition(_P)
           // this.Manager.Add(e, key)
 
@@ -338,8 +348,8 @@ export const scenery_controller = (() => {
           // Remove from scene
           if (obj && obj.parent) obj.parent.remove(obj)
 
-          // Dispose geometry/materials/textures
-          obj.traverse &&
+          if (obj && obj.traverse) {
+            // Dispose geometry/materials/textures
             obj.traverse((n) => {
               if (n.isMesh) {
                 if (n.geometry) {
@@ -369,6 +379,7 @@ export const scenery_controller = (() => {
                 }
               }
             })
+          }
 
           this.spawned.delete(k)
         }
