@@ -148,7 +148,9 @@ class Scene {
       if (this.preferWebGPU) {
         this.renderer = new WebGPURenderer({ antialias: true })
         // WebGPURenderer requires async initialization
-        if (this.renderer.init) await this.renderer.init()
+        if (this.renderer.init) {
+          await this.renderer.init()
+        }
         this.isWebGPU = true
       }
     } catch (err) {
@@ -159,14 +161,16 @@ class Scene {
 
     if (!this.renderer) {
       this.renderer = new WebGLRenderer({ antialias: true, alpha: false })
-      this.renderer.shadowMap.enabled = true
-      this.renderer.shadowMap.type = PCFSoftShadowMap
     }
+
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = PCFSoftShadowMap
 
     // Common renderer setup
     this.renderer.setSize(window.innerWidth, window.innerHeight)
-    if (this.renderer.outputEncoding !== undefined)
-      this.renderer.outputEncoding = sRGBEncoding
+    // console.log(this.renderer.outputEncoding)
+    // if (this.renderer.outputEncoding !== undefined)
+      // this.renderer.outputEncoding = sRGBEncoding
     this.renderer.setPixelRatio(window.devicePixelRatio || 1)
 
     // this.renderer.gammaFactor = 2.2
