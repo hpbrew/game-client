@@ -17,7 +17,8 @@ import {
   CircleGeometry,
   MeshBasicMaterial,
   Mesh,
-  Box3
+  Box3,
+  Fog
 } from "three"
 import { WebGPURenderer } from 'three/webgpu';
 import { Player } from "../objects/player"
@@ -243,7 +244,7 @@ class Scene {
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    this.scene.fog = new FogExp2(0x89b2eb, 0.00002)
+    this.scene.fog = new FogExp2(0x89b2eb, 0.0008)
 
     const texture = new CanvasTexture(canvas)
     this.scene.background = texture
