@@ -7,7 +7,7 @@ import {
   DataArrayTexture,
   TextureLoader,
   LoadingManager,
-  sRGBEncoding,
+  // sRGBEncoding,
 } from "three"
 
 export const textures = (function () {
@@ -51,7 +51,7 @@ export const textures = (function () {
 
       _LoadTexture(n) {
         const t = this._loader.load(n)
-        t.encoding = sRGBEncoding
+        // t.encoding = sRGBEncoding
         return t
       }
 

@@ -22,10 +22,8 @@ export const loadAsset = async (resourcePath, resourceName, assetType) => {
     }
     // wait for existing promise
     try {
-      console.log("waiting for existing promise key=", key)
       const ent = await entry.promise
 
-      console.log("promise resolved key=", key)
       return ent.clone(true)
     } catch (err) {
       // previous load failed; fall through to start a new one

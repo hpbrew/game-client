@@ -1,21 +1,38 @@
-import * as THREE from "three"
-// import WebGPURenderer from "three/addons/renderers/webgpu/WebGPURenderer.js"
+import {
+  Scene as ThreeScene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  PCFSoftShadowMap,
+  // sRGBEncoding,
+  Vector3,
+  FogExp2,
+  Color,
+  CanvasTexture,
+  HemisphereLight,
+  DirectionalLight,
+  AmbientLight,
+  CubeTextureLoader,
+  SphereGeometry,
+  ShaderMaterial,
+  CircleGeometry,
+  MeshBasicMaterial,
+  Mesh,
+  Box3
+} from "three"
+import { WebGPURenderer } from 'three/webgpu';
 import { Player } from "../objects/player"
 import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
 import { TerrainChunkManager } from "../entities/terrain"
 import { GUI } from "dat.gui"
-// import { entity } from "../entities/entity"
-// import { entity_manager } from "../entities/entity-manager"
-// import { threejs_component } from "../entities/threejs_component"
 import { _VS, _FS } from "./sceneShaders.js"
 import { spatial_hash_grid } from "/shared/spatial-hash-grid.mjs"
 import { scenery_controller } from "../entities/scenery-controller.js"
 
 class Scene {
   constructor() {
-    this.scene = new THREE.Scene()
-    this.camera = new THREE.PerspectiveCamera(
+    this.scene = new ThreeScene()
+    this.camera = new PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
@@ -65,7 +82,7 @@ class Scene {
     this.targetAzimuth = this.orbit.azimuth // Add this line
 
     // Camera target offset (so we look at player's head/center instead of feet)
-    this.cameraTargetOffset = new THREE.Vector3(0, 1, 0)
+    this.cameraTargetOffset = new Vector3(0, 1, 0)
 
     // For smooth rotation
     this.targetRotationY = 0
@@ -127,29 +144,29 @@ class Scene {
 
   async init() {
     // Create renderer: prefer WebGPU when available
-    // try {
-    //   if (this.preferWebGPU) {
-    //     this.renderer = new WebGPURenderer({ antialias: true })
-    //     // WebGPURenderer requires async initialization
-    //     if (this.renderer.init) await this.renderer.init()
-    //     this.isWebGPU = true
-    //   }
-    // } catch (err) {
-    //   console.warn("WebGPU init failed, falling back to WebGL:", err)
-    //   this.renderer = null
-    //   this.isWebGPU = false
-    // }
+    try {
+      if (this.preferWebGPU) {
+        this.renderer = new WebGPURenderer({ antialias: true })
+        // WebGPURenderer requires async initialization
+        if (this.renderer.init) await this.renderer.init()
+        this.isWebGPU = true
+      }
+    } catch (err) {
+      console.warn("WebGPU init failed, falling back to WebGL:", err)
+      this.renderer = null
+      this.isWebGPU = false
+    }
 
     if (!this.renderer) {
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
+      this.renderer = new WebGLRenderer({ antialias: true, alpha: false })
       this.renderer.shadowMap.enabled = true
-      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+      this.renderer.shadowMap.type = PCFSoftShadowMap
     }
 
     // Common renderer setup
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     if (this.renderer.outputEncoding !== undefined)
-      this.renderer.outputEncoding = THREE.sRGBEncoding
+      this.renderer.outputEncoding = sRGBEncoding
     this.renderer.setPixelRatio(window.devicePixelRatio || 1)
 
     // this.renderer.gammaFactor = 2.2
@@ -222,15 +239,15 @@ class Scene {
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    this.scene.fog = new THREE.FogExp2(0x89b2eb, 0.00002)
+    this.scene.fog = new FogExp2(0x89b2eb, 0.00002)
 
-    const texture = new THREE.CanvasTexture(canvas)
+    const texture = new CanvasTexture(canvas)
     this.scene.background = texture
-    // const hemiLight = new THREE.HemisphereLight(0x424a75, 0x6a88b5, 0.7)
+    // const hemiLight = new HemisphereLight(0x424a75, 0x6a88b5, 0.7)
     // // hemiLight.color.setHSL(0.6, 1, 0.4);
     // // hemiLight.groundColor.setHSL(0.095, 1, 0.5);
     // this.scene.add(hemiLight)
-    // const loader = new THREE.CubeTextureLoader()
+    // const loader = new CubeTextureLoader()
     // const texture = loader.load([
     //   "not_my_resources/terrain/space-posx.jpg",
     //   "not_my_resources/terrain/space-negx.jpg",
@@ -239,10 +256,10 @@ class Scene {
     //   "not_my_resources/terrain/space-posz.jpg",
     //   "not_my_resources/terrain/space-negz.jpg",
     // ])
-    // texture.encoding = THREE.sRGBEncoding
+    // texture.encoding = sRGBEncoding
     // const uniforms = {
-    //   topColor: { value: new THREE.Color(0x000000) },
-    //   bottomColor: { value: new THREE.Color(0x5d679e) },
+    //   topColor: { value: new Color(0x000000) },
+    //   bottomColor: { value: new Color(0x5d679e) },
     //   offset: { value: -500 },
     //   exponent: { value: 0.3 },
     //   background: { value: texture },
@@ -250,21 +267,21 @@ class Scene {
 
     // this.scene.fog.color.copy(uniforms.bottomColor.value)
 
-    // const skyGeo = new THREE.SphereGeometry(5000, 32, 15)
-    // const skyMat = new THREE.ShaderMaterial({
+    // const skyGeo = new SphereGeometry(5000, 32, 15)
+    // const skyMat = new ShaderMaterial({
     //   uniforms: uniforms,
     //   vertexShader: _VS,
     //   fragmentShader: _FS,
-    //   side: THREE.BackSide,
+    //   side: BackSide,
     // })
 
-    // const sky = new THREE.Mesh(skyGeo, skyMat)
+    // const sky = new Mesh(skyGeo, skyMat)
     // this.scene.add(sky)
     // this.scene.background = texture
     // Add a blue circle to the front side of the cube
-    const frontCircleGeometry = new THREE.CircleGeometry(0.18, 32)
-    const frontCircleMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff })
-    const frontBlueCircle = new THREE.Mesh(
+    const frontCircleGeometry = new CircleGeometry(0.18, 32)
+    const frontCircleMaterial = new MeshBasicMaterial({ color: 0x0000ff })
+    const frontBlueCircle = new Mesh(
       frontCircleGeometry,
       frontCircleMaterial
     )
@@ -272,9 +289,9 @@ class Scene {
     this.player.add(frontBlueCircle)
 
     // Add lighting for FBX models
-    const ambientLight = new THREE.AmbientLight(0x101010)
+    const ambientLight = new AmbientLight(0x101010)
     this.scene.add(ambientLight)
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0)
+    const directionalLight = new DirectionalLight(0xffffff, 1.0)
     directionalLight.position.set(10, 20, 10)
     directionalLight.position.set(-100, 100, 100)
     directionalLight.target.position.set(0, 0, 0)
@@ -292,7 +309,7 @@ class Scene {
     directionalLight.shadow.camera.bottom = -50
     this.scene.add(directionalLight)
 
-    // directionalLight = new THREE.AmbientLight(0xFFFFFF, 0.25);
+    // directionalLight = new AmbientLight(0xFFFFFF, 0.25);
     // this.scene.add(directionalLight);
   }
 
@@ -472,7 +489,7 @@ class Scene {
         let diff = Math.abs(
           ((this.orbit.azimuth - this.player.rotation.y + Math.PI) %
             (2 * Math.PI)) -
-            Math.PI
+          Math.PI
         )
         // If the difference is greater than 90 degrees (PI/2), rotate the cube with the camera
         if (diff > Math.PI / 2) {
@@ -668,7 +685,7 @@ class Scene {
       radius * Math.sin(polar) * Math.cos(oppositeAzimuth)
 
     // Compute the actual target we want the camera to look at (player + offset)
-    const target = new THREE.Vector3()
+    const target = new Vector3()
     target.copy(this.player.position).add(this.cameraTargetOffset)
 
     // Prevent camera from going below the terrain relative to the target
@@ -774,8 +791,8 @@ class Scene {
 
       // --- Collision detection between cube and nearby box ---
       if (this.nearbyBox) {
-        const playerBox = new THREE.Box3().setFromObject(this.player)
-        const otherBox = new THREE.Box3().setFromObject(this.nearbyBox)
+        const playerBox = new Box3().setFromObject(this.player)
+        const otherBox = new Box3().setFromObject(this.nearbyBox)
 
         if (playerBox.intersectsBox(otherBox)) {
           // Check vertical overlap
@@ -792,9 +809,9 @@ class Scene {
             playerBottom < boxTop &&
             playerTop > boxTop && // cube is above box
             Math.abs(this.player.position.x - this.nearbyBox.position.x) <
-              overlapValue &&
+            overlapValue &&
             Math.abs(this.player.position.z - this.nearbyBox.position.z) <
-              overlapValue
+            overlapValue
           ) {
             // Snap cube to top of box
             this.player.position.y = boxTop + overlapValue

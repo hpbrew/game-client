@@ -9,12 +9,12 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "three": "^0.180.0",
-    "vite-plugin-html": "^3.2.2"
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "dat.gui": "^0.7.9",
-    "vite": "^7.1.7"
+    "vite": "^7.1.10",
+    "vite-plugin-html": "^3.2.2"
   },
   "keywords": [
     "threejs",

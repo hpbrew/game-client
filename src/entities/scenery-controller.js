@@ -233,7 +233,6 @@ export const scenery_controller = (() => {
       // }
 
       const asset = await loadAsset(data.resourcePath, data.resourceName, "fbx")
-      console.log("loaded asset", asset, fbxName)
       if (!asset) return
       asset.scale.setScalar(data.scale)
       asset.traverse((child) => {
@@ -275,7 +274,6 @@ export const scenery_controller = (() => {
       // asset.SetQuaternion(q)
 
       this.spawned.set(key, asset)
-      console.log("asset spawned", key, asset)
     }
 
     Spawn() {
@@ -331,7 +329,6 @@ export const scenery_controller = (() => {
 
           this.spawned.set(key, null)
           const position = _P.clone()
-          console.log("spawning scenery", key, biome, position)
 
           this.SpawnAt_(biome, position, key)
           // e.SetPosition(_P)
