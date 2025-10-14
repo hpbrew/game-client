@@ -194,7 +194,7 @@ export class TerrainChunkManager extends entity.Component {
       width: width,
       offset: offset,
       // origin: this._params.camera.position.clone(),
-      radius: terrain_constants.PLANET_RADIUS,
+      // radius: terrain_constants.PLANET_RADIUS,
       resolution: resolution,
       biomeGenerator: this._biomes,
       colourGenerator: new texture_splatter.TextureSplatter({

@@ -159,7 +159,29 @@ export const terrain_builder_threaded = (function () {
 
     Rebuild(chunks) {
       for (let k in chunks) {
-        this._workerPool.Enqueue(chunks[k].chunk._params)
+        const chunk = chunks[k].chunk
+              const threadedParams = {
+        noiseParams: chunk._params.noiseParams,
+        colourNoiseParams: chunk._params.colourNoiseParams,
+        biomesParams: chunk._params.biomesParams,
+        colourGeneratorParams: chunk._params.colourGeneratorParams,
+        heightGeneratorsParams: chunk._params.heightGeneratorsParams,
+        width: chunk._params.width,
+        offset: [chunk._params.offset.x, chunk._params.offset.y, chunk._params.offset.z],
+        // origin: chunk._params.origin,
+        radius: chunk._params.radius,
+        resolution: chunk._params.resolution,
+        worldMatrix: chunk._params.transform,
+      }
+
+      const msg = {
+        subject: "build_chunk",
+        params: threadedParams,
+      }
+      //threadedParams
+              this._workerPool.Enqueue(msg, (m) => {
+        this._OnResult(chunk, m)
+      })
       }
     }
 
