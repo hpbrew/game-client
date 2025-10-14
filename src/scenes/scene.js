@@ -98,6 +98,24 @@ class Scene {
     gui.addFolder("General")
     gui.close()
 
+    const links = gui.addFolder("Links")
+
+    const location = `${window.location}images`
+
+    const allImages = ["map.jpeg","map2.jpeg", "map3.jpeg", "map4.jpeg", "monsters.jpeg","monsters2.jpeg", "monsters3.jpeg", "races.jpeg","races2.jpeg"]
+    
+    allImages.forEach((img)=>{
+    const link = {
+     [img]: () => { window.open(`${location}/${img}`, "_blank")}
+    }
+    links
+      .add(link, img)
+    })
+
+      // .onChange(onNoiseChanged)
+
+    gui.close()
+
     // TerrainChunkManager will be created during init() after renderer is available
     this.terrainChunkManager = null
     this.guiParams = guiParams
