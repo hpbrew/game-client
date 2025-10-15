@@ -7,7 +7,7 @@ import { math } from "/shared/math.mjs"
 import { noise } from "/shared/noise.mjs"
 import { createNearbyBox } from "../objects/nearbyBox.js"
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js"
-import { loadAsset, loadedAssets } from "./asset-loading-controller.js"
+import { loadModel, loadTexture } from "./asset-loading-controller.js"
 
 export const scenery_controller = (() => {
   const _SCENERY = {
@@ -112,7 +112,6 @@ export const scenery_controller = (() => {
       this.spawned = new Map()
       this.spawnGroup = new THREE.Group()
       this.params_.scene.add(this.spawnGroup)
-      this.models = new Map()
     }
 
     InitEntity() {
@@ -210,43 +209,64 @@ export const scenery_controller = (() => {
       }
 
       const fbxName = `${data.resourcePath}${data.resourceName}`
-      // if (loadedAssets.has(fbxName)) {
-      //   const asset = await loadAsset(
-      //     data.resourcePath,
-      //     data.resourceName,
-      //     "fbx"
-      //   )
-      //   this.spawnGroup.add(asset)
-      //   const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
-      //   asset.position.copy(
-      //     new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
-      //   )
-      //   const q = new THREE.Quaternion().setFromAxisAngle(
-      //     new THREE.Vector3(0, 1, 0),
-      //     this.noise_.Get(spawnPos.x, 5.0, spawnPos.z) * 360
-      //   )
-      //   asset.quaternion.copy(q)
-      //   asset.updateMatrix()
-      //   asset.matrixAutoUpdate = false
-      //   this.spawned.set(key, asset)
-      //   return
+
+      const asset = await loadModel(data.resourcePath, data.resourceName, "fbx")
+      if (!asset) return
+
+      let textures = []
+      // if (randomProp.names && Object.keys(randomProp.names).length > 0) {
+
+      //   const texturePromises = Object.keys(randomProp.names).map((name) =>{
+
+      //     const textureName = randomProp.names[name]
+      //     const loadedTexture = loadTexture(data.textures.resourcePath, textureName, {
+      //       wrap: data.textures.wrap,
+      //     })
+
+      //     return loadedTexture
+      //   })
+
+      //   textures = await Promise.all(texturePromises)
+      //   // Do something with the loaded textures
+      //   console.log(textures)
       // }
 
-      const asset = await loadAsset(data.resourcePath, data.resourceName, "fbx")
-      if (!asset) return
       asset.scale.setScalar(data.scale)
       asset.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = data.castShadow
-          child.receiveShadow = data.receiveShadow
-          if (data.onMaterial) {
-            child.material.onBeforeCompile = data.onMaterial
+        let materials = child.material
+        if (!(child.material instanceof Array)) {
+          materials = [child.material]
+        }
+        if (child.geometry) {
+          child.geometry.computeBoundingBox()
+        }
+        for (let m of materials) {
+          if (m) {
+            if (data.onMaterial) {
+              data.onMaterial(m)
+            }
+            for (let k of textures) {
+              if (m.name.search(k.name) >= 0) {
+                m.map = k
+              }
+            }
+            if (data.specular) {
+              m.specular = data.specular
+            }
+            if (data.emissive) {
+              m.emissive = data.emissive
+            }
           }
+        }
+        child.castShadow = data.castShadow
+        child.receiveShadow = data.receiveShadow
+
+        if (data.onMaterial) {
+          // child.material.onBeforeCompile = data.onMaterial
         }
       })
       this.spawnGroup.add(asset)
-      this.models.set(fbxName, asset)
-      // const e = createNearbyBox()
+
       const tHeight = this.params_.terrain.getHeightAt(spawnPos.x, spawnPos.z)
       asset.position.copy(
         new THREE.Vector3(spawnPos.x, tHeight + 0.5, spawnPos.z)
