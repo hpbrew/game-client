@@ -117,8 +117,6 @@ export const terrain_builder_threaded = (function () {
         noiseParams: params.noiseParams,
         colourNoiseParams: params.colourNoiseParams,
         biomesParams: params.biomesParams,
-        colourGeneratorParams: params.colourGeneratorParams,
-        heightGeneratorsParams: params.heightGeneratorsParams,
         width: params.width,
         offset: [params.offset.x, params.offset.y, params.offset.z],
         // origin: params.origin,
@@ -160,28 +158,30 @@ export const terrain_builder_threaded = (function () {
     Rebuild(chunks) {
       for (let k in chunks) {
         const chunk = chunks[k].chunk
-              const threadedParams = {
-        noiseParams: chunk._params.noiseParams,
-        colourNoiseParams: chunk._params.colourNoiseParams,
-        biomesParams: chunk._params.biomesParams,
-        colourGeneratorParams: chunk._params.colourGeneratorParams,
-        heightGeneratorsParams: chunk._params.heightGeneratorsParams,
-        width: chunk._params.width,
-        offset: [chunk._params.offset.x, chunk._params.offset.y, chunk._params.offset.z],
-        // origin: chunk._params.origin,
-        radius: chunk._params.radius,
-        resolution: chunk._params.resolution,
-        worldMatrix: chunk._params.transform,
-      }
+        const threadedParams = {
+          noiseParams: chunk._params.noiseParams,
+          colourNoiseParams: chunk._params.colourNoiseParams,
+          biomesParams: chunk._params.biomesParams,
+          width: chunk._params.width,
+          offset: [
+            chunk._params.offset.x,
+            chunk._params.offset.y,
+            chunk._params.offset.z,
+          ],
+          // origin: chunk._params.origin,
+          radius: chunk._params.radius,
+          resolution: chunk._params.resolution,
+          worldMatrix: chunk._params.transform,
+        }
 
-      const msg = {
-        subject: "build_chunk",
-        params: threadedParams,
-      }
-      //threadedParams
-              this._workerPool.Enqueue(msg, (m) => {
-        this._OnResult(chunk, m)
-      })
+        const msg = {
+          subject: "build_chunk",
+          params: threadedParams,
+        }
+        //threadedParams
+        this._workerPool.Enqueue(msg, (m) => {
+          this._OnResult(chunk, m)
+        })
       }
     }
 

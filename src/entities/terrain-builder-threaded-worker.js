@@ -57,7 +57,6 @@ class _TerrainBuilderThreadedWorker {
     const wsPositions = []
 
     const resolution = this._params.resolution + 2
-    const radius = this._params.radius
     const offset = this._params.offset
     const width = this._params.width
     const half = width / 2

@@ -18,9 +18,9 @@ import {
   MeshBasicMaterial,
   Mesh,
   Box3,
-  Fog
+  Fog,
 } from "three"
-import { WebGPURenderer } from 'three/webgpu';
+import { WebGPURenderer } from "three/webgpu"
 import { Player } from "../objects/player"
 import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
@@ -102,17 +102,28 @@ class Scene {
 
     const location = `${window.location}images`
 
-    const allImages = ["map.jpeg","map2.jpeg", "map3.jpeg", "map4.jpeg", "monsters.jpeg","monsters2.jpeg", "monsters3.jpeg", "races.jpeg","races2.jpeg"]
-    
-    allImages.forEach((img)=>{
-    const link = {
-     [img]: () => { window.open(`${location}/${img}`, "_blank")}
-    }
-    links
-      .add(link, img)
+    const allImages = [
+      "map.jpeg",
+      "map2.jpeg",
+      "map3.jpeg",
+      "map4.jpeg",
+      "monsters.jpeg",
+      "monsters2.jpeg",
+      "monsters3.jpeg",
+      "races.jpeg",
+      "races2.jpeg",
+    ]
+
+    allImages.forEach((img) => {
+      const link = {
+        [img]: () => {
+          window.open(`${location}/${img}`, "_blank")
+        },
+      }
+      links.add(link, img)
     })
 
-      // .onChange(onNoiseChanged)
+    // .onChange(onNoiseChanged)
 
     gui.close()
 
@@ -189,7 +200,7 @@ class Scene {
     this.renderer.setSize(window.innerWidth, window.innerHeight)
     // console.log(this.renderer.outputEncoding)
     // if (this.renderer.outputEncoding !== undefined)
-      // this.renderer.outputEncoding = sRGBEncoding
+    // this.renderer.outputEncoding = sRGBEncoding
     this.renderer.setPixelRatio(window.devicePixelRatio || 1)
 
     // this.renderer.gammaFactor = 2.2
@@ -304,10 +315,7 @@ class Scene {
     // Add a blue circle to the front side of the cube
     const frontCircleGeometry = new CircleGeometry(0.18, 32)
     const frontCircleMaterial = new MeshBasicMaterial({ color: 0x0000ff })
-    const frontBlueCircle = new Mesh(
-      frontCircleGeometry,
-      frontCircleMaterial
-    )
+    const frontBlueCircle = new Mesh(frontCircleGeometry, frontCircleMaterial)
     frontBlueCircle.position.set(0, 0, 0.501)
     this.player.add(frontBlueCircle)
 
@@ -512,7 +520,7 @@ class Scene {
         let diff = Math.abs(
           ((this.orbit.azimuth - this.player.rotation.y + Math.PI) %
             (2 * Math.PI)) -
-          Math.PI
+            Math.PI
         )
         // If the difference is greater than 90 degrees (PI/2), rotate the cube with the camera
         if (diff > Math.PI / 2) {
@@ -832,9 +840,9 @@ class Scene {
             playerBottom < boxTop &&
             playerTop > boxTop && // cube is above box
             Math.abs(this.player.position.x - this.nearbyBox.position.x) <
-            overlapValue &&
+              overlapValue &&
             Math.abs(this.player.position.z - this.nearbyBox.position.z) <
-            overlapValue
+              overlapValue
           ) {
             // Snap cube to top of box
             this.player.position.y = boxTop + overlapValue
