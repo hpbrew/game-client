@@ -270,9 +270,6 @@ export class TerrainChunkManager {
     for (let c of this._builder._old) {
       c.chunk.Update(target.position)
     }
-
-    // this._params.scattering.uniforms.planetRadius.value = terrain_constants.PLANET_RADIUS;
-    // this._params.scattering.uniforms.atmosphereRadius.value = terrain_constants.PLANET_RADIUS * 1.01;
   }
 
   _UpdateVisibleChunks_Quadtree(target) {
@@ -280,13 +277,13 @@ export class TerrainChunkManager {
       return c.position[0] + "/" + c.position[2] + " [" + c.size + "]"
     }
 
-    const q = new quadtree.CubeQuadTree({
-      radius: terrain_constants.PLANET_RADIUS,
+    const quadTree = new quadtree.CubeQuadTree({
+      radius: terrain_constants.VIEWER_RADIUS,
       min_node_size: terrain_constants.QT_MIN_CELL_SIZE,
     })
-    q.Insert(target.position)
+    quadTree.Insert(target.position)
 
-    const sides = q.GetChildren()
+    const sides = quadTree.GetChildren()
 
     let newTerrainChunks = {}
     const center = new Vector3()

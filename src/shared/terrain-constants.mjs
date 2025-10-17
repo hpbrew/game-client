@@ -3,7 +3,7 @@ export const terrain_constants = (function () {
   // const QT_MIN_CELL_RESOLUTION = 24;
   const QT_MIN_CELL_RESOLUTION = 16
   // const QT_MIN_CELL_RESOLUTION = 4;
-  const PLANET_RADIUS = 8000.0
+  const VIEWER_RADIUS = 8000.0
 
   const NOISE_HEIGHT = 1200.0
   // const NOISE_HEIGHT = 0.0;
@@ -12,7 +12,7 @@ export const terrain_constants = (function () {
   return {
     QT_MIN_CELL_SIZE: QT_MIN_CELL_SIZE,
     QT_MIN_CELL_RESOLUTION: QT_MIN_CELL_RESOLUTION,
-    PLANET_RADIUS: PLANET_RADIUS,
+    VIEWER_RADIUS: VIEWER_RADIUS,
 
     NOISE_HEIGHT: NOISE_HEIGHT,
     NOISE_SCALE: NOISE_SCALE,

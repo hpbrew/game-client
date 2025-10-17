@@ -34,10 +34,10 @@ class Scene {
   constructor() {
     this.scene = new ThreeScene()
     this.camera = new PerspectiveCamera(
-      75,
+      100,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      10000
     )
     // Defer renderer creation until init so we can async-init WebGPU when available.
     this.preferWebGPU = typeof navigator !== "undefined" && !!navigator.gpu
@@ -91,11 +91,16 @@ class Scene {
 
     this.mouseButtons = { left: false, right: false } // Track mouse button states
 
-    const guiParams = {
-      general: {},
+    this.guiParams = {
+      general: {
+        EditMode: false,
+      },
     }
     const gui = new GUI()
-    gui.addFolder("General")
+    const general = gui.addFolder("General")
+
+    general.add(this.guiParams.general, "EditMode")
+
     gui.close()
 
     const links = gui.addFolder("Links")
@@ -129,7 +134,6 @@ class Scene {
 
     // TerrainChunkManager will be created during init() after renderer is available
     this.terrainChunkManager = null
-    this.guiParams = guiParams
     this.gui = gui
 
     // this.terrainChunkManager = new QuadtreeFloor({
@@ -789,33 +793,38 @@ class Scene {
       const overlapValue = 0.01
       // --- Terrain collision using quadtree terrain map ---
       if (this.player.isJumping) {
-        if (
-          this.terrainChunkManager &&
-          typeof this.terrainChunkManager.getHeightAt === "function"
-        ) {
-          const terrainY =
-            this.terrainChunkManager.getHeightAt(
-              this.player.position.x,
-              this.player.position.z
-            ) + overlapValue
-          if (this.player.position.y <= terrainY) {
-            this.player.position.y = terrainY
-            this.player.resetJump()
+        if (!this.guiParams.general.EditMode) {
+          if (
+            this.terrainChunkManager &&
+            typeof this.terrainChunkManager.getHeightAt === "function"
+          ) {
+            const terrainY =
+              this.terrainChunkManager.getHeightAt(
+                this.player.position.x,
+                this.player.position.z
+              ) + overlapValue
+            if (this.player.position.y <= terrainY) {
+              this.player.position.y = terrainY
+              this.player.resetJump()
+            }
+          } else if (this.player.position.y <= overlapValue) {
           }
-        } else if (this.player.position.y <= overlapValue) {
-          this.player.position.y = overlapValue
+        } else {
+          this.player.position.y = this.player.position.y += 100
           this.player.resetJump()
         }
       } else if (
         this.terrainChunkManager &&
         typeof this.terrainChunkManager.getHeightAt === "function"
       ) {
-        const terrainY =
-          this.terrainChunkManager.getHeightAt(
-            this.player.position.x,
-            this.player.position.z
-          ) + overlapValue
-        this.player.position.y = terrainY
+        if (!this.guiParams.general.EditMode) {
+          const terrainY =
+            this.terrainChunkManager.getHeightAt(
+              this.player.position.x,
+              this.player.position.z
+            ) + overlapValue
+          this.player.position.y = terrainY
+        }
       } else if (this.player.position.y < overlapValue) {
         this.player.position.y = overlapValue
       }
