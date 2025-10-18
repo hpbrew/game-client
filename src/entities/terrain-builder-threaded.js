@@ -119,10 +119,8 @@ export const terrain_builder_threaded = (function () {
         biomesParams: params.biomesParams,
         width: params.width,
         offset: [params.offset.x, params.offset.y, params.offset.z],
-        // origin: params.origin,
         radius: params.radius,
         resolution: params.resolution,
-        worldMatrix: params.transform,
       }
 
       const msg = {
@@ -168,10 +166,8 @@ export const terrain_builder_threaded = (function () {
             chunk._params.offset.y,
             chunk._params.offset.z,
           ],
-          // origin: chunk._params.origin,
           radius: chunk._params.radius,
           resolution: chunk._params.resolution,
-          worldMatrix: chunk._params.transform,
         }
 
         const msg = {

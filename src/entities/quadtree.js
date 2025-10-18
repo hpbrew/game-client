@@ -7,55 +7,14 @@ export const quadtree = (function () {
       this._sides = []
 
       const r = params.radius
-      let m
 
-      const transforms = []
-
-      // +Y
-      m = new Matrix4()
-      m =
-        // m.makeRotationX(-Math.PI / 2);
-        // m.premultiply(new Matrix4().makeTranslation(0, r, 0));
-        transforms.push(m)
-
-      // // -Y
-      // m = new Matrix4();
-      // m.makeRotationX(Math.PI / 2);
-      // m.premultiply(new Matrix4().makeTranslation(0, -r, 0));
-      // transforms.push(m);
-
-      // // +X
-      // m = new Matrix4();
-      // m.makeRotationY(Math.PI / 2);
-      // m.premultiply(new Matrix4().makeTranslation(r, 0, 0));
-      // transforms.push(m);
-
-      // // -X
-      // m = new Matrix4();
-      // m.makeRotationY(-Math.PI / 2);
-      // m.premultiply(new Matrix4().makeTranslation(-r, 0, 0));
-      // transforms.push(m);
-
-      // // +Z
-      // m = new Matrix4();
-      // m.premultiply(new Matrix4().makeTranslation(0, 0, r));
-      // transforms.push(m);
-
-      // // -Z
-      // m = new Matrix4();
-      // m.makeRotationY(Math.PI);
-      // m.premultiply(new Matrix4().makeTranslation(0, 0, -r));
-      // transforms.push(m);
-
-      for (let t of transforms) {
-        this._sides.push({
-          transform: t.clone(),
-          quadtree: new QuadTree({
-            size: r,
-            min_node_size: params.min_node_size,
-          }),
-        })
-      }
+      this._sides.push({
+        transform: new Matrix4(),
+        quadtree: new QuadTree({
+          size: r,
+          min_node_size: params.min_node_size,
+        }),
+      })
     }
 
     GetChildren() {
