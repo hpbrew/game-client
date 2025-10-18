@@ -114,7 +114,11 @@ export const quadtree = (function () {
       if (!pos) {
         return console.warn("No position given")
       }
-      this._Insert(this._root, pos)
+      // ensure positon is zero Y for quadtree insertion
+      const newPosition = pos.clone()
+      newPosition.y = 0
+
+      this._Insert(this._root, newPosition)
     }
 
     _Insert(child, pos) {

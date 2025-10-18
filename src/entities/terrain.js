@@ -308,11 +308,13 @@ export class TerrainChunkManager {
     }
 
     const intersection = utils.DictIntersection(this._chunks, newTerrainChunks)
+    // Compare list of terrain chunks to the list we already have
     const difference = utils.DictDifference(newTerrainChunks, this._chunks)
     const recycle = Object.values(
       utils.DictDifference(this._chunks, newTerrainChunks)
     )
 
+    // Keep the old chunks so we don't rebuild them if not required
     this._builder.RetireChunks(recycle)
 
     newTerrainChunks = intersection
