@@ -1,9 +1,11 @@
 export const terrain_constants = (function () {
-  const QT_MIN_CELL_SIZE = 100
+  const QT_MIN_CELL_SIZE = 32
   // const QT_MIN_CELL_RESOLUTION = 24;
   const QT_MIN_CELL_RESOLUTION = 16
   // const QT_MIN_CELL_RESOLUTION = 4;
-  const VIEWER_RADIUS = 8000.0
+
+  // 2^13 = 8192
+  const VIEWER_RADIUS = 8192.0
 
   const NOISE_HEIGHT = 1200.0
   // const NOISE_HEIGHT = 0.0;

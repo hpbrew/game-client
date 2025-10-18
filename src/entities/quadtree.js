@@ -125,7 +125,9 @@ export const quadtree = (function () {
       const distToChild = this._DistanceToChild(child, pos)
 
       if (
+        // Hampton: Changed condition to adjust min node size required for LOD
         distToChild < child.size.x * 1.5 &&
+        // distToChild < child.size.x &&
         child.size.x > this._params.min_node_size
       ) {
         child.children = this._CreateChildren(child)
