@@ -16,10 +16,10 @@ import { texture_splatter } from "./texture-splatter.js"
 import { textures } from "./textures.js"
 import { utils } from "./utils.js"
 
-import { terrain_constants } from "../shared/terrain-constants.js"
-import { terrain_height } from "../shared/terrain-height.mjs"
+import { terrain_constants } from "../shared/terrain-constants.ts"
+import { HeightGenerator } from "../shared/terrain-height.ts"
 
-import { noise } from "../shared/noise.mjs"
+import { NoiseGenerator } from "../shared/noise.ts"
 
 export class TerrainChunkManager {
   constructor(params) {
@@ -113,7 +113,7 @@ export class TerrainChunkManager {
   }
 
   _InitNoise() {
-    this.heightGenerator_ = new terrain_height.HeightGenerator()
+    this.heightGenerator_ = new HeightGenerator()
   }
 
   _InitBiomes(params) {
@@ -149,7 +149,7 @@ export class TerrainChunkManager {
       .add(params.guiParams.biomes, "exponentiation", 0.1, 10.0)
       .onChange(onNoiseChanged)
 
-    this._biomes = new noise.Noise(params.guiParams.biomes)
+    this._biomes = new NoiseGenerator(params.guiParams.biomes)
     this._biomesParams = params.guiParams.biomes
 
     const colourParams = {
@@ -162,7 +162,7 @@ export class TerrainChunkManager {
       seed: 2,
       height: 1.0,
     }
-    this._colourNoise = new noise.Noise(colourParams)
+    this._colourNoise = new NoiseGenerator(colourParams)
     this._colourNoiseParams = colourParams
   }
 

@@ -3,8 +3,8 @@ import { Vector3 } from "three"
 import { texture_splatter } from "./texture-splatter.js"
 
 import { math } from "../shared/math.mjs"
-import { noise } from "../shared/noise.mjs"
-import { terrain_height } from "../shared/terrain-height.mjs"
+import { NoiseGenerator } from "../shared/noise.ts"
+import { HeightGenerator } from "../shared/terrain-height.ts"
 
 class _TerrainBuilderThreadedWorker {
   constructor() {}
@@ -16,11 +16,11 @@ class _TerrainBuilderThreadedWorker {
       params.offset[1],
       params.offset[2]
     )
-    this._params.noise = new noise.Noise(params.noiseParams)
-    this._params.heightGenerators = [new terrain_height.HeightGenerator()]
+    this._params.noise = new NoiseGenerator(params.noiseParams)
+    this._params.heightGenerators = [new HeightGenerator()]
 
-    this._params.biomeGenerator = new noise.Noise(params.biomesParams)
-    this._params.colourNoise = new noise.Noise(params.colourNoiseParams)
+    this._params.biomeGenerator = new NoiseGenerator(params.biomesParams)
+    this._params.colourNoise = new NoiseGenerator(params.colourNoiseParams)
     this._params.colourGenerator = new texture_splatter.TextureSplatter({
       biomeGenerator: this._params.biomeGenerator,
       colourNoise: this._params.colourNoise,

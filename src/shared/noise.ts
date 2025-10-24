@@ -1,8 +1,26 @@
 import { simplex } from "./simplex-noise.mjs"
 
-export const noise = (function () {
-  class _NoiseGenerator {
-    constructor(params) {
+export class NoiseGenerator {
+    private _params: {
+      exponentiation: number
+      height: number
+      lacunarity: number
+      octaves: number
+      persistence: number
+      scale: number
+      seed: number
+    }
+    private _noise!: InstanceType<typeof simplex.SimplexNoise>
+
+    constructor(params: {
+      exponentiation: number
+      height: number
+      lacunarity: number
+      octaves: number
+      persistence: number
+      scale: number
+      seed: number
+    }) {
       this._params = params
       this._Init()
     }
@@ -11,7 +29,7 @@ export const noise = (function () {
       this._noise = new simplex.SimplexNoise(this._params.seed)
     }
 
-    Get(x, y, z) {
+    Get(x: number, y: number, z: number) {
       const G = 2.0 ** -this._params.persistence
       const xs = x / this._params.scale
       const ys = y / this._params.scale
@@ -37,8 +55,3 @@ export const noise = (function () {
       return Math.pow(total, this._params.exponentiation) * this._params.height
     }
   }
-
-  return {
-    Noise: _NoiseGenerator,
-  }
-})()

@@ -4,7 +4,7 @@ import { render_component } from "./render-component.js"
 import { spatial_grid_controller } from "./spatial-grid-controller.js"
 
 import { math } from "/shared/math.mjs"
-import { noise } from "/shared/noise.mjs"
+import { NoiseGenerator } from "/shared/noise.ts"
 import { createNearbyBox } from "../objects/nearbyBox.js"
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js"
 import { loadModel, loadTexture } from "./asset-loading-controller.js"
@@ -106,7 +106,7 @@ export const scenery_controller = (() => {
         seed: 2,
         height: 1.0,
       }
-      this.noise_ = new noise.Noise(noiseParams)
+      this.noise_ = new NoiseGenerator(noiseParams)
 
       this.center_ = null
       this.spawned = new Map()
