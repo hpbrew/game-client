@@ -16,7 +16,7 @@ import { texture_splatter } from "./texture-splatter.js"
 import { textures } from "./textures.js"
 import { utils } from "./utils.js"
 
-import { terrain_constants } from "../shared/terrain-constants.mjs"
+import { terrain_constants } from "../shared/terrain-constants.js"
 import { terrain_height } from "../shared/terrain-height.mjs"
 
 import { noise } from "../shared/noise.mjs"

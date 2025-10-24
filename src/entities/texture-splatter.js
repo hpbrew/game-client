@@ -2,7 +2,7 @@ import { Color } from "three"
 
 import { math } from "/shared/math.mjs"
 import { spline } from "/shared/spline.mjs"
-import { terrain_constants } from "/shared/terrain-constants.mjs"
+import { terrain_constants } from "/shared/terrain-constants.js"
 
 export const texture_splatter = (function () {
   const _HEIGHT_NORMALIZATION = terrain_constants.NOISE_HEIGHT / 10.0

@@ -29,6 +29,7 @@ import { GUI } from "dat.gui"
 import { _VS, _FS } from "./sceneShaders.js"
 import { spatial_hash_grid } from "/shared/spatial-hash-grid.mjs"
 import { scenery_controller } from "../entities/scenery-controller.js"
+import Stats from "three/examples/jsm/libs/stats.module.js"
 
 class Scene {
   constructor() {
@@ -43,6 +44,10 @@ class Scene {
     this.preferWebGPU = typeof navigator !== "undefined" && !!navigator.gpu
     this.renderer = null
     this.isWebGPU = false
+
+    this.stats = new Stats()
+    this.stats.showPanel(0) // 0: FPS, 1: ms, 2: memory
+    document.body.appendChild(this.stats.dom)
 
     window.addEventListener(
       "resize",
@@ -161,7 +166,7 @@ class Scene {
     this.positionDiv = document.createElement("div")
     this.positionDiv.style.position = "fixed"
     this.positionDiv.style.top = "10px"
-    this.positionDiv.style.left = "10px"
+    this.positionDiv.style.left = "100px"
     this.positionDiv.style.background = "rgba(0,0,0,0.7)"
     this.positionDiv.style.color = "#fff"
     this.positionDiv.style.padding = "6px 12px"
@@ -170,10 +175,6 @@ class Scene {
     this.positionDiv.style.borderRadius = "6px"
     this.positionDiv.style.zIndex = "1000"
     document.body.appendChild(this.positionDiv)
-
-    // FPS counter state
-    this.lastFrameTime = performance.now()
-    this.fps = 0
   }
 
   async init() {
@@ -227,12 +228,12 @@ class Scene {
       threejs: this.renderer,
     })
 
-    this.scenery = new scenery_controller.SceneryController({
-      scene: this.scene,
-      grid: this.grid,
-      player: this.player,
-      terrain: this.terrainChunkManager,
-    })
+    // this.scenery = new scenery_controller.SceneryController({
+    //   scene: this.scene,
+    //   grid: this.grid,
+    //   player: this.player,
+    //   terrain: this.terrainChunkManager,
+    // })
 
     this.addObjects()
     this.addEventListeners()
@@ -277,7 +278,7 @@ class Scene {
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    this.scene.fog = new FogExp2(0x89b2eb, 0.0008)
+    // this.scene.fog = new FogExp2(0x89b2eb, 0.0008)
 
     const texture = new CanvasTexture(canvas)
     this.scene.background = texture
@@ -737,12 +738,11 @@ class Scene {
   }
 
   animate() {
-    requestAnimationFrame(() => this.animate())
+    this.stats.begin()
 
     // FPS calculation
-    const now = performance.now()
+    const now = Date.now()
     const delta = now - this.lastFrameTime
-    this.fps = 1000 / delta
     this.lastFrameTime = now
 
     // update player animations (delta in seconds)
@@ -897,11 +897,9 @@ class Scene {
 
       // Update position and FPS display
       const { x, y, z } = this.player.position
-      this.positionDiv.innerHTML =
-        `FPS: ${this.fps.toFixed(1)}<br>` +
-        `Player Position: x=${x.toFixed(2)}, y=${y.toFixed(2)}, z=${z.toFixed(
-          2
-        )}`
+      this.positionDiv.innerHTML = `Player Position: <br> x=${x.toFixed(
+        2
+      )}, y=${y.toFixed(2)}, z=${z.toFixed(2)}`
 
       // Always update camera to follow the player
       this.updateCameraPosition()
@@ -913,6 +911,10 @@ class Scene {
     // }
 
     this.render()
+
+    requestAnimationFrame(() => this.animate())
+
+    this.stats.end()
   }
 
   render() {
