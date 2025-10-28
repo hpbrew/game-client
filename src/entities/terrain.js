@@ -68,7 +68,7 @@ export class TerrainChunkManager {
       vertexColors: true,
       wireframe: false,
     })
-
+    // this._material.wireframe = false
     // this._material.onBeforeCompile = (s) => {
     //   let a = 0
     //   let vsh = s.vertexShader
@@ -168,7 +168,7 @@ export class TerrainChunkManager {
 
   _InitTerrain(params) {
     params.guiParams.terrain = {
-      wireframe: true,
+      wireframe: false,
     }
 
     this._groups = [...new Array(6)].map((_) => new Group())
@@ -176,14 +176,15 @@ export class TerrainChunkManager {
 
     const terrainRollup = params.gui.addFolder("Terrain")
     terrainRollup.add(params.guiParams.terrain, "wireframe").onChange(() => {
+      console.log(params.guiParams.terrain.wireframe)
+      this._material.wireframe = params.guiParams.terrain.wireframe
       for (let k in this._chunks) {
-        this._chunks[k].chunk._plane.material.wireframe =
+        this._chunks[k].chunk._plane.material =
           new MeshStandardMaterial({
             side: BackSide,
             vertexColors: true,
             wireframe: params.guiParams.terrain.wireframe,
           })
-        // params.guiParams.terrain.wireframe
       }
     })
 
@@ -204,7 +205,7 @@ export class TerrainChunkManager {
         biomeGenerator: this._biomes,
         colourNoise: this._colourNoise,
       }),
-      heightGenerators: [this.heightGenerator_],
+      // heightGenerators: [this.heightGenerator_],
       noiseParams: terrain_constants.NOISE_PARAMS,
       colourNoiseParams: this._colourNoiseParams,
       biomesParams: this._biomesParams,
