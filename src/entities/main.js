@@ -11,7 +11,7 @@ import { spawners } from "./spawners.js"
 import { TerrainChunkManager } from "./terrain.js"
 import { inventory_controller } from "./inventory-controller.js"
 
-import { spatial_hash_grid } from "../shared/spatial-hash-grid.mjs"
+import SpatialHashGrid from "/shared/spatial-hash-grid.ts"
 import { defs } from "../shared/defs.mjs"
 import { threejs_component } from "./threejs_component.js"
 
@@ -32,7 +32,7 @@ class CrappyMMOAttempt {
   OnGameStarted_() {
     this.CreateGUI_()
 
-    this.grid_ = new spatial_hash_grid.SpatialHashGrid(
+    this.grid_ = new SpatialHashGrid(
       [
         [-1000, -1000],
         [1000, 1000],

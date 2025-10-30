@@ -27,7 +27,7 @@ import { QuadtreeFloor } from "../objects/quadtreeFloor"
 import { TerrainChunkManager } from "../entities/terrain"
 import { GUI } from "dat.gui"
 import { _VS, _FS } from "./sceneShaders.js"
-import { spatial_hash_grid } from "/shared/spatial-hash-grid.mjs"
+import { SpatialHashGrid } from "../shared/spatial-hash-grid.ts"
 import { scenery_controller } from "../entities/scenery-controller.js"
 import Stats from "three/examples/jsm/libs/stats.module.js"
 
@@ -63,7 +63,7 @@ class Scene {
     this.player = new Player()
     this.scene.add(this.player)
 
-    this.grid = new spatial_hash_grid.SpatialHashGrid(
+    this.grid = new SpatialHashGrid(
       [
         [-1000, -1000],
         [1000, 1000],
