@@ -153,11 +153,11 @@ export const terrain_builder_threaded = (function () {
       return this._workerPool.Busy
     }
 
-    Rebuild(chunks) {
+    Rebuild(chunks, noiseParams) {
       for (let k in chunks) {
         const chunk = chunks[k].chunk
         const threadedParams = {
-          noiseParams: chunk._params.noiseParams,
+          noiseParams: noiseParams || chunk._params.noiseParams,
           colourNoiseParams: chunk._params.colourNoiseParams,
           biomesParams: chunk._params.biomesParams,
           width: chunk._params.width,

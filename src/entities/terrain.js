@@ -6,6 +6,9 @@ import {
   Group,
   Vector3,
   Raycaster,
+  PlaneGeometry,
+  Mesh,
+  DoubleSide,
 } from "three"
 
 import { entity } from "./entity.js"
@@ -24,9 +27,13 @@ import { NoiseGenerator } from "../shared/noise.ts"
 export class TerrainChunkManager {
   constructor(params) {
     this._Init(params)
+
+    this._chunks = {}
   }
 
   _Init(params) {
+    this._planeMesh = generateSomePlaneGeometrySegments()
+    params.scene.add(this._planeMesh)
     this._params = params
 
     const loader = new TextureLoader()
@@ -129,7 +136,7 @@ export class TerrainChunkManager {
     }
 
     const onNoiseChanged = () => {
-      this._builder.Rebuild(this._chunks)
+      if (this._chunks) this._builder.Rebuild(this._chunks)
     }
 
     const noiseRollup = params.gui.addFolder("Terrain.Biomes")
@@ -160,7 +167,7 @@ export class TerrainChunkManager {
       scale: 256.0,
       noiseType: "simplex",
       seed: 2,
-      height: 1.0,
+      height: 2.0,
     }
     this._colourNoise = new NoiseGenerator(colourParams)
     this._colourNoiseParams = colourParams
@@ -178,18 +185,43 @@ export class TerrainChunkManager {
     terrainRollup.add(params.guiParams.terrain, "wireframe").onChange(() => {
       console.log(params.guiParams.terrain.wireframe)
       this._material.wireframe = params.guiParams.terrain.wireframe
+      if (!this._chunks) return
       for (let k in this._chunks) {
-        this._chunks[k].chunk._plane.material =
-          new MeshStandardMaterial({
-            side: BackSide,
-            vertexColors: true,
-            wireframe: params.guiParams.terrain.wireframe,
-          })
+        this._chunks[k].chunk._plane.material = new MeshStandardMaterial({
+          side: BackSide,
+          vertexColors: true,
+          wireframe: params.guiParams.terrain.wireframe,
+        })
       }
     })
 
-    this._chunks = {}
-    this._params = params
+    const onNoiseChanged = () => {
+      if (this._chunks)
+        this._builder.Rebuild(this._chunks, terrain_constants.NOISE_PARAMS)
+    }
+
+    const terrainNoiseRollup = params.gui.addFolder("Terrain.Noise")
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "octaves", 1, 10)
+      .onChange(onNoiseChanged)
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "persistence", 0.01, 1.0)
+      .onChange(onNoiseChanged)
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "lacunarity", 0.01, 4.0)
+      .onChange(onNoiseChanged)
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "exponentiation", 0.1, 10.0)
+      .onChange(onNoiseChanged)
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "scale", 16.0, 20024.0)
+      .onChange(onNoiseChanged)
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "height", -512.0, 15120.0)
+      .onChange(onNoiseChanged)
+    terrainNoiseRollup
+      .add(terrain_constants.NOISE_PARAMS, "seed", 0, 10000)
+      .onChange(onNoiseChanged)
   }
 
   _CreateTerrainChunk(group, groupTransform, offset, width, resolution) {
@@ -264,7 +296,7 @@ export class TerrainChunkManager {
     if (!this._builder.Busy) {
       this._UpdateVisibleChunks_Quadtree(target)
     }
-
+    if (!this._chunks) return
     for (let k in this._chunks) {
       this._chunks[k].chunk.Update(target.position)
     }
@@ -308,6 +340,7 @@ export class TerrainChunkManager {
       }
     }
 
+    if (!this._chunks) return
     const intersection = utils.DictIntersection(this._chunks, newTerrainChunks)
     // Compare list of terrain chunks to the list we already have
     const difference = utils.DictDifference(newTerrainChunks, this._chunks)
@@ -336,6 +369,36 @@ export class TerrainChunkManager {
       }
     }
 
+    // for (let k in newTerrainChunks) {
+    //   this._chunks[k] = newTerrainChunks[k]
+    // }
     this._chunks = newTerrainChunks
   }
+}
+
+function generateSomePlaneGeometrySegments() {
+  const groupedSegments = new Group()
+  const geometry = new PlaneGeometry(
+    64,
+    64,
+    // terrain_constants.VIEWER_RADIUS * 2,
+    // terrain_constants.VIEWER_RADIUS * 2,
+    16,
+    16
+  )
+  geometry.rotateX(-Math.PI / 2)
+  geometry.translate(0, 5, 50)
+  const material = new MeshStandardMaterial({
+    color: 0x00ff00,
+    side: DoubleSide,
+    wireframe: true,
+  })
+  const mesh = new Mesh(geometry, material)
+  groupedSegments.add(mesh)
+  for (let i = 1; i < 10; i++) {
+    const translatedMesh = mesh.clone()
+    translatedMesh.position.set(0, 0, i * 64)
+    groupedSegments.add(translatedMesh)
+  }
+  return groupedSegments
 }

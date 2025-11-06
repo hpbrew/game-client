@@ -35,7 +35,7 @@ class Scene {
   constructor() {
     this.scene = new ThreeScene()
     this.camera = new PerspectiveCamera(
-      100,
+      50,
       window.innerWidth / window.innerHeight,
       0.1,
       10000

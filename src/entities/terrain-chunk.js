@@ -40,31 +40,31 @@ export const terrain_chunk = (function () {
     }
 
     RebuildMeshFromData(data) {
-      this._geometry.setAttribute(
+      this._plane.geometry.setAttribute(
         "position",
         new Float32BufferAttribute(data.positions, 3)
       )
-      this._geometry.setAttribute(
+      this._plane.geometry.setAttribute(
         "color",
         new Float32BufferAttribute(data.colours, 3)
       )
-      this._geometry.setAttribute(
+      this._plane.geometry.setAttribute(
         "normal",
         new Float32BufferAttribute(data.normals, 3)
       )
-      this._geometry.setAttribute(
+      this._plane.geometry.setAttribute(
         "coords",
         new Float32BufferAttribute(data.coords, 3)
       )
-      this._geometry.setAttribute(
+      this._plane.geometry.setAttribute(
         "weights1",
         new Float32BufferAttribute(data.weights1, 4)
       )
-      this._geometry.setAttribute(
+      this._plane.geometry.setAttribute(
         "weights2",
         new Float32BufferAttribute(data.weights2, 4)
       )
-      this._geometry.computeBoundingBox()
+      this._plane.geometry.computeBoundingBox()
     }
   }
 
