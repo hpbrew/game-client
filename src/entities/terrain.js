@@ -9,6 +9,7 @@ import {
   PlaneGeometry,
   Mesh,
   DoubleSide,
+  Float32BufferAttribute, // added
 } from "three"
 
 import { entity } from "./entity.js"
@@ -32,8 +33,6 @@ export class TerrainChunkManager {
   }
 
   _Init(params) {
-    this._planeMesh = generateSomePlaneGeometrySegments()
-    params.scene.add(this._planeMesh)
     this._params = params
 
     const loader = new TextureLoader()
@@ -117,6 +116,8 @@ export class TerrainChunkManager {
     this._InitNoise()
     this._InitBiomes(params)
     this._InitTerrain(params)
+    this._planeMesh = this.generateSomePlaneGeometrySegments()
+    params.scene.add(this._planeMesh)
   }
 
   _InitNoise() {
@@ -374,31 +375,83 @@ export class TerrainChunkManager {
     // }
     this._chunks = newTerrainChunks
   }
-}
 
-function generateSomePlaneGeometrySegments() {
-  const groupedSegments = new Group()
-  const geometry = new PlaneGeometry(
-    64,
-    64,
-    // terrain_constants.VIEWER_RADIUS * 2,
-    // terrain_constants.VIEWER_RADIUS * 2,
-    16,
-    16
-  )
-  geometry.rotateX(-Math.PI / 2)
-  geometry.translate(0, 5, 50)
-  const material = new MeshStandardMaterial({
-    color: 0x00ff00,
-    side: DoubleSide,
-    wireframe: true,
-  })
-  const mesh = new Mesh(geometry, material)
-  groupedSegments.add(mesh)
-  for (let i = 1; i < 10; i++) {
-    const translatedMesh = mesh.clone()
-    translatedMesh.position.set(0, 0, i * 64)
-    groupedSegments.add(translatedMesh)
+  generateSomePlaneGeometrySegments() {
+    const groupedSegments = new Group()
+    const baseGeometry = new PlaneGeometry(64, 64, 16, 16)
+    baseGeometry.rotateX(-Math.PI / 2)
+    baseGeometry.translate(70, 5, 50)
+
+    const posAttr = baseGeometry.attributes.position
+    const count = posAttr.count
+    const colors = new Float32Array(count * 3)
+    const tmp = new Vector3()
+
+    for (let i = 0; i < count; i++) {
+      tmp.fromArray(posAttr.array, i * 3)
+      const height = this.getHeightAt(tmp.x, tmp.z)
+      tmp.y = height
+
+      posAttr.array[i * 3 + 0] = tmp.x
+      posAttr.array[i * 3 + 1] = tmp.y
+      posAttr.array[i * 3 + 2] = tmp.z
+
+      // color ramp by height (t in [0,1])
+      const t = Math.min(Math.max((tmp.y + 10) / 30, 0), 1)
+      // example lerp from green -> rock/white
+      const r = (1 - t) * 0.1 + t * 0.9
+      const g = (1 - t) * 0.6 + t * 0.9
+      const b = (1 - t) * 0.2 + t * 0.9
+
+      colors[i * 3 + 0] = r
+      colors[i * 3 + 1] = g
+      colors[i * 3 + 2] = b
+    }
+
+    baseGeometry.setAttribute("color", new Float32BufferAttribute(colors, 3))
+    posAttr.needsUpdate = true
+    baseGeometry.attributes.color.needsUpdate = true
+    baseGeometry.computeVertexNormals()
+
+    const material = new MeshStandardMaterial({
+      vertexColors: true, // enable vertex colors
+      metalness: 0.0,
+      roughness: 0.8,
+    })
+
+    const mesh = new Mesh(baseGeometry, material)
+    groupedSegments.add(mesh)
+
+    // create a row of translated clones (ensure each clone has its own geometry)
+    for (let i = -10; i < 10; i++) {
+      const geomClone = baseGeometry.clone()
+      geomClone.translate(0, 0, i * 64)
+
+      // recalc heights & colors for the translated clone
+      const pAttr = geomClone.attributes.position
+      const cAttr = new Float32Array(pAttr.count * 3)
+      for (let j = 0; j < pAttr.count; j++) {
+        tmp.fromArray(pAttr.array, j * 3)
+        const height = this.getHeightAt(tmp.x, tmp.z)
+        tmp.y = height
+
+        pAttr.array[j * 3 + 1] = tmp.y
+
+        const t = Math.min(Math.max((tmp.y + 10) / 30, 0), 1)
+        cAttr[j * 3 + 0] = (1 - t) * 0.1 + t * 0.9
+        cAttr[j * 3 + 1] = (1 - t) * 0.6 + t * 0.9
+        cAttr[j * 3 + 2] = (1 - t) * 0.2 + t * 0.9
+      }
+
+      geomClone.setAttribute("color", new Float32BufferAttribute(cAttr, 3))
+      pAttr.needsUpdate = true
+      geomClone.attributes.color.needsUpdate = true
+      geomClone.computeVertexNormals()
+
+      const translatedMesh = new Mesh(geomClone, material.clone())
+      groupedSegments.add(translatedMesh)
+    }
+
+    return groupedSegments
   }
-  return groupedSegments
 }
