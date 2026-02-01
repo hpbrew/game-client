@@ -2,6 +2,25 @@ import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 export class Player extends THREE.Group {
+  // Typed properties
+  isJumping: boolean
+  canDoubleJump: boolean
+  jumpVelocity: number
+  gravity: number
+  jumpHorizontal: { x: number; z: number }
+  movement: { x: number; y: number; z: number }
+  model: THREE.Object3D | null
+  mixer: THREE.AnimationMixer | null
+  actions: {
+    idle: THREE.AnimationAction | null
+    run: THREE.AnimationAction | null
+    dance: THREE.AnimationAction | null
+    death: THREE.AnimationAction | null
+    walk: THREE.AnimationAction | null
+    attack: THREE.AnimationAction | null
+  }
+  _activeActionName: THREE.AnimationAction | null
+
   constructor() {
     super()
 
@@ -28,9 +47,8 @@ export class Player extends THREE.Group {
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
-    const url = `${
-      import.meta.env.BASE_URL
-    }not_my_resources/characters/guard.glb`
+    const url = `${import.meta.env.BASE_URL
+      }not_my_resources/characters/guard.glb`
     loader.load(
       url,
       (gltf) => {
@@ -38,24 +56,24 @@ export class Player extends THREE.Group {
         if (!model) return
 
         // Ensure visible materials for debugging and enable shadows
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true
-            child.receiveShadow = true
-            if (child.material) {
-              if (!("map" in child.material) || !child.material.map) {
-                child.material = new THREE.MeshStandardMaterial({
-                  color: 0xcccccc,
-                })
-              }
-              child.material.needsUpdate = true
-            } else {
-              child.material = new THREE.MeshStandardMaterial({
-                color: 0xcccccc,
-              })
-            }
-          }
-        })
+        // model.traverse((child) => {
+        //   if (child.isMesh) {
+        //     child.castShadow = true
+        //     child.receiveShadow = true
+        //     if (child.material) {
+        //       if (!("map" in child.material) || !child.material.map) {
+        //         child.material = new THREE.MeshStandardMaterial({
+        //           color: 0xcccccc,
+        //         })
+        //       }
+        //       child.material.needsUpdate = true
+        //     } else {
+        //       child.material = new THREE.MeshStandardMaterial({
+        //         color: 0xcccccc,
+        //       })
+        //     }
+        //   }
+        // })
 
         this.model = model
         this.add(model)
@@ -89,13 +107,13 @@ export class Player extends THREE.Group {
           this.actions.run = runClip ? this.mixer.clipAction(runClip) : null
 
           // Ensure actions exist and are looped
-          if (this.idleAction) {
-            this.idleAction.reset()
-            this.idleAction.play()
+          if (this.actions.idle) {
+            this.actions.idle.reset()
+            this.actions.idle.play()
             this._activeActionName = "idle"
           }
-          if (this.runAction) {
-            this.runAction.loop = THREE.LoopRepeat
+          if (this.actions.run) {
+            this.actions.run.loop = THREE.LoopRepeat
           }
         }
       },
@@ -106,7 +124,7 @@ export class Player extends THREE.Group {
     )
   }
 
-  setMovement(axis, value) {
+  setMovement(axis: 'x' | 'y' | 'z', value: number) {
     this.movement[axis] = value
   }
 
@@ -133,12 +151,15 @@ export class Player extends THREE.Group {
     }
   }
 
-  applyJump() {
+  applyJump(deltaSeconds: number) {
     if (this.isJumping) {
-      this.position.y += this.jumpVelocity
-      this.position.x += this.jumpHorizontal.x
-      this.position.z += this.jumpHorizontal.z
-      this.jumpVelocity += this.gravity
+      const v = new THREE.Vector3(
+        this.jumpHorizontal.x,
+        this.jumpVelocity,
+        this.jumpHorizontal.z
+      )
+      this.position.addScaledVector(v, deltaSeconds)
+      this.jumpVelocity += this.gravity * deltaSeconds
     }
   }
 
@@ -151,7 +172,7 @@ export class Player extends THREE.Group {
   }
 
   // switch animations with a short crossfade
-  setAction(name) {
+  setAction(name: string) {
     if (!this.mixer) return
     if (this._activeActionName === name) return
 

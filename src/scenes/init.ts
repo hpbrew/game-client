@@ -5,6 +5,8 @@ import { useWebGPURenderer } from './renderer'
 import { Camera, Scene, Vector3, Mesh, BoxGeometry, MeshBasicMaterial, BoxHelper, Object3D } from 'three'
 import { WebGPURenderer } from 'three/webgpu'
 import { useCamera } from './camera'
+import { Player } from '../objects/player'
+import { useLighting } from './lighting'
 
 
 export async function init() {
@@ -30,13 +32,20 @@ export async function init() {
 
 
     // Call scene init callback
-    onSceneInit(scene, camera)
+    const renderables = onSceneInit(scene, camera)
 
     // Animation loop
-    function animate() {
+    let lastTime = performance.now()
+    function animate(time: number = performance.now()) {
         requestAnimationFrame(animate)
 
-        // Update scene and camera here as needed
+        const delta = (time - lastTime) / 1000
+        lastTime = time
+
+        // call player update with delta seconds if available
+        if (renderables && renderables.player && typeof renderables.player.update === 'function') {
+            renderables.player.update(delta)
+        }
 
         renderer.render(scene, camera)
     }
@@ -46,24 +55,21 @@ export async function init() {
 function onSceneInit(scene: Scene, camera: Camera) {
     console.log("Scene initialized.")
 
-    // create a simple box for the camera to look at
-    const boxGeo = new BoxGeometry(1, 1, 1)
-    const boxMat = new MeshBasicMaterial({ color: 0x00ff00 })
-    const box = new Mesh(boxGeo, boxMat)
-    box.name = 'focusBox'
-    box.position.set(0, 0.5, 0)
-    scene.add(box)
+    const player = new Player()
+    scene.add(player)
 
     // add a helper to outline the box so it's easy to see
-    const helper = new BoxHelper(box, 0xffff00)
+    const helper = new BoxHelper(player, 0xffff00)
     scene.add(helper)
 
     // position the camera (if not already positioned) and make it look at the box
-    if ((camera as any).position) {
-        (camera as any).position.set(0, 2, 5)
-    }
-    camera.lookAt(box.position)
+    camera.position.set(0, 2, 5)
 
+    camera.lookAt(player.position)
+
+    const lighting = useLighting()
+    scene.add(lighting.directionalLight)
+    scene.add(lighting.ambientLight)
     // const terrainChunkManager = new TerrainChunkManager({
     //       scene: this.scene,
     //       target: this.player,
@@ -71,4 +77,6 @@ function onSceneInit(scene: Scene, camera: Camera) {
     //       guiParams: this.guiParams,
     //       threejs: this.renderer,
     //     })
+
+    return { player }
 }
