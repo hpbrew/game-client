@@ -1,7 +1,8 @@
-// This file initializes the Three.js scene, camera, and renderer, and starts the animation loop.
-
+/**
+ * Overrides for initial fog shaders in Three.js
+ */
 import * as THREE from "three"
-import Scene from "./scenes/scene"
+
 
 THREE.ShaderChunk.fog_fragment = `
       #ifdef USE_FOG
@@ -41,25 +42,3 @@ THREE.ShaderChunk.fog_pars_vertex = `
       #ifdef USE_FOG
         varying vec3 vWorldPosition;
       #endif`
-
-const scene = new Scene()
-// const renderer = new THREE.WebGLRenderer()
-// const camera = new THREE.PerspectiveCamera(
-//   75,
-//   window.innerWidth / window.innerHeight,
-//   0.1,
-//   1000
-// )
-window.scene = scene
-// renderer.setSize(window.innerWidth, window.innerHeight)
-// document.body.appendChild(renderer.domElement)
-//
-// camera.position.z = 5
-
-function animate() {
-  requestAnimationFrame(animate)
-  // scene.render(camera)
-}
-
-scene.init()
-animate()

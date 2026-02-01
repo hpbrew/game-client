@@ -116,8 +116,8 @@ export class TerrainChunkManager {
     this._InitNoise()
     this._InitBiomes(params)
     this._InitTerrain(params)
-    this._planeMesh = this.generateSomePlaneGeometrySegments()
-    params.scene.add(this._planeMesh)
+    // this._planeMesh = this.generateSomePlaneGeometrySegments()
+    // params.scene.add(this._planeMesh)
   }
 
   _InitNoise() {

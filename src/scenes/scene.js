@@ -30,16 +30,16 @@ import { _VS, _FS } from "./sceneShaders.js"
 import { SpatialHashGrid } from "../shared/spatial-hash-grid.ts"
 import { scenery_controller } from "../entities/scenery-controller.js"
 import Stats from "three/examples/jsm/libs/stats.module.js"
+import { useCamera } from "./camera.ts"
 
 class Scene {
   constructor() {
     this.scene = new ThreeScene()
-    this.camera = new PerspectiveCamera(
-      50,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      10000
-    )
+    this.cameraScene = useCamera()
+
+    this.camera = this.cameraScene.camera
+
+
     // Defer renderer creation until init so we can async-init WebGPU when available.
     this.preferWebGPU = typeof navigator !== "undefined" && !!navigator.gpu
     this.renderer = null
@@ -52,8 +52,7 @@ class Scene {
     window.addEventListener(
       "resize",
       () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight
-        this.camera.updateProjectionMatrix()
+        this.cameraScene.onWindowResize()
         this.renderer.setSize(window.innerWidth, window.innerHeight)
       },
       false
@@ -180,7 +179,7 @@ class Scene {
   async init() {
     // Create renderer: prefer WebGPU when available
     try {
-      if (this.preferWebGPU) {
+    if (this.preferWebGPU) {
         this.renderer = new WebGPURenderer({ antialias: true })
         // WebGPURenderer requires async initialization
         if (this.renderer.init) {

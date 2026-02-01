@@ -9,11 +9,16 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "three": "^0.180.0"
+    "three": "^0.182.0"
   },
   "devDependencies": {
+    "@types/three": "^0.182.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
     "dat.gui": "^0.7.9",
-    "vite": "^7.1.12",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vite-plugin-html": "^3.2.2"
   },
   "keywords": [
