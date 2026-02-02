@@ -1,6 +1,8 @@
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
+type ActionName = 'idle' | 'run' | 'dance' | 'death' | 'walk' | 'attack'
+
 export class Player extends THREE.Group {
   // Typed properties
   isJumping: boolean
@@ -19,7 +21,7 @@ export class Player extends THREE.Group {
     walk: THREE.AnimationAction | null
     attack: THREE.AnimationAction | null
   }
-  _activeActionName: THREE.AnimationAction | null
+  _activeActionName: ActionName
 
   constructor() {
     super()
@@ -43,7 +45,7 @@ export class Player extends THREE.Group {
       walk: null,
       attack: null,
     }
-    this._activeActionName = null
+    this._activeActionName = 'idle'
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
@@ -81,7 +83,7 @@ export class Player extends THREE.Group {
         // Animation setup: create mixer and prepare idle/run actions
         if (gltf.animations && gltf.animations.length > 0) {
           this.mixer = new THREE.AnimationMixer(model)
-          const findClip = (re) => gltf.animations.find((a) => re.test(a.name))
+          const findClip = (re: RegExp) => gltf.animations.find((a) => re.test(a.name))
 
           // prefer explicit names, fallback to sensible alternatives
           const idleClip =
@@ -128,7 +130,7 @@ export class Player extends THREE.Group {
     this.movement[axis] = value
   }
 
-  startJump(angle, movement) {
+  startJump(angle: number, movement: { x: number; y: number; z: number }) {
     if (!this.isJumping) {
       this.isJumping = true
       this.canDoubleJump = true
@@ -172,7 +174,7 @@ export class Player extends THREE.Group {
   }
 
   // switch animations with a short crossfade
-  setAction(name: string) {
+  setAction(name: ActionName) {
     if (!this.mixer) return
     if (this._activeActionName === name) return
 
@@ -184,10 +186,10 @@ export class Player extends THREE.Group {
     // fade out current
     if (this._activeActionName && this.actions[this._activeActionName]) {
       try {
-        this.actions[this._activeActionName].fadeOut(fadeDuration)
+        this.actions[this._activeActionName]?.fadeOut(fadeDuration)
       } catch (e) {
-        this.actions[this._activeActionName].stop &&
-          this.actions[this._activeActionName].stop()
+        this.actions[this._activeActionName]?.stop &&
+          this.actions[this._activeActionName]?.stop()
       }
     }
 
@@ -198,7 +200,7 @@ export class Player extends THREE.Group {
     this._activeActionName = name
   }
 
-  update(deltaSeconds) {
+  update(deltaSeconds: number) {
     // update animation mixer if present
     if (this.mixer) {
       this.mixer.update(deltaSeconds)
