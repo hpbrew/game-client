@@ -479,7 +479,7 @@ class Scene {
 
         // Exit pointer lock if no buttons are pressed
         if (document.pointerLockElement === this.renderer.domElement) {
-          document.exitPointerLock()
+            
         }
       }
     })

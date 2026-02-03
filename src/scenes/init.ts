@@ -2,13 +2,15 @@
 // import Scene from "./scenes/scene"
 import { useScene } from './scene1'
 import { useWebGPURenderer } from './renderer'
-import { Camera, Scene, Vector3, Mesh, BoxGeometry, MeshBasicMaterial, BoxHelper, Object3D } from 'three'
+import { Camera, Scene, Vector3, Mesh, BoxGeometry, MeshBasicMaterial, BoxHelper, Object3D, Color } from 'three'
 import { WebGPURenderer } from 'three/webgpu'
 import { useCamera } from './camera'
 import { Player } from '../objects/player'
 import { useLighting } from './lighting'
 import { useWindowListeners, type WindowListenerParams } from './window-listeners'
-
+import { TerrainChunkManager } from '../entities/terrain'
+import { useGui } from './gui'
+import { useBaseSkybox } from './skybox'
 
 export async function init() {
     // Initialize renderer
@@ -40,7 +42,7 @@ export async function init() {
     useWindowListeners(listenerParams)
 
     // Call scene init callback
-    const renderables = onSceneInit(scene, CameraViewer.camera)
+    const renderables = onSceneInit(listenerParams)
 
     // Animation loop
     let lastTime = performance.now()
@@ -54,6 +56,9 @@ export async function init() {
         if (renderables && renderables.player && typeof renderables.player.update === 'function') {
             renderables.player.update(delta)
         }
+        if (renderables && renderables.terrainChunkManager && typeof renderables.terrainChunkManager.Update === 'function') {
+            renderables.terrainChunkManager.Update(delta)
+        }
         CameraViewer.updateCameraPosition(renderables.player.position)
 
         renderer.render(scene, CameraViewer.camera)
@@ -61,8 +66,12 @@ export async function init() {
     animate()
 }
 
-function onSceneInit(scene: Scene, camera: Camera) {
+function onSceneInit(params: WindowListenerParams) {
     console.log("Scene initialized.")
+    const { scene, renderer } = params
+
+    const skyboxArea = useBaseSkybox()
+    scene.background = skyboxArea?.texture || new Color('skyblue')
 
     const player = new Player()
     scene.add(player)
@@ -70,13 +79,16 @@ function onSceneInit(scene: Scene, camera: Camera) {
     const lighting = useLighting()
     scene.add(lighting.directionalLight)
     scene.add(lighting.ambientLight)
-    // const terrainChunkManager = new TerrainChunkManager({
-    //       scene: this.scene,
-    //       target: this.player,
-    //       gui: this.gui,
-    //       guiParams: this.guiParams,
-    //       threejs: this.renderer,
-    //     })
 
-    return { player }
+    const { gui, guiParams } = useGui()
+
+    const terrainChunkManager = new TerrainChunkManager({
+        scene,
+        target: player,
+        gui,
+        guiParams,
+        threejs: renderer,
+    })
+
+    return { player, terrainChunkManager }
 }
