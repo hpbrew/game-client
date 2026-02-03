@@ -1,6 +1,7 @@
+import { ActiveKeys, KeyBindings } from "../controllers/keys"
 import { PerspectiveCamera, Vector3 } from "three"
 
-export const useThirdPersonCamera = () => {
+export const useCamera = () => {
     // Camera scene setup code goes here
 
     const camera = new PerspectiveCamera(
@@ -60,9 +61,31 @@ export const useThirdPersonCamera = () => {
         camera.lookAt(target)
     }
 
+    function onMouseWheel(event: WheelEvent) {
+        event.preventDefault()
+        const zoomSpeed = 0.5
+        orbit.radius += event.deltaY * 0.01 * zoomSpeed
+        orbit.radius = Math.max(2, Math.min(30, orbit.radius)) // Clamp zoom
+    }
+
+    function onMouseMove(event: MouseEvent) {
+        if (ActiveKeys[KeyBindings.MOUSEDOWNLEFT] !== true) return
+        const rotateSpeed = 0.008
+        orbit.azimuth -= event.movementX * rotateSpeed
+        orbit.polar -= event.movementY * rotateSpeed
+        // Clamp polar angle to prevent flipping
+        const minPolar = 0.1
+        const maxPolar = Math.PI / 2 - 0.1
+        orbit.polar = Math.max(minPolar, Math.min(maxPolar, orbit.polar))
+    }
+
     return {
         camera,
         onWindowResize,
-        updateCameraPosition
+        updateCameraPosition,
+        onMouseWheel,
+        onMouseMove
     }
 }
+
+export type UseCameraType = ReturnType<typeof useCamera>
