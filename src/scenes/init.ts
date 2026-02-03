@@ -4,9 +4,10 @@ import { useScene } from './scene1'
 import { useWebGPURenderer } from './renderer'
 import { Camera, Scene, Vector3, Mesh, BoxGeometry, MeshBasicMaterial, BoxHelper, Object3D } from 'three'
 import { WebGPURenderer } from 'three/webgpu'
-import { useCamera } from './camera'
+import { useThirdPersonCamera } from './camera'
 import { Player } from '../objects/player'
 import { useLighting } from './lighting'
+import { useWindowListeners, type WindowListenerParams } from './window-listeners'
 
 
 export async function init() {
@@ -28,11 +29,19 @@ export async function init() {
 
     // Initialize camera
     // Can use this to swap out different camera types later
-    const { camera } = useCamera()
+    const ThirdPersonCamera = useThirdPersonCamera()
 
+    // Setup window listeners
+    const listenerParams: WindowListenerParams = {
+        scene,
+        camera: ThirdPersonCamera.camera,
+        renderer,
+        resizeCamera: ThirdPersonCamera.onWindowResize
+    }
+    useWindowListeners(listenerParams)
 
     // Call scene init callback
-    const renderables = onSceneInit(scene, camera)
+    const renderables = onSceneInit(scene, ThirdPersonCamera.camera)
 
     // Animation loop
     let lastTime = performance.now()
@@ -42,12 +51,13 @@ export async function init() {
         const delta = (time - lastTime) / 1000
         lastTime = time
 
-        // call player update with delta seconds if available
+        // Run Updates
         if (renderables && renderables.player && typeof renderables.player.update === 'function') {
             renderables.player.update(delta)
         }
+        ThirdPersonCamera.updateCameraPosition(renderables.player.position)
 
-        renderer.render(scene, camera)
+        renderer.render(scene, ThirdPersonCamera.camera)
     }
     animate()
 }
@@ -57,15 +67,6 @@ function onSceneInit(scene: Scene, camera: Camera) {
 
     const player = new Player()
     scene.add(player)
-
-    // add a helper to outline the box so it's easy to see
-    const helper = new BoxHelper(player, 0xffff00)
-    scene.add(helper)
-
-    // position the camera (if not already positioned) and make it look at the box
-    camera.position.set(0, 2, 5)
-
-    camera.lookAt(player.position)
 
     const lighting = useLighting()
     scene.add(lighting.directionalLight)

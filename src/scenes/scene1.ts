@@ -2,12 +2,12 @@ import { Scene } from 'three'
 import { WebGPURenderer } from 'three/webgpu'
 
 interface UseSceneParams {
-    renderer: WebGPURenderer
+    renderer?: WebGPURenderer
 }
 
 export const useScene = ({
     // renderer
-}) => {
+}: UseSceneParams) => {
     // Scene setup code goes here
 
     const scene = new Scene()
