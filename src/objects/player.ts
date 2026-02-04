@@ -25,7 +25,6 @@ export class Player extends THREE.Group {
 
   constructor() {
     super()
-
     // Movement / jump state
     this.isJumping = false
     this.canDoubleJump = false
@@ -198,6 +197,17 @@ export class Player extends THREE.Group {
     next.fadeIn(fadeDuration)
     next.play()
     this._activeActionName = name
+  }
+
+  sampleTerrainHeight(terrainChunkManager: any) {
+    const overlapValue = 0.01
+
+    const terrainY =
+      terrainChunkManager?.getHeightAt(
+        this.position.x,
+        this.position.z
+      ) + overlapValue
+    if (!isNaN(terrainY)) this.position.setY(terrainY)
   }
 
   update(deltaSeconds: number) {

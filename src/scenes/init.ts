@@ -73,14 +73,10 @@ function onSceneInit(params: WindowListenerParams) {
     const skyboxArea = useBaseSkybox()
     scene.background = skyboxArea?.texture || new Color('skyblue')
 
+    const { gui, guiParams } = useGui()
+
     const player = new Player()
     scene.add(player)
-
-    const lighting = useLighting()
-    scene.add(lighting.directionalLight)
-    scene.add(lighting.ambientLight)
-
-    const { gui, guiParams } = useGui()
 
     const terrainChunkManager = new TerrainChunkManager({
         scene,
@@ -89,6 +85,15 @@ function onSceneInit(params: WindowListenerParams) {
         guiParams,
         threejs: renderer,
     })
+
+    player.sampleTerrainHeight(terrainChunkManager)
+
+    const lighting = useLighting()
+    scene.add(lighting.directionalLight)
+    scene.add(lighting.ambientLight)
+
+
+
 
     return { player, terrainChunkManager }
 }
