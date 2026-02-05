@@ -1,16 +1,16 @@
 // This file initializes the Three.js scene, camera, and renderer, and starts the animation loop.
 // import Scene from "./scenes/scene"
-import { useScene } from './scene1'
-import { useWebGPURenderer } from './renderer'
+import { useScene } from './scenes/scene1'
+import { useWebGPURenderer } from './scenes/renderer'
 import { Camera, Scene, Vector3, Mesh, BoxGeometry, MeshBasicMaterial, BoxHelper, Object3D, Color } from 'three'
 import { WebGPURenderer } from 'three/webgpu'
-import { useCamera } from './camera'
-import { Player } from '../objects/player'
-import { useLighting } from './lighting'
-import { useWindowListeners, type WindowListenerParams } from './window-listeners'
-import { TerrainChunkManager } from '../entities/terrain'
-import { useGui } from './gui'
-import { useBaseSkybox } from './skybox'
+import { useCamera } from './scenes/camera'
+import { Player } from './objects/player'
+import { useLighting } from './scenes/lighting'
+import { useWindowListeners, type WindowListenerParams } from './scenes/window-listeners'
+import { TerrainChunkManager } from './entities/terrain'
+import { useGui } from './scenes/gui'
+import { useBaseSkybox } from './scenes/skybox'
 
 export async function init() {
     // Initialize renderer

@@ -1,5 +1,5 @@
 import './initial-shaders'
-import { init } from './scenes/init'
+import { init } from './init'
 
 init().then(() => {
   console.log("Game initialized.")
