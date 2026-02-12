@@ -1,6 +1,5 @@
-export const utils = (function() {
-  return {
-    DictIntersection: function(dictA, dictB) {
+
+export const DictIntersection = (dictA, dictB) => {
       const intersection = {};
       for (let k in dictB) {
         if (k in dictA) {
@@ -8,14 +7,13 @@ export const utils = (function() {
         }
       }
       return intersection
-    },
+    }
 
-    DictDifference: function(dictA, dictB) {
+export const DictDifference = (dictA, dictB) => {
       const diff = {...dictA};
       for (let k in dictB) {
         delete diff[k];
       }
       return diff;
     }
-  };
-})();
+

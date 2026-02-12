@@ -11,14 +11,14 @@ import {
   DoubleSide,
   Float32BufferAttribute, // added
 } from "three"
+import { useCubeQuadTree } from "./quadtree"
 
-import { entity } from "./entity.js"
-import { quadtree } from "./quadtree.js"
-import { terrain_shader } from "./terrain-shader.js"
+// import { entity } from "./entity.js"
+// import { terrain_shader } from "./terrain-shader.js"
 import { terrain_builder_threaded } from "./terrain-builder-threaded.js"
 import { texture_splatter } from "./texture-splatter.js"
 import { textures } from "./textures.js"
-import { utils } from "./utils.js"
+import * as utils from "../shared/utils"
 
 import { terrain_constants } from "../shared/terrain-constants.ts"
 import { HeightGenerator } from "../shared/terrain-height.ts"
@@ -311,13 +311,13 @@ export class TerrainChunkManager {
       return c.position[0] + "/" + c.position[2] + " [" + c.size + "]"
     }
 
-    const quadTree = new quadtree.CubeQuadTree({
+    const quadTree = useCubeQuadTree({
       radius: terrain_constants.VIEWER_RADIUS,
       min_node_size: terrain_constants.QT_MIN_CELL_SIZE,
     })
-    quadTree.Insert(target.position)
+    quadTree.insert(target.position)
 
-    const sides = quadTree.GetChildren()
+    const sides = quadTree.getChildren()
 
     let newTerrainChunks = {}
     const center = new Vector3()

@@ -2,7 +2,7 @@ import { Vector3 } from "three"
 
 import { texture_splatter } from "./texture-splatter.js"
 
-import { math } from "../shared/math.mjs"
+import { sat } from "../shared/math"
 import { NoiseGenerator } from "../shared/noise.ts"
 import { HeightGenerator } from "../shared/terrain-height.ts"
 
@@ -63,10 +63,10 @@ class _TerrainBuilderThreadedWorker {
 
     const effectiveResolution = resolution - 2
     for (let x = -1; x <= effectiveResolution + 1; x++) {
-      let xp = width * math.sat(x / effectiveResolution)
+      let xp = width * sat(x / effectiveResolution)
 
       for (let y = -1; y <= effectiveResolution + 1; y++) {
-        let yp = width * math.sat(y / effectiveResolution)
+        let yp = width * sat(y / effectiveResolution)
 
         // Compute position
         _P.set(xp - half, 0.0, yp - half)

@@ -1,6 +1,6 @@
 import { Color } from "three"
 
-import { math } from "/shared/math.mjs"
+import * as math from "/shared/math.ts"
 import { spline } from "/shared/spline.mjs"
 import { terrain_constants } from "/shared/terrain-constants.ts"
 

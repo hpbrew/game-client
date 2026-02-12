@@ -10,6 +10,22 @@ import {
   // sRGBEncoding,
 } from "three"
 
+function getImageData(image) {
+  const canvas = document.createElement("canvas")
+  canvas.width = image.width
+  canvas.height = image.height
+
+  const context = canvas.getContext("2d")
+  context.drawImage(image, 0, 0)
+
+  return context.getImageData(0, 0, image.width, image.height)
+}
+  
+export const useTextureAtlas = () => {
+  
+
+}
+
 export const textures = (function () {
   // Taken from https://github.com/mrdoob/three.js/issues/758
   function _GetImageData(image) {
@@ -82,7 +98,7 @@ export const textures = (function () {
           diffuse.wrapT = RepeatWrapping
           diffuse.generateMipmaps = true
 
-          const caps = this._threejs.capabilities
+          // const caps = this._threejs.capabilities
           // const aniso = caps.getMaxAnisotropy()
 
           diffuse.anisotropy = 4
