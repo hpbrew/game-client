@@ -1,6 +1,5 @@
 import { ActiveKeys, KeyBindings } from "../controllers/keys"
 import { PerspectiveCamera, Vector3 } from "three"
-
 export const useCamera = () => {
     // Camera scene setup code goes here
 

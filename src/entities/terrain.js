@@ -18,7 +18,7 @@ import { useCubeQuadTree } from "./quadtree"
 import { terrain_builder_threaded } from "./terrain-builder-threaded.js"
 import { texture_splatter } from "./texture-splatter.js"
 import { textures } from "./textures.js"
-import * as utils from "../shared/utils"
+import { DictDifference, DictIntersection} from "../shared/utils"
 
 import { terrain_constants } from "../shared/terrain-constants.ts"
 import { HeightGenerator } from "../shared/terrain-height.ts"
@@ -342,11 +342,11 @@ export class TerrainChunkManager {
     }
 
     if (!this._chunks) return
-    const intersection = utils.DictIntersection(this._chunks, newTerrainChunks)
+    const intersection = DictIntersection(this._chunks, newTerrainChunks)
     // Compare list of terrain chunks to the list we already have
-    const difference = utils.DictDifference(newTerrainChunks, this._chunks)
+    const difference = DictDifference(newTerrainChunks, this._chunks)
     const recycle = Object.values(
-      utils.DictDifference(this._chunks, newTerrainChunks)
+      DictDifference(this._chunks, newTerrainChunks)
     )
 
     // Keep the old chunks so we don't rebuild them if not required
