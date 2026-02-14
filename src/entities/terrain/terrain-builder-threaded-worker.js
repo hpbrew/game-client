@@ -2,9 +2,9 @@ import { Vector3 } from "three"
 
 import { texture_splatter } from "./texture-splatter.js"
 
-import { sat } from "../shared/math"
-import { NoiseGenerator } from "../shared/noise.ts"
-import { HeightGenerator } from "../shared/terrain-height.ts"
+import { sat } from "@/shared/math"
+import { NoiseGenerator } from "@/shared/noise.ts"
+import { HeightGenerator } from "@/shared/terrain-height.ts"
 
 class _TerrainBuilderThreadedWorker {
   constructor() {}
@@ -14,7 +14,7 @@ class _TerrainBuilderThreadedWorker {
     this._params.offset = new Vector3(
       params.offset[0],
       params.offset[1],
-      params.offset[2]
+      params.offset[2],
     )
     this._params.noise = new NoiseGenerator(params.noiseParams)
     this._params.heightGenerators = [new HeightGenerator()]
@@ -105,12 +105,12 @@ class _TerrainBuilderThreadedWorker {
         indices.push(
           i * (resolution + 1) + j,
           (i + 1) * (resolution + 1) + j + 1,
-          i * (resolution + 1) + j + 1
+          i * (resolution + 1) + j + 1,
         )
         indices.push(
           (i + 1) * (resolution + 1) + j,
           (i + 1) * (resolution + 1) + j + 1,
-          i * (resolution + 1) + j
+          i * (resolution + 1) + j,
         )
       }
     }
@@ -291,25 +291,25 @@ class _TerrainBuilderThreadedWorker {
 
     const bytesInFloat32 = 4
     const positionsArray = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiPositions.length)
+      new ArrayBuffer(bytesInFloat32 * uiPositions.length),
     )
     const coloursArray = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiColours.length)
+      new ArrayBuffer(bytesInFloat32 * uiColours.length),
     )
     const normalsArray = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiNormals.length)
+      new ArrayBuffer(bytesInFloat32 * uiNormals.length),
     )
     const coordsArray = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiCoords.length)
+      new ArrayBuffer(bytesInFloat32 * uiCoords.length),
     )
     const uvsArray = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiUVs.length)
+      new ArrayBuffer(bytesInFloat32 * uiUVs.length),
     )
     const weights1Array = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiWeights2.length)
+      new ArrayBuffer(bytesInFloat32 * uiWeights2.length),
     )
     const weights2Array = new Float32Array(
-      new ArrayBuffer(bytesInFloat32 * uiWeights2.length)
+      new ArrayBuffer(bytesInFloat32 * uiWeights2.length),
     )
 
     positionsArray.set(uiPositions, 0)

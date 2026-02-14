@@ -8,22 +8,18 @@ import {
   Raycaster,
   PlaneGeometry,
   Mesh,
-  DoubleSide,
-  Float32BufferAttribute, // added
+  Float32BufferAttribute,
 } from "three"
-import { useCubeQuadTree } from "./quadtree"
-
 // import { entity } from "./entity.js"
 // import { terrain_shader } from "./terrain-shader.js"
+// import { textures } from "./textures.js"
+// import { texture_splatter } from "./texture-splatter.js"
+import { useCubeQuadTree } from "@/shared/quadtree"
+import { DictDifference, DictIntersection } from "@/shared/utils"
+import { terrain_constants } from "@/shared/terrain-constants"
+import { HeightGenerator } from "@/shared/terrain-height"
+import { NoiseGenerator } from "@/shared/noise"
 import { terrain_builder_threaded } from "./terrain-builder-threaded.js"
-import { texture_splatter } from "./texture-splatter.js"
-import { textures } from "./textures.js"
-import { DictDifference, DictIntersection} from "../shared/utils"
-
-import { terrain_constants } from "../shared/terrain-constants.ts"
-import { HeightGenerator } from "../shared/terrain-height.ts"
-
-import { NoiseGenerator } from "../shared/noise.ts"
 
 export class TerrainChunkManager {
   constructor(params) {
@@ -38,36 +34,36 @@ export class TerrainChunkManager {
     const loader = new TextureLoader()
 
     const noiseTexture = loader.load(
-      "not_my_resources/terrain/simplex-noise.png"
+      "not_my_resources/terrain/simplex-noise.png",
     )
     noiseTexture.wrapS = RepeatWrapping
     noiseTexture.wrapT = RepeatWrapping
 
-    const diffuse = new textures.TextureAtlas(params)
-    diffuse.Load("diffuse", [
-      "not_my_resources/terrain/dirt_01_diffuse-1024.png",
-      "not_my_resources/terrain/grass1-albedo3-1024.png",
-      "not_my_resources/terrain/sandyground-albedo-1024.png",
-      "not_my_resources/terrain/worn-bumpy-rock-albedo-1024.png",
-      "not_my_resources/terrain/rock-snow-ice-albedo-1024.png",
-      "not_my_resources/terrain/snow-packed-albedo-1024.png",
-      "not_my_resources/terrain/rough-wet-cobble-albedo-1024.png",
-      // 'not_my_resources/terrain/sandy-rocks1-albedo-1024.png',
-      "not_my_resources/terrain/bark1-albedo.jpg",
-    ])
+    // const diffuse = new textures.TextureAtlas(params)
+    // diffuse.Load("diffuse", [
+    //   "not_my_resources/terrain/dirt_01_diffuse-1024.png",
+    //   "not_my_resources/terrain/grass1-albedo3-1024.png",
+    //   "not_my_resources/terrain/sandyground-albedo-1024.png",
+    //   "not_my_resources/terrain/worn-bumpy-rock-albedo-1024.png",
+    //   "not_my_resources/terrain/rock-snow-ice-albedo-1024.png",
+    //   "not_my_resources/terrain/snow-packed-albedo-1024.png",
+    //   "not_my_resources/terrain/rough-wet-cobble-albedo-1024.png",
+    //   // 'not_my_resources/terrain/sandy-rocks1-albedo-1024.png',
+    //   "not_my_resources/terrain/bark1-albedo.jpg",
+    // ])
 
-    const normal = new textures.TextureAtlas(params)
-    normal.Load("normal", [
-      "not_my_resources/terrain/dirt_01_normal-1024.jpg",
-      "not_my_resources/terrain/grass1-normal-1024.jpg",
-      "not_my_resources/terrain/sandyground-normal-1024.jpg",
-      "not_my_resources/terrain/worn-bumpy-rock-normal-1024.jpg",
-      "not_my_resources/terrain/rock-snow-ice-normal-1024.jpg",
-      "not_my_resources/terrain/snow-packed-normal-1024.jpg",
-      "not_my_resources/terrain/rough-wet-cobble-normal-1024.jpg",
-      // 'not_my_resources/terrain/sandy-rocks1-normal-1024.jpg',
-      "not_my_resources/terrain/bark1-normal3.jpg",
-    ])
+    // const normal = new textures.TextureAtlas(params)
+    // normal.Load("normal", [
+    //   "not_my_resources/terrain/dirt_01_normal-1024.jpg",
+    //   "not_my_resources/terrain/grass1-normal-1024.jpg",
+    //   "not_my_resources/terrain/sandyground-normal-1024.jpg",
+    //   "not_my_resources/terrain/worn-bumpy-rock-normal-1024.jpg",
+    //   "not_my_resources/terrain/rock-snow-ice-normal-1024.jpg",
+    //   "not_my_resources/terrain/snow-packed-normal-1024.jpg",
+    //   "not_my_resources/terrain/rough-wet-cobble-normal-1024.jpg",
+    //   // 'not_my_resources/terrain/sandy-rocks1-normal-1024.jpg',
+    //   "not_my_resources/terrain/bark1-normal3.jpg",
+    // ])
 
     this._material = new MeshStandardMaterial({
       side: BackSide,
@@ -234,10 +230,10 @@ export class TerrainChunkManager {
       offset: offset,
       resolution: resolution,
       biomeGenerator: this._biomes,
-      colourGenerator: new texture_splatter.TextureSplatter({
-        biomeGenerator: this._biomes,
-        colourNoise: this._colourNoise,
-      }),
+      // colourGenerator: new texture_splatter.TextureSplatter({
+      //   biomeGenerator: this._biomes,
+      //   colourNoise: this._colourNoise,
+      // }),
       // heightGenerators: [this.heightGenerator_],
       noiseParams: terrain_constants.NOISE_PARAMS,
       colourNoiseParams: this._colourNoiseParams,
@@ -256,16 +252,16 @@ export class TerrainChunkManager {
     const raycaster = new Raycaster()
     raycaster.setFromCamera(mouse, camera)
     const intersects = raycaster.intersectObjects(
-      Object.values(this._chunks).map((c) => c.chunk._plane)
+      Object.values(this._chunks).map((c) => c.chunk._plane),
     )
     if (intersects.length > 0) {
       const p = intersects[0].point
       console.log(
         `Clicked on terrain at ${p.x.toFixed(2)}, ${p.y.toFixed(
-          2
+          2,
         )}, ${p.z.toFixed(2)} (height: ${this.getHeightAt(p.x, p.z).toFixed(
-          2
-        )})`
+          2,
+        )})`,
       )
 
       return {
@@ -346,7 +342,7 @@ export class TerrainChunkManager {
     // Compare list of terrain chunks to the list we already have
     const difference = DictDifference(newTerrainChunks, this._chunks)
     const recycle = Object.values(
-      DictDifference(this._chunks, newTerrainChunks)
+      DictDifference(this._chunks, newTerrainChunks),
     )
 
     // Keep the old chunks so we don't rebuild them if not required
@@ -365,7 +361,7 @@ export class TerrainChunkManager {
           difference[k].transform,
           offset,
           difference[k].size,
-          terrain_constants.QT_MIN_CELL_RESOLUTION
+          terrain_constants.QT_MIN_CELL_RESOLUTION,
         ),
       }
     }

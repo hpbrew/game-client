@@ -28,11 +28,12 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "/shared": "/src/shared",
-      "/entities": "/src/entities",
-      "/objects": "/src/objects",
-      "/scenes": "/src/scenes",
-      "/resources": "/src/not_my_resources",
+      "@": "/src",
+      "@/shared": "/src/shared",
+      "@/entities": "/src/entities",
+      "@/objects": "/src/objects",
+      "@/scenes": "/src/scenes",
+      "@/resources": "/src/not_my_resources",
     },
   },
   server: {

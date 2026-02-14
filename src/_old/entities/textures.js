@@ -16,6 +16,7 @@ function getImageData(image) {
   canvas.height = image.height
 
   const context = canvas.getContext("2d")
+  if(!context) return
   context.drawImage(image, 0, 0)
 
   return context.getImageData(0, 0, image.width, image.height)

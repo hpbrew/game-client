@@ -44,9 +44,7 @@ export async function init() {
     const delta = (time - lastTime) / 1000
     lastTime = time
 
-
     updateScene(delta, CameraViewer)
-
 
     renderer.render(scene, CameraViewer.camera)
   }

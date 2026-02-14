@@ -7,12 +7,9 @@ export const terrain_builder_threaded = (function () {
   let _IDs = 0
 
   class WorkerThread {
-    constructor(s) {
+    constructor() {
       this._worker = new TerrainWorker()
 
-      //new Worker(s, {
-      //type: "module",
-      //})
       this._worker.onmessage = (e) => {
         this._OnMessage(e)
       }
@@ -81,7 +78,7 @@ export const terrain_builder_threaded = (function () {
 
       const url = new URL(
         "./terrain-builder-threaded-worker.js",
-        import.meta.url
+        import.meta.url,
       )
 
       this._workerPool = new WorkerThreadPool(_NUM_WORKERS, url)

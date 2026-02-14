@@ -26,11 +26,11 @@ import { createNearbyBox } from "../objects/nearbyBox"
 import { QuadtreeFloor } from "../objects/quadtreeFloor"
 import { TerrainChunkManager } from "../entities/terrain"
 import { GUI } from "dat.gui"
-import { _VS, _FS } from "./sceneShaders.js"
+import { _VS, _FS } from "../scenes/sceneShaders.js"
 import { SpatialHashGrid } from "../shared/spatial-hash-grid.ts"
 import { scenery_controller } from "../entities/scenery-controller.js"
 import Stats from "three/examples/jsm/libs/stats.module.js"
-import { useCamera } from "./camera.ts"
+import { useCamera } from "../scenes/camera.ts"
 
 class Scene {
   constructor() {
@@ -38,7 +38,6 @@ class Scene {
     this.cameraScene = useCamera()
 
     this.camera = this.cameraScene.camera
-
 
     // Defer renderer creation until init so we can async-init WebGPU when available.
     this.preferWebGPU = typeof navigator !== "undefined" && !!navigator.gpu
@@ -55,7 +54,7 @@ class Scene {
         this.cameraScene.onWindowResize()
         this.renderer.setSize(window.innerWidth, window.innerHeight)
       },
-      false
+      false,
     )
     // this.entityManager_ = new entity_manager.EntityManager()
     // Use the new Player class
@@ -67,7 +66,7 @@ class Scene {
         [-1000, -1000],
         [1000, 1000],
       ],
-      [100, 100]
+      [100, 100],
     )
 
     // this.terrain = null // Renamed from floor
@@ -179,7 +178,7 @@ class Scene {
   async init() {
     // Create renderer: prefer WebGPU when available
     try {
-    if (this.preferWebGPU) {
+      if (this.preferWebGPU) {
         this.renderer = new WebGPURenderer({ antialias: true })
         // WebGPURenderer requires async initialization
         if (this.renderer.init) {
@@ -479,7 +478,6 @@ class Scene {
 
         // Exit pointer lock if no buttons are pressed
         if (document.pointerLockElement === this.renderer.domElement) {
-            
         }
       }
     })
@@ -508,7 +506,7 @@ class Scene {
       this.orbit.polar -= deltaY * 0.01
       this.orbit.polar = Math.max(
         0.1,
-        Math.min(Math.PI - 0.1, this.orbit.polar)
+        Math.min(Math.PI - 0.1, this.orbit.polar),
       )
       this.updateCameraPosition()
 
@@ -524,7 +522,7 @@ class Scene {
         let diff = Math.abs(
           ((this.orbit.azimuth - this.player.rotation.y + Math.PI) %
             (2 * Math.PI)) -
-            Math.PI
+            Math.PI,
         )
         // If the difference is greater than 90 degrees (PI/2), rotate the cube with the camera
         if (diff > Math.PI / 2) {
@@ -544,7 +542,7 @@ class Scene {
         this.orbit.radius = Math.max(2, Math.min(50, this.orbit.radius)) // Clamp zoom
         this.updateCameraPosition()
       },
-      { passive: false }
+      { passive: false },
     )
 
     // Touch pinch-to-zoom support for mobile: two-finger pinch to zoom
@@ -573,7 +571,7 @@ class Scene {
           this.prevMouse.y = t.clientY
         }
       },
-      { passive: true }
+      { passive: true },
     )
 
     // Double-tap detection state for moving player
@@ -619,7 +617,7 @@ class Scene {
           this.orbit.polar -= deltaY * 0.01
           this.orbit.polar = Math.max(
             0.1,
-            Math.min(Math.PI - 0.1, this.orbit.polar)
+            Math.min(Math.PI - 0.1, this.orbit.polar),
           )
 
           this.prevMouse.x = t.clientX
@@ -629,7 +627,7 @@ class Scene {
           e.preventDefault()
         }
       },
-      { passive: false }
+      { passive: false },
     )
 
     this.renderer.domElement.addEventListener(
@@ -677,7 +675,7 @@ class Scene {
               }
               const pos = this.terrainChunkManager?.raycastSelect(
                 fakeEvent,
-                this.camera
+                this.camera,
               )
               if (pos) {
                 console.log("Double-tap move to", pos)
@@ -694,12 +692,12 @@ class Scene {
           // ignore
         }
       },
-      { passive: true }
+      { passive: true },
     )
 
     // Prevent default right-click context menu on the renderer
     this.renderer.domElement.addEventListener("contextmenu", (e) =>
-      e.preventDefault()
+      e.preventDefault(),
     )
   }
 
@@ -800,7 +798,7 @@ class Scene {
             const terrainY =
               this.terrainChunkManager.getHeightAt(
                 this.player.position.x,
-                this.player.position.z
+                this.player.position.z,
               ) + overlapValue
             if (this.player.position.y <= terrainY) {
               this.player.position.y = terrainY
@@ -820,7 +818,7 @@ class Scene {
           const terrainY =
             this.terrainChunkManager.getHeightAt(
               this.player.position.x,
-              this.player.position.z
+              this.player.position.z,
             ) + overlapValue
           this.player.position.y = terrainY
         }
@@ -897,7 +895,7 @@ class Scene {
       // Update position and FPS display
       const { x, y, z } = this.player.position
       this.positionDiv.innerHTML = `Player Position: <br> x=${x.toFixed(
-        2
+        2,
       )}, y=${y.toFixed(2)}, z=${z.toFixed(2)}`
 
       // Always update camera to follow the player

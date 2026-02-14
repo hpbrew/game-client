@@ -1,3 +1,4 @@
 {
-  "terminal.integrated.automationProfile.windows": {}
+  "terminal.integrated.automationProfile.windows": {},
+  "editor.formatOnSave": true
 }

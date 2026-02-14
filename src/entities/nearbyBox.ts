@@ -1,6 +1,9 @@
 import * as THREE from "three"
 
-export function createNearbyBox(floor = null) {
+interface BoxHeightProvider {
+  getHeightAt(x: number, z: number): number
+}
+export function createNearbyBox(floor: BoxHeightProvider | null = null) {
   const geometry = new THREE.BoxGeometry(2, 2, 2)
   const material = new THREE.MeshBasicMaterial({ color: 0xff8800 })
   const box = new THREE.Mesh(geometry, material)
