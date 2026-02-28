@@ -9,6 +9,7 @@ import { logger } from "@/shared/logger"
 
 //@ts-ignore-line
 import { TerrainChunkManager } from "../entities/terrain/terrain"
+import { updateInputActions } from "./input-actions"
 
 interface UseSceneParams {
   renderer: WebGPURenderer
@@ -43,6 +44,7 @@ export const useScene = ({ renderer }: UseSceneParams) => {
 
   function updateScene(delta: number, CameraViewer: UseCameraType) {
     // Run Updates
+    updateInputActions(CameraViewer, player)
     player.update(delta)
     CameraViewer.updateCameraPosition(player.position)
 

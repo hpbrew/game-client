@@ -1,72 +1,90 @@
 import { Camera, Scene } from "three"
 import { UseCameraType } from "./camera"
-import { ActiveKeys, KeyBindingCode, KeyBindings, mouseHandler } from "../controllers/keys";
-import { WebGPURenderer } from "three/webgpu";
+import {
+  ActiveKeys,
+  KeyBindingCode,
+  KeyBindings,
+  keyDownHandler,
+  keyUpHandler,
+  mouseHandler,
+} from "../controllers/keys"
+import { WebGPURenderer } from "three/webgpu"
 
 export interface WindowListenerParams {
-    scene: Scene;
-    cameraViewer: UseCameraType;
-    renderer: WebGPURenderer;
+  scene: Scene
+  cameraViewer: UseCameraType
+  renderer: WebGPURenderer
 }
 
 export const useWindowListeners = (params: WindowListenerParams) => {
-    // Window listeners setup code goes here
+  // Window listeners setup code goes here
 
-    const { scene, cameraViewer, renderer } = params
+  const { scene, cameraViewer, renderer } = params
 
-    window.addEventListener(
-        "resize",
-        () => {
-            cameraViewer.onWindowResize()
-            renderer.setSize(window.innerWidth, window.innerHeight)
-        },
-        false
-    )
+  window.addEventListener(
+    "resize",
+    () => {
+      cameraViewer.onWindowResize()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    },
+    false,
+  )
 
-    // Add scroll wheel zoom for camera
-    window.addEventListener(
-        "wheel",
-        (e: WheelEvent) => {
-            e.preventDefault()
-            cameraViewer.onMouseWheel(e)
-        },
-        { passive: false }
-    )
+  // Add scroll wheel zoom for camera
+  window.addEventListener(
+    "wheel",
+    (e: WheelEvent) => {
+      e.preventDefault()
+      cameraViewer.onMouseWheel(e)
+    },
+    { passive: false },
+  )
 
-    window.addEventListener('keydown', (event) => {
-        const code = event.code as KeyBindingCode
-        ActiveKeys[code] = true
-    })
+  window.addEventListener("keydown", (event) => {
+    const code = event.code as KeyBindingCode
+    ActiveKeys[code] = true
+  })
 
-    window.addEventListener('keyup', (event) => {
-        const code = event.code as KeyBindingCode
-        ActiveKeys[code] = false
-    })
+  window.addEventListener("keyup", (event) => {
+    const code = event.code as KeyBindingCode
+    ActiveKeys[code] = false
+  })
 
-    renderer.domElement.addEventListener("mousemove", (event: MouseEvent) => {
-        // Implement mouse movement handling if needed
-        cameraViewer.onMouseMove(event)
-    })
+  renderer.domElement.addEventListener("mousemove", (event: MouseEvent) => {
+    // Implement mouse movement handling if needed
+    cameraViewer.onMouseMove(event)
+  })
 
-    // Mouse events
-    renderer.domElement.addEventListener('mousedown', (event) => {
-        renderer.domElement.requestPointerLock()
-        mouseHandler(event, true)
-    })
+  // Mouse events
+  renderer.domElement.addEventListener("mousedown", (event) => {
+    renderer.domElement.requestPointerLock()
+    mouseHandler(event, true)
+  })
 
-    window.addEventListener('mouseup', (event) => {
-        mouseHandler(event, false)
-        if (!ActiveKeys[KeyBindings.MOUSEDOWNLEFT] && !ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]) {
-            document.exitPointerLock()
-        }
-    })
+  window.addEventListener("mouseup", (event) => {
+    mouseHandler(event, false)
+    if (
+      !ActiveKeys[KeyBindings.MOUSEDOWNLEFT] &&
+      !ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
+    ) {
+      document.exitPointerLock()
+    }
+  })
 
-    // Pointer events catch Mac trackpad presses and other pointer devices
-    window.addEventListener('pointerdown', (event) => {
-        console.log('pointerdown', event)
-        mouseHandler(event as PointerEvent, true)
-    })
-    window.addEventListener('pointerup', (event) => {
-        mouseHandler(event as PointerEvent, false)
-    })
+  // Pointer events catch Mac trackpad presses and other pointer devices
+  window.addEventListener("pointerdown", (event) => {
+    console.log("pointerdown", event)
+    mouseHandler(event as PointerEvent, true)
+  })
+  window.addEventListener("pointerup", (event) => {
+    mouseHandler(event as PointerEvent, false)
+  })
+
+  window.addEventListener("keydown", (event) => {
+    keyUpHandler(event)
+  })
+
+  window.addEventListener("keyup", (event) => {
+    keyDownHandler(event)
+  })
 }

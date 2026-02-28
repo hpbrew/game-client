@@ -1,7 +1,8 @@
+import { ActiveKeys, KeyBindings } from "@/controllers/keys"
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
-type ActionName = 'idle' | 'run' | 'dance' | 'death' | 'walk' | 'attack'
+type ActionName = "idle" | "run" | "dance" | "death" | "walk" | "attack"
 
 export class Player extends THREE.Group {
   // Typed properties
@@ -22,6 +23,7 @@ export class Player extends THREE.Group {
     attack: THREE.AnimationAction | null
   }
   _activeActionName: ActionName
+  movementSpeed: number
 
   constructor() {
     super()
@@ -30,6 +32,7 @@ export class Player extends THREE.Group {
     this.canDoubleJump = false
     this.jumpVelocity = 0
     this.gravity = -0.01
+    this.movementSpeed = 0.1
     this.jumpHorizontal = { x: 0, z: 0 }
     this.movement = { x: 0, y: 0, z: 0 }
 
@@ -44,12 +47,13 @@ export class Player extends THREE.Group {
       walk: null,
       attack: null,
     }
-    this._activeActionName = 'idle'
+    this._activeActionName = "idle"
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
-    const url = `${import.meta.env.BASE_URL
-      }not_my_resources/characters/guard.glb`
+    const url = `${
+      import.meta.env.BASE_URL
+    }not_my_resources/characters/guard.glb`
     loader.load(
       url,
       (gltf) => {
@@ -82,7 +86,8 @@ export class Player extends THREE.Group {
         // Animation setup: create mixer and prepare idle/run actions
         if (gltf.animations && gltf.animations.length > 0) {
           this.mixer = new THREE.AnimationMixer(model)
-          const findClip = (re: RegExp) => gltf.animations.find((a) => re.test(a.name))
+          const findClip = (re: RegExp) =>
+            gltf.animations.find((a) => re.test(a.name))
 
           // prefer explicit names, fallback to sensible alternatives
           const idleClip =
@@ -121,11 +126,11 @@ export class Player extends THREE.Group {
       undefined,
       (err) => {
         console.error("Failed to load guard.glb:", err)
-      }
+      },
     )
   }
 
-  setMovement(axis: 'x' | 'y' | 'z', value: number) {
+  setMovement(axis: "x" | "y" | "z", value: number) {
     this.movement[axis] = value
   }
 
@@ -157,7 +162,7 @@ export class Player extends THREE.Group {
       const v = new THREE.Vector3(
         this.jumpHorizontal.x,
         this.jumpVelocity,
-        this.jumpHorizontal.z
+        this.jumpHorizontal.z,
       )
       this.position.addScaledVector(v, deltaSeconds)
       this.jumpVelocity += this.gravity * deltaSeconds
@@ -203,10 +208,8 @@ export class Player extends THREE.Group {
     const overlapValue = 0.01
 
     const terrainY =
-      terrainChunkManager?.getHeightAt(
-        this.position.x,
-        this.position.z
-      ) + overlapValue
+      terrainChunkManager?.getHeightAt(this.position.x, this.position.z) +
+      overlapValue
     if (!isNaN(terrainY)) this.position.setY(terrainY)
   }
 
