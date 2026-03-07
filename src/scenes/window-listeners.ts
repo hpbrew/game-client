@@ -1,13 +1,6 @@
 import { Camera, Scene } from "three"
 import { UseCameraType } from "./camera"
-import {
-  ActiveKeys,
-  KeyBindingCode,
-  KeyBindings,
-  keyDownHandler,
-  keyUpHandler,
-  mouseHandler,
-} from "../controllers/keys"
+import { useKeyMapper } from "../controllers/keys"
 import { WebGPURenderer } from "three/webgpu"
 
 export interface WindowListenerParams {
@@ -20,6 +13,9 @@ export const useWindowListeners = (params: WindowListenerParams) => {
   // Window listeners setup code goes here
 
   const { scene, cameraViewer, renderer } = params
+
+  const { getActions, keyDownHandler, keyUpHandler, mouseHandler } =
+    useKeyMapper()
 
   window.addEventListener(
     "resize",
@@ -41,13 +37,11 @@ export const useWindowListeners = (params: WindowListenerParams) => {
   )
 
   window.addEventListener("keydown", (event) => {
-    const code = event.code as KeyBindingCode
-    ActiveKeys[code] = true
+    keyDownHandler(event)
   })
 
   window.addEventListener("keyup", (event) => {
-    const code = event.code as KeyBindingCode
-    ActiveKeys[code] = false
+    keyUpHandler(event)
   })
 
   renderer.domElement.addEventListener("mousemove", (event: MouseEvent) => {
@@ -63,10 +57,9 @@ export const useWindowListeners = (params: WindowListenerParams) => {
 
   window.addEventListener("mouseup", (event) => {
     mouseHandler(event, false)
-    if (
-      !ActiveKeys[KeyBindings.MOUSEDOWNLEFT] &&
-      !ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
-    ) {
+
+    const activeKeys = getActions()
+    if (!activeKeys.mouseLeft && !activeKeys.mouseRight) {
       document.exitPointerLock()
     }
   })
@@ -76,6 +69,7 @@ export const useWindowListeners = (params: WindowListenerParams) => {
     console.log("pointerdown", event)
     mouseHandler(event as PointerEvent, true)
   })
+
   window.addEventListener("pointerup", (event) => {
     mouseHandler(event as PointerEvent, false)
   })

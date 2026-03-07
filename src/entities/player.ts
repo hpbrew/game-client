@@ -1,4 +1,3 @@
-import { ActiveKeys, KeyBindings } from "@/controllers/keys"
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
@@ -213,12 +212,7 @@ export class Player extends THREE.Group {
     if (!isNaN(terrainY)) this.position.setY(terrainY)
   }
 
-  update(deltaSeconds: number) {
-    // update animation mixer if present
-    if (this.mixer) {
-      this.mixer.update(deltaSeconds)
-    }
-
+  determineAnimationState() {
     // decide which animation to play:
     // when moving on x or y use "run", otherwise "idle"
     const moving =
@@ -232,5 +226,44 @@ export class Player extends THREE.Group {
     } else {
       this.setAction("idle")
     }
+  }
+
+  update(delta: number) {
+    // update animation mixer if present
+    if (this.mixer) {
+      this.mixer.update(delta)
+    }
+
+    this.onInputs(delta)
+
+    this.determineAnimationState()
+  }
+
+  onInputs(delta: number) {
+    // This can be used to trigger immediate reactions to input changes if needed
+    // if (
+    //   ActiveKeys[KeyBindings.MOUSEDOWNLEFT] &&
+    //   ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
+    // ) {
+    //   // instantly align the player with the camera and move forward
+    //   player.rotation.y = camera.orbit.azimuth
+    //   player.setMovement("z", player.movementSpeed)
+    // }
+    // const activeKeys = getActions()
+    // const moveX = input.right - input.left
+    // const moveZ = input.down - input.up
+    // if (moveX !== 0 || moveZ !== 0) {
+    //   const direction = new THREE.Vector3(moveX, 0, moveZ)
+    //     .normalize()
+    //     .multiplyScalar(speed * delta)
+    //   player.position.add(direction)
+    // }
+    // if (ActiveKeys[KeyBindings.MOVE_FORWARD]) {
+    //   player.setMovement("z", player.movementSpeed)
+    //   return
+    // } else if (ActiveKeys[KeyBindings.MOVE_BACKWARD]) {
+    //   player.setMovement("z", -player.movementSpeed)
+    //   return
+    // }
   }
 }

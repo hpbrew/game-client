@@ -1,24 +1,44 @@
 import { Player } from "@/entities/player"
 import { UseCameraType } from "./camera"
-import { ActiveKeys, KeyBindings } from "@/controllers/keys"
+// import { ActiveKeys, KeyBindings } from "@/controllers/keys"
+
+// remember whether the jump key was down on the previous frame so we
+// only trigger a jump once per press instead of every update tick
+let _prevJumpDown = false
 
 export const updateInputActions = (camera: UseCameraType, player: Player) => {
-  if (
-    !ActiveKeys[KeyBindings.MOUSEDOWNLEFT] ||
-    !ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
-  ) {
-    player.setMovement("z", 0)
-    return
-  }
-
-  if (
-    ActiveKeys[KeyBindings.MOUSEDOWNLEFT] &&
-    ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
-  ) {
-    // this.targetRotationY = this.orbit.azimuth
-    player.rotation.y = camera.orbit.azimuth // Instantly sync cube rotation with camera
-    player.setMovement("z", player.movementSpeed)
-  }
+  // --- jump handling ------------------------------------------------------
+  //   const jumpDown = !!ActiveKeys[KeyBindings.JUMP]
+  //   if (jumpDown && !_prevJumpDown) {
+  //     // rising edge: start a (possibly double) jump
+  //     player.startJump(player.rotation.y, player.movement)
+  //   }
+  //   _prevJumpDown = jumpDown
+  // --- forward/back movement driven by the two‑button mouse gesture ----------
+  //   if (
+  //     !ActiveKeys[KeyBindings.MOUSEDOWNLEFT] ||
+  //     !ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
+  //   ) {
+  //     player.setMovement("z", 0)
+  //     return
+  //   }
+  //   if (
+  //     ActiveKeys[KeyBindings.MOUSEDOWNLEFT] &&
+  //     ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]
+  //   ) {
+  //     // instantly align the player with the camera and move forward
+  //     player.rotation.y = camera.orbit.azimuth
+  //     player.setMovement("z", player.movementSpeed)
+  //     return
+  //   }
+  //   if (ActiveKeys[KeyBindings.MOVE_FORWARD]) {
+  //     player.setMovement("z", player.movementSpeed)
+  //     return
+  //   } else if (ActiveKeys[KeyBindings.MOVE_BACKWARD]) {
+  //     player.setMovement("z", -player.movementSpeed)
+  //     return
+  //   }
+  //   player.setMovement("z", 0)
 }
 
 /**
