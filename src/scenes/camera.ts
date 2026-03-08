@@ -1,5 +1,5 @@
-import { ActiveKeys, KeyBindings } from "../controllers/keys"
 import { PerspectiveCamera, Vector3 } from "three"
+
 export const useCamera = () => {
   // Camera scene setup code goes here
 
@@ -65,8 +65,9 @@ export const useCamera = () => {
     orbit.radius = Math.max(2, Math.min(30, orbit.radius)) // Clamp zoom
   }
 
-  function onMouseMove(event: MouseEvent) {
-    if (ActiveKeys[KeyBindings.MOUSEDOWNLEFT] !== true) return
+  function onMouseMove(event: MouseEvent, mouseLeft: boolean) {
+    if (mouseLeft !== true) return
+
     const rotateSpeed = 0.008
     orbit.azimuth -= event.movementX * rotateSpeed
     orbit.polar -= event.movementY * rotateSpeed

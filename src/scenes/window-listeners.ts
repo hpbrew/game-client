@@ -46,7 +46,7 @@ export const useWindowListeners = (params: WindowListenerParams) => {
 
   renderer.domElement.addEventListener("mousemove", (event: MouseEvent) => {
     // Implement mouse movement handling if needed
-    cameraViewer.onMouseMove(event)
+    cameraViewer.onMouseMove(event, getActions().mouseLeft)
   })
 
   // Mouse events
