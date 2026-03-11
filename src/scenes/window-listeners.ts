@@ -1,6 +1,6 @@
 import { Camera, Scene } from "three"
 import { UseCameraType } from "./camera"
-import { useKeyMapper } from "../controllers/keys"
+import { KeyMapperType, useKeyMapper } from "../controllers/keys"
 import { WebGPURenderer } from "three/webgpu"
 
 export interface WindowListenerParams {
@@ -9,13 +9,12 @@ export interface WindowListenerParams {
   renderer: WebGPURenderer
 }
 
-export const useWindowListeners = (params: WindowListenerParams) => {
+export const useWindowListeners = (params: WindowListenerParams, keyMapper: KeyMapperType) => {
   // Window listeners setup code goes here
 
   const { scene, cameraViewer, renderer } = params
 
-  const { getActions, keyDownHandler, keyUpHandler, mouseHandler } =
-    useKeyMapper()
+  const { getActions, keyDownHandler, keyUpHandler, mouseHandler } = keyMapper
 
   window.addEventListener(
     "resize",

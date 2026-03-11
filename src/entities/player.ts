@@ -1,3 +1,4 @@
+import { KeyMapperType } from "@/controllers/keys"
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
@@ -50,9 +51,8 @@ export class Player extends THREE.Group {
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
-    const url = `${
-      import.meta.env.BASE_URL
-    }not_my_resources/characters/guard.glb`
+    const url = `${import.meta.env.BASE_URL
+      }not_my_resources/characters/guard.glb`
     loader.load(
       url,
       (gltf) => {
@@ -228,19 +228,40 @@ export class Player extends THREE.Group {
     }
   }
 
-  update(delta: number) {
+  update(delta: number, keyMapper: KeyMapperType) {
     // update animation mixer if present
     if (this.mixer) {
       this.mixer.update(delta)
     }
 
-    this.onInputs(delta)
+    this.onInputs(delta, keyMapper)
 
     this.determineAnimationState()
   }
 
-  onInputs(delta: number) {
+  move(delta: number, x: number, z: number) {
+
+    const direction = new THREE.Vector3(x, 0, z);
+
+    if (direction.lengthSq() > 0) {
+      direction.normalize();
+    }
+
+    this.position.addScaledVector(direction, this.movementSpeed * delta);
+
+  }
+  onInputs(delta: number, keyMapper: KeyMapperType) {
     // This can be used to trigger immediate reactions to input changes if needed
+
+    const axis = keyMapper.getAxis()
+    // console.log(keyMapper.getActions())
+    this.move(delta, axis.x, axis.z)
+
+    // if () {
+    //   const angle = this.player.rotation.y
+    //   this.player.position.x += Math.sin(angle) * this.player.movement.z * 3 // Triple speed
+    //   this.player.position.z += Math.cos(angle) * this.player.movement.z * 3 // Triple speed
+    // }
     // if (
     //   ActiveKeys[KeyBindings.MOUSEDOWNLEFT] &&
     //   ActiveKeys[KeyBindings.MOUSEDOWNRIGHT]

@@ -60,6 +60,17 @@ export const useKeyMapper = () => {
     keyHandler(event, false)
   }
 
+  const actions = {
+    moveForward: () => isKeyActive(KeyBindings.MOVE_FORWARD),
+    moveBackward: () => isKeyActive(KeyBindings.MOVE_BACKWARD),
+    moveLeft: () => isKeyActive(KeyBindings.MOVE_LEFT),
+    moveRight: () => isKeyActive(KeyBindings.MOVE_RIGHT),
+    jump: () => isKeyActive(KeyBindings.JUMP),
+
+    mouseLeft: () => isKeyActive(KeyBindings.MOUSEDOWNLEFT),
+    mouseRight: () => isKeyActive(KeyBindings.MOUSEDOWNRIGHT)
+  }
+
   /**
    * Action Map for Device -> Game Meaning
    * @param input
@@ -67,21 +78,43 @@ export const useKeyMapper = () => {
    */
   function getActions() {
     return {
-      moveForward: isKeyActive(KeyBindings.MOVE_FORWARD),
-      moveBackward: isKeyActive(KeyBindings.MOVE_BACKWARD),
-      moveLeft: isKeyActive(KeyBindings.MOVE_LEFT),
-      moveRight: isKeyActive(KeyBindings.MOVE_RIGHT),
-      jump: isKeyActive(KeyBindings.JUMP),
+      moveForward: actions.moveForward(),
+      moveBackward: actions.moveBackward(),
+      moveLeft: actions.moveLeft(),
+      moveRight: actions.moveRight(),
+      jump: actions.jump(),
 
-      mouseLeft: isKeyActive(KeyBindings.MOUSEDOWNLEFT),
-      mouseRight: isKeyActive(KeyBindings.MOUSEDOWNRIGHT),
+      mouseLeft: actions.mouseLeft(),
+      mouseRight: actions.mouseRight(),
     }
+  }
+
+  /**
+   * Determine movement axis based on current active keys
+   * @returns {x: number, z: number}
+   */
+  function getAxis() {
+
+    let x = 0;
+    let z = 0;
+
+    if (actions.moveForward()) z -= 1;
+    if (actions.moveBackward()) z += 1;
+    if (actions.moveLeft()) x -= 1;
+    if (actions.moveRight()) x += 1;
+
+    return { x, z };
+
   }
 
   return {
     getActions,
+    getAxis,
+    actions,
     keyUpHandler,
     keyDownHandler,
     mouseHandler,
   }
 }
+
+export type KeyMapperType = ReturnType<typeof useKeyMapper>

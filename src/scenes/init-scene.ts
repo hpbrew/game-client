@@ -10,6 +10,7 @@ import { logger } from "@/shared/logger"
 //@ts-ignore-line
 import { TerrainChunkManager } from "../entities/terrain/terrain"
 import { updateInputActions } from "./input-actions"
+import { KeyMapperType } from "@/controllers/keys"
 
 interface UseSceneParams {
   renderer: WebGPURenderer
@@ -42,10 +43,10 @@ export const useScene = ({ renderer }: UseSceneParams) => {
   scene.add(lighting.directionalLight)
   scene.add(lighting.ambientLight)
 
-  function updateScene(delta: number, CameraViewer: UseCameraType) {
+  function updateScene(delta: number, CameraViewer: UseCameraType, keyMapper: KeyMapperType) {
     // Run Updates
     updateInputActions(CameraViewer, player)
-    player.update(delta)
+    player.update(delta, keyMapper)
     CameraViewer.updateCameraPosition(player.position)
 
     if (
