@@ -25,12 +25,10 @@ export const useKeyMapper = () => {
     } else if (event.button === 2) {
       ActiveKeys.set(KeyBindings.MOUSEDOWNRIGHT, state)
     }
-    console.log(`Mouse button ${event.button} is now ${state ? "down" : "up"}.`)
   }
 
   function keyHandler(event: KeyboardEvent, state: boolean) {
     const code = event.code as KeyBindingCode
-    console.log(`Key ${code} is now ${state ? "down" : "up"}.`)
     switch (code) {
       case KeyBindings.MOVE_FORWARD:
         ActiveKeys.set(KeyBindings.MOVE_FORWARD, state)
@@ -61,8 +59,8 @@ export const useKeyMapper = () => {
   }
 
   const actions = {
-    moveForward: () => isKeyActive(KeyBindings.MOVE_FORWARD),
-    moveBackward: () => isKeyActive(KeyBindings.MOVE_BACKWARD),
+    moveForward: () => isKeyActive(KeyBindings.MOVE_BACKWARD),
+    moveBackward: () => isKeyActive(KeyBindings.MOVE_FORWARD),
     moveLeft: () => isKeyActive(KeyBindings.MOVE_LEFT),
     moveRight: () => isKeyActive(KeyBindings.MOVE_RIGHT),
     jump: () => isKeyActive(KeyBindings.JUMP),
@@ -97,13 +95,14 @@ export const useKeyMapper = () => {
 
     let x = 0;
     let z = 0;
+    let y = 0;
 
     if (actions.moveForward()) z -= 1;
     if (actions.moveBackward()) z += 1;
     if (actions.moveLeft()) x -= 1;
     if (actions.moveRight()) x += 1;
 
-    return { x, z };
+    return { x, z, y };
 
   }
 

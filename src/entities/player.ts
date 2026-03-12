@@ -32,7 +32,7 @@ export class Player extends THREE.Group {
     this.canDoubleJump = false
     this.jumpVelocity = 0
     this.gravity = -0.01
-    this.movementSpeed = 0.1
+    this.movementSpeed = 5
     this.jumpHorizontal = { x: 0, z: 0 }
     this.movement = { x: 0, y: 0, z: 0 }
 
@@ -186,21 +186,27 @@ export class Player extends THREE.Group {
     const next = this.actions[name]
     if (!next) return
 
-    // fade out current
-    if (this._activeActionName && this.actions[this._activeActionName]) {
+    const previousName = this._activeActionName
+    const previousAction = previousName ? this.actions[previousName] : null
+
+    // fade out previous action (if different)
+    if (previousAction && previousAction !== next) {
       try {
-        this.actions[this._activeActionName]?.fadeOut(fadeDuration)
+        previousAction.fadeOut(fadeDuration)
       } catch (e) {
-        this.actions[this._activeActionName]?.stop &&
-          this.actions[this._activeActionName]?.stop()
+        previousAction.stop && previousAction.stop()
       }
     }
+
+    // mark new active action
+    this._activeActionName = name
 
     // fade in next
     next.reset()
     next.fadeIn(fadeDuration)
     next.play()
-    this._activeActionName = name
+
+    console.log(`Switched to action: ${name}`)
   }
 
   sampleTerrainHeight(terrainChunkManager: any) {
@@ -229,6 +235,7 @@ export class Player extends THREE.Group {
   }
 
   update(delta: number, keyMapper: KeyMapperType) {
+
     // update animation mixer if present
     if (this.mixer) {
       this.mixer.update(delta)
@@ -236,26 +243,46 @@ export class Player extends THREE.Group {
 
     this.onInputs(delta, keyMapper)
 
-    this.determineAnimationState()
+    // this.determineAnimationState()
   }
 
   move(delta: number, x: number, z: number) {
+
 
     const direction = new THREE.Vector3(x, 0, z);
 
     if (direction.lengthSq() > 0) {
       direction.normalize();
     }
-
+    console.log("Moving in direction:", direction)
+    console.log("Current position:", this.position)
     this.position.addScaledVector(direction, this.movementSpeed * delta);
+
+    // move the player in the direction they are facing
+    // const angle = this.rotation.y
+    // this.position.x += Math.sin(angle) * z * this.movementSpeed * delta
+    // this.position.z += Math.cos(angle) * z * this.movementSpeed * delta
+    // this.position.x += Math.sin(angle - Math.PI / 2) * x * this.movementSpeed * delta
+    // this.position.z += Math.cos(angle - Math.PI / 2) * x * this.movementSpeed * delta
 
   }
   onInputs(delta: number, keyMapper: KeyMapperType) {
     // This can be used to trigger immediate reactions to input changes if needed
 
     const axis = keyMapper.getAxis()
+
+    // If no movement input, skip processing
+    if (!axis.x && !axis.z && !axis.y) {
+      console.log("No movement input detected, skipping move and animation update.")
+      this.setAction("idle")
+      return
+    }
+
     // console.log(keyMapper.getActions())
+    this.setAction("run")
     this.move(delta, axis.x, axis.z)
+
+
 
     // if () {
     //   const angle = this.player.rotation.y
