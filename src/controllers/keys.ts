@@ -2,9 +2,24 @@ export const useKeyMapper = () => {
   const KeyBindings = {
     MOVE_FORWARD: "KeyW",
     MOVE_BACKWARD: "KeyS",
-    MOVE_LEFT: "KeyA",
-    MOVE_RIGHT: "KeyD",
+    STRAFE_LEFT: "KeyQ",
+    STRAFE_RIGHT: "KeyE",
+    TURN_LEFT: "KeyA",
+    TURN_RIGHT: "KeyD",
+
+    // MOVE_LEFT: "KeyA",
+    // MOVE_RIGHT: "KeyD",
+
+    MOVE_FORWARD2: "ArrowUp",
+    MOVE_BACKWARD2: "ArrowDown",
+    STRAFE_LEFT2: "Num1",
+    STRAFE_RIGHT2: "Num0",
+    TURN_LEFT2: "ArrowLeft",
+    TURN_RIGHT2: "ArrowRight",
+
     JUMP: "Space",
+
+    // Mouse Down Events
     MOUSEDOWNLEFT: "Mouse0", // Left mouse button
     MOUSEDOWNMIDDLE: "Mouse1", // Middle mouse button
     MOUSEDOWNRIGHT: "Mouse2", // Right mouse button
@@ -28,7 +43,8 @@ export const useKeyMapper = () => {
   }
 
   function keyHandler(event: KeyboardEvent, state: boolean) {
-    const code = event.code as KeyBindingCode
+    const code = event.code
+
     switch (code) {
       case KeyBindings.MOVE_FORWARD:
         ActiveKeys.set(KeyBindings.MOVE_FORWARD, state)
@@ -36,12 +52,38 @@ export const useKeyMapper = () => {
       case KeyBindings.MOVE_BACKWARD:
         ActiveKeys.set(KeyBindings.MOVE_BACKWARD, state)
         break
-      case KeyBindings.MOVE_LEFT:
-        ActiveKeys.set(KeyBindings.MOVE_LEFT, state)
+      case KeyBindings.STRAFE_LEFT:
+        ActiveKeys.set(KeyBindings.STRAFE_LEFT, state)
         break
-      case KeyBindings.MOVE_RIGHT:
-        ActiveKeys.set(KeyBindings.MOVE_RIGHT, state)
+      case KeyBindings.STRAFE_RIGHT:
+        ActiveKeys.set(KeyBindings.STRAFE_RIGHT, state)
         break
+      case KeyBindings.TURN_LEFT:
+        ActiveKeys.set(KeyBindings.TURN_LEFT, state)
+        break
+      case KeyBindings.TURN_RIGHT:
+        ActiveKeys.set(KeyBindings.TURN_RIGHT, state)
+        break
+
+      case KeyBindings.MOVE_FORWARD2:
+        ActiveKeys.set(KeyBindings.MOVE_FORWARD2, state)
+        break
+      case KeyBindings.MOVE_BACKWARD2:
+        ActiveKeys.set(KeyBindings.MOVE_BACKWARD2, state)
+        break
+      case KeyBindings.STRAFE_LEFT2:
+        ActiveKeys.set(KeyBindings.STRAFE_LEFT2, state)
+        break
+      case KeyBindings.STRAFE_RIGHT:
+        ActiveKeys.set(KeyBindings.STRAFE_RIGHT, state)
+        break
+      case KeyBindings.TURN_LEFT2:
+        ActiveKeys.set(KeyBindings.TURN_LEFT2, state)
+        break
+      case KeyBindings.TURN_RIGHT2:
+        ActiveKeys.set(KeyBindings.TURN_RIGHT2, state)
+        break
+
       case KeyBindings.JUMP:
         ActiveKeys.set(KeyBindings.JUMP, state)
         break
@@ -59,10 +101,12 @@ export const useKeyMapper = () => {
   }
 
   const actions = {
-    moveForward: () => isKeyActive(KeyBindings.MOVE_BACKWARD),
-    moveBackward: () => isKeyActive(KeyBindings.MOVE_FORWARD),
-    moveLeft: () => isKeyActive(KeyBindings.MOVE_LEFT),
-    moveRight: () => isKeyActive(KeyBindings.MOVE_RIGHT),
+    moveForward: () => isKeyActive(KeyBindings.MOVE_BACKWARD) || isKeyActive(KeyBindings.MOVE_BACKWARD2),
+    moveBackward: () => isKeyActive(KeyBindings.MOVE_FORWARD) || isKeyActive(KeyBindings.MOVE_FORWARD2),
+    strafeLeft: () => isKeyActive(KeyBindings.STRAFE_RIGHT) || isKeyActive(KeyBindings.STRAFE_RIGHT2),
+    strafeRight: () => isKeyActive(KeyBindings.STRAFE_LEFT) || isKeyActive(KeyBindings.STRAFE_LEFT2),
+    turnLeft: () => isKeyActive(KeyBindings.TURN_LEFT) || isKeyActive(KeyBindings.TURN_LEFT2),
+    turnRight: () => isKeyActive(KeyBindings.TURN_RIGHT) || isKeyActive(KeyBindings.TURN_RIGHT2),
     jump: () => isKeyActive(KeyBindings.JUMP),
 
     mouseLeft: () => isKeyActive(KeyBindings.MOUSEDOWNLEFT),
@@ -78,8 +122,8 @@ export const useKeyMapper = () => {
     return {
       moveForward: actions.moveForward(),
       moveBackward: actions.moveBackward(),
-      moveLeft: actions.moveLeft(),
-      moveRight: actions.moveRight(),
+      strafeLeft: actions.strafeLeft(),
+      strafeRight: actions.strafeRight(),
       jump: actions.jump(),
 
       mouseLeft: actions.mouseLeft(),
@@ -99,8 +143,8 @@ export const useKeyMapper = () => {
 
     if (actions.moveForward()) z -= 1;
     if (actions.moveBackward()) z += 1;
-    if (actions.moveLeft()) x -= 1;
-    if (actions.moveRight()) x += 1;
+    if (actions.strafeLeft()) x -= 1;
+    if (actions.strafeRight()) x += 1;
 
     return { x, z, y };
 
