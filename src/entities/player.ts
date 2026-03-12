@@ -24,6 +24,7 @@ export class Player extends THREE.Group {
   }
   _activeActionName: ActionName
   movementSpeed: number
+  turnSpeed: number
 
   constructor() {
     super()
@@ -33,6 +34,7 @@ export class Player extends THREE.Group {
     this.jumpVelocity = 0
     this.gravity = -0.01
     this.movementSpeed = 5
+    this.turnSpeed = 5
     this.jumpHorizontal = { x: 0, z: 0 }
     this.movement = { x: 0, y: 0, z: 0 }
 
@@ -249,15 +251,24 @@ export class Player extends THREE.Group {
   move(delta: number, x: number, z: number) {
 
 
-    const direction = new THREE.Vector3(x, 0, z);
+    const direction = new THREE.Vector3(x, 0, z)
 
-    if (direction.lengthSq() > 0) {
-      direction.normalize();
-    }
+    if (direction.lengthSq() === 0) return
+
+    direction.normalize()
     console.log("Moving in direction:", direction)
     console.log("Current position:", this.position)
-    this.position.addScaledVector(direction, this.movementSpeed * delta);
+    this.position.addScaledVector(direction, this.movementSpeed * delta)
 
+    // Determine target rotation
+    const targetAngle = Math.atan2(direction.x, direction.z);
+
+    // Smooth rotation
+    this.rotation.y = THREE.MathUtils.lerp(
+      this.rotation.y,
+      targetAngle,
+      this.turnSpeed * delta
+    );
     // move the player in the direction they are facing
     // const angle = this.rotation.y
     // this.position.x += Math.sin(angle) * z * this.movementSpeed * delta
