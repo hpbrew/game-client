@@ -53,8 +53,9 @@ export class Player extends THREE.Group {
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
-    const url = `${import.meta.env.BASE_URL
-      }not_my_resources/characters/guard.glb`
+    const url = `${
+      import.meta.env.BASE_URL
+    }not_my_resources/characters/guard.glb`
     loader.load(
       url,
       (gltf) => {
@@ -237,7 +238,6 @@ export class Player extends THREE.Group {
   }
 
   update(delta: number, keyMapper: KeyMapperType) {
-
     // update animation mixer if present
     if (this.mixer) {
       this.mixer.update(delta)
@@ -249,8 +249,6 @@ export class Player extends THREE.Group {
   }
 
   move(delta: number, x: number, z: number) {
-
-
     const direction = new THREE.Vector3(x, 0, z)
 
     if (direction.lengthSq() === 0) return
@@ -261,21 +259,20 @@ export class Player extends THREE.Group {
     this.position.addScaledVector(direction, this.movementSpeed * delta)
 
     // Determine target rotation
-    const targetAngle = Math.atan2(direction.x, direction.z);
+    const targetAngle = Math.atan2(direction.x, direction.z)
 
     // Smooth rotation
     this.rotation.y = THREE.MathUtils.lerp(
       this.rotation.y,
       targetAngle,
-      this.turnSpeed * delta
-    );
+      this.turnSpeed * delta,
+    )
     // move the player in the direction they are facing
     // const angle = this.rotation.y
     // this.position.x += Math.sin(angle) * z * this.movementSpeed * delta
     // this.position.z += Math.cos(angle) * z * this.movementSpeed * delta
     // this.position.x += Math.sin(angle - Math.PI / 2) * x * this.movementSpeed * delta
     // this.position.z += Math.cos(angle - Math.PI / 2) * x * this.movementSpeed * delta
-
   }
   onInputs(delta: number, keyMapper: KeyMapperType) {
     // This can be used to trigger immediate reactions to input changes if needed
@@ -284,7 +281,6 @@ export class Player extends THREE.Group {
 
     // If no movement input, skip processing
     if (!axis.x && !axis.z && !axis.y) {
-      console.log("No movement input detected, skipping move and animation update.")
       this.setAction("idle")
       return
     }
@@ -292,8 +288,6 @@ export class Player extends THREE.Group {
     // console.log(keyMapper.getActions())
     this.setAction("run")
     this.move(delta, axis.x, axis.z)
-
-
 
     // if () {
     //   const angle = this.player.rotation.y

@@ -74,8 +74,8 @@ export const useKeyMapper = () => {
       case KeyBindings.STRAFE_LEFT2:
         ActiveKeys.set(KeyBindings.STRAFE_LEFT2, state)
         break
-      case KeyBindings.STRAFE_RIGHT:
-        ActiveKeys.set(KeyBindings.STRAFE_RIGHT, state)
+      case KeyBindings.STRAFE_RIGHT2:
+        ActiveKeys.set(KeyBindings.STRAFE_RIGHT2, state)
         break
       case KeyBindings.TURN_LEFT2:
         ActiveKeys.set(KeyBindings.TURN_LEFT2, state)
@@ -101,16 +101,27 @@ export const useKeyMapper = () => {
   }
 
   const actions = {
-    moveForward: () => isKeyActive(KeyBindings.MOVE_BACKWARD) || isKeyActive(KeyBindings.MOVE_BACKWARD2),
-    moveBackward: () => isKeyActive(KeyBindings.MOVE_FORWARD) || isKeyActive(KeyBindings.MOVE_FORWARD2),
-    strafeLeft: () => isKeyActive(KeyBindings.STRAFE_RIGHT) || isKeyActive(KeyBindings.STRAFE_RIGHT2),
-    strafeRight: () => isKeyActive(KeyBindings.STRAFE_LEFT) || isKeyActive(KeyBindings.STRAFE_LEFT2),
-    turnLeft: () => isKeyActive(KeyBindings.TURN_LEFT) || isKeyActive(KeyBindings.TURN_LEFT2),
-    turnRight: () => isKeyActive(KeyBindings.TURN_RIGHT) || isKeyActive(KeyBindings.TURN_RIGHT2),
+    moveForward: () =>
+      isKeyActive(KeyBindings.MOVE_BACKWARD) ||
+      isKeyActive(KeyBindings.MOVE_BACKWARD2),
+    moveBackward: () =>
+      isKeyActive(KeyBindings.MOVE_FORWARD) ||
+      isKeyActive(KeyBindings.MOVE_FORWARD2),
+    strafeLeft: () =>
+      isKeyActive(KeyBindings.STRAFE_RIGHT) ||
+      isKeyActive(KeyBindings.STRAFE_RIGHT2),
+    strafeRight: () =>
+      isKeyActive(KeyBindings.STRAFE_LEFT) ||
+      isKeyActive(KeyBindings.STRAFE_LEFT2),
+    turnLeft: () =>
+      isKeyActive(KeyBindings.TURN_LEFT) || isKeyActive(KeyBindings.TURN_LEFT2),
+    turnRight: () =>
+      isKeyActive(KeyBindings.TURN_RIGHT) ||
+      isKeyActive(KeyBindings.TURN_RIGHT2),
     jump: () => isKeyActive(KeyBindings.JUMP),
 
     mouseLeft: () => isKeyActive(KeyBindings.MOUSEDOWNLEFT),
-    mouseRight: () => isKeyActive(KeyBindings.MOUSEDOWNRIGHT)
+    mouseRight: () => isKeyActive(KeyBindings.MOUSEDOWNRIGHT),
   }
 
   /**
@@ -136,18 +147,16 @@ export const useKeyMapper = () => {
    * @returns {x: number, z: number}
    */
   function getAxis() {
+    let x = 0
+    let z = 0
+    let y = 0
 
-    let x = 0;
-    let z = 0;
-    let y = 0;
+    if (actions.moveForward()) z -= 1
+    if (actions.moveBackward()) z += 1
+    if (actions.strafeLeft()) x -= 1
+    if (actions.strafeRight()) x += 1
 
-    if (actions.moveForward()) z -= 1;
-    if (actions.moveBackward()) z += 1;
-    if (actions.strafeLeft()) x -= 1;
-    if (actions.strafeRight()) x += 1;
-
-    return { x, z, y };
-
+    return { x, z, y }
   }
 
   return {

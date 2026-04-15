@@ -15,8 +15,8 @@ export function useScenery({
   const loader = new GLTFLoader()
   const sceneryObjects: THREE.Object3D[] = []
   const loadedPositions = new Set<string>()
-  const maxDistance = 100 // Adjust as needed
-  const numTrees = 100 // Number of trees to place
+  const maxDistance = 200 // Adjust as needed
+  const numTrees = 2000 // Number of trees to place
 
   // Generate random positions centered around player's initial position
   const positions: THREE.Vector3[] = []
