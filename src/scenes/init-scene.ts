@@ -1,4 +1,4 @@
-import { WebGPURenderer } from "three/webgpu"
+import { Vector3, WebGPURenderer } from "three/webgpu"
 import { Color, Scene } from "three"
 import { useGui } from "./gui"
 import { useBaseSkybox } from "./skybox"
@@ -58,7 +58,9 @@ export const useScene = ({ renderer }: UseSceneParams) => {
   ) {
     // Run Updates
     updateInputActions(CameraViewer, player)
-    player.update(delta, keyMapper)
+    player.update(delta, keyMapper, (vector3: Vector3) =>
+      terrainChunkManager.getHeightAt(vector3.x, vector3.z),
+    )
     CameraViewer.updateCameraPosition(player.position)
 
     updateScenery(delta)

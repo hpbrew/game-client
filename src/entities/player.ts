@@ -237,13 +237,24 @@ export class Player extends THREE.Group {
     }
   }
 
-  update(delta: number, keyMapper: KeyMapperType) {
+  update(
+    delta: number,
+    keyMapper: KeyMapperType,
+    positionHeightChecker: (position: THREE.Vector3) => number = (
+      position: THREE.Vector3,
+    ) => position.y,
+  ) {
     // update animation mixer if present
     if (this.mixer) {
       this.mixer.update(delta)
     }
 
     this.onInputs(delta, keyMapper)
+
+    const height = positionHeightChecker(this.position)
+
+    // set player to this terrain height unless they are above it (jumping)
+    this.position.y = height
 
     // this.determineAnimationState()
   }
@@ -267,6 +278,7 @@ export class Player extends THREE.Group {
       targetAngle,
       this.turnSpeed * delta,
     )
+
     // move the player in the direction they are facing
     // const angle = this.rotation.y
     // this.position.x += Math.sin(angle) * z * this.movementSpeed * delta
