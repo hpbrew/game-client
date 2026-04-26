@@ -153,8 +153,10 @@ export const useKeyMapper = () => {
 
     if (actions.moveForward()) z -= 1
     if (actions.moveBackward()) z += 1
-    if (actions.strafeLeft()) x -= 1
-    if (actions.strafeRight()) x += 1
+    if (actions.strafeLeft()) x += 1
+    if (actions.strafeRight()) x -= 1
+    if (actions.turnLeft()) y += 1
+    if (actions.turnRight()) y -= 1
 
     return { x, z, y }
   }

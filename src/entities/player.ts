@@ -53,9 +53,8 @@ export class Player extends THREE.Group {
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
-    const url = `${
-      import.meta.env.BASE_URL
-    }not_my_resources/characters/guard.glb`
+    const url = `${import.meta.env.BASE_URL
+      }not_my_resources/characters/guard.glb`
     loader.load(
       url,
       (gltf) => {
@@ -260,31 +259,28 @@ export class Player extends THREE.Group {
   }
 
   move(delta: number, x: number, z: number) {
-    const direction = new THREE.Vector3(x, 0, z)
+    // Move relative to the player's facing direction (rotation.y).
+    const angle = this.rotation.y
 
-    if (direction.lengthSq() === 0) return
-
-    direction.normalize()
-    console.log("Moving in direction:", direction)
-    console.log("Current position:", this.position)
-    this.position.addScaledVector(direction, this.movementSpeed * delta)
-
-    // Determine target rotation
-    const targetAngle = Math.atan2(direction.x, direction.z)
-
-    // Smooth rotation
-    this.rotation.y = THREE.MathUtils.lerp(
-      this.rotation.y,
-      targetAngle,
-      this.turnSpeed * delta,
+    const forward = new THREE.Vector3(
+      Math.sin(angle),
+      0,
+      Math.cos(angle),
+    )
+    const right = new THREE.Vector3(
+      Math.sin(angle - Math.PI / 2),
+      0,
+      Math.cos(angle - Math.PI / 2),
     )
 
-    // move the player in the direction they are facing
-    // const angle = this.rotation.y
-    // this.position.x += Math.sin(angle) * z * this.movementSpeed * delta
-    // this.position.z += Math.cos(angle) * z * this.movementSpeed * delta
-    // this.position.x += Math.sin(angle - Math.PI / 2) * x * this.movementSpeed * delta
-    // this.position.z += Math.cos(angle - Math.PI / 2) * x * this.movementSpeed * delta
+    const movement = new THREE.Vector3()
+    movement.addScaledVector(forward, z)
+    movement.addScaledVector(right, x)
+
+    if (movement.lengthSq() === 0) return
+
+    movement.normalize()
+    this.position.addScaledVector(movement, this.movementSpeed * delta)
   }
   onInputs(delta: number, keyMapper: KeyMapperType) {
     // This can be used to trigger immediate reactions to input changes if needed
@@ -295,6 +291,11 @@ export class Player extends THREE.Group {
     if (!axis.x && !axis.z && !axis.y) {
       this.setAction("idle")
       return
+    }
+
+    // Apply rotation from axis.y (turn left/right)
+    if (axis.y) {
+      this.rotation.y += axis.y * this.turnSpeed * delta
     }
 
     // console.log(keyMapper.getActions())
