@@ -1,4 +1,8 @@
-import { PerspectiveCamera, Vector3 } from "three"
+import { Euler, PerspectiveCamera, Vector3 } from "three"
+
+export interface UpdateCameraPositionOptions {
+  rotation?: Euler
+}
 
 export const useCamera = () => {
   // Camera scene setup code goes here
@@ -20,6 +24,8 @@ export const useCamera = () => {
     radius: 5, // distance from target
   }
 
+  let previousRotationY = 0
+
   // Offset to look slightly above the player
   const cameraTargetOffset = new Vector3(0, 1, 0)
 
@@ -28,7 +34,10 @@ export const useCamera = () => {
     camera.updateProjectionMatrix()
   }
 
-  function updateCameraPosition(targetPosition: Vector3) {
+  function updateCameraPosition(
+    targetPosition: Vector3,
+    options?: UpdateCameraPositionOptions,
+  ) {
     // Spherical to Cartesian conversion
     const { azimuth, polar, radius } = orbit
 
@@ -56,6 +65,13 @@ export const useCamera = () => {
 
     camera.position.set(x, y, z)
     camera.lookAt(target)
+
+    // If player rotation is provided, apply it to the camera orbit
+    if (options?.rotation) {
+      const rotationDelta = options.rotation.y - previousRotationY
+      orbit.azimuth += rotationDelta
+      previousRotationY = options.rotation.y
+    }
   }
 
   function onMouseWheel(event: WheelEvent) {

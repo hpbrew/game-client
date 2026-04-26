@@ -58,9 +58,18 @@ export const useScene = ({ renderer }: UseSceneParams) => {
   ) {
     // Run Updates
     updateInputActions(CameraViewer, player)
+
+    // Track player rotation before update
+    const previousRotationY = player.rotation.y
+
     player.update(delta, keyMapper, (vector3: Vector3) =>
       terrainChunkManager.getHeightAt(vector3.x, vector3.z),
     )
+
+    // Apply the same rotation delta to camera
+    const rotationDelta = player.rotation.y - previousRotationY
+    CameraViewer.orbit.azimuth += rotationDelta
+
     CameraViewer.updateCameraPosition(player.position)
 
     updateScenery(delta)

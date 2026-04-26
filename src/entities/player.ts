@@ -287,7 +287,7 @@ export class Player extends THREE.Group {
     // this.determineAnimationState()
   }
 
-  move(delta: number, x: number, z: number) {
+  move(delta: number, x: number, z: number, speedMultiplier: number = 1) {
     // Move relative to the player's facing direction (rotation.y).
     const angle = this.rotation.y
 
@@ -305,7 +305,10 @@ export class Player extends THREE.Group {
     if (movement.lengthSq() === 0) return
 
     movement.normalize()
-    this.position.addScaledVector(movement, this.movementSpeed * delta)
+    this.position.addScaledVector(
+      movement,
+      this.movementSpeed * speedMultiplier * delta,
+    )
   }
   onInputs(delta: number, keyMapper: KeyMapperType) {
     // This can be used to trigger immediate reactions to input changes if needed
@@ -330,6 +333,15 @@ export class Player extends THREE.Group {
       return
     }
 
+    // If backing up, use walk animation and reduced speed
+    const isBackingUp = axis.z < 0
+    if (isBackingUp) {
+      this.setAction("walk")
+      this.move(delta, axis.x, axis.z, 0.6) // 60% of normal movement speed
+      return
+    }
+
+    // Moving forward
     // console.log(keyMapper.getActions())
     this.setAction("run")
     this.move(delta, axis.x, axis.z)
