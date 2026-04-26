@@ -10,7 +10,6 @@ import { logger } from "@/shared/logger"
 //@ts-ignore-line
 import { TerrainChunkManager } from "../entities/terrain/terrain"
 
-import { updateInputActions } from "./input-actions"
 import { KeyMapperType } from "@/controllers/keys"
 import { useScenery } from "../entities/scenery/scenery"
 
@@ -57,20 +56,13 @@ export const useScene = ({ renderer }: UseSceneParams) => {
     keyMapper: KeyMapperType,
   ) {
     // Run Updates
-    updateInputActions(CameraViewer, player)
-
-    // Track player rotation before update
-    const previousRotationY = player.rotation.y
-
     player.update(delta, keyMapper, (vector3: Vector3) =>
       terrainChunkManager.getHeightAt(vector3.x, vector3.z),
     )
 
-    // Apply the same rotation delta to camera
-    const rotationDelta = player.rotation.y - previousRotationY
-    CameraViewer.orbit.azimuth += rotationDelta
-
-    CameraViewer.updateCameraPosition(player.position)
+    CameraViewer.updateCameraPosition(player.position, {
+      rotation: player.rotation,
+    })
 
     updateScenery(delta)
 
