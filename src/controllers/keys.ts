@@ -106,7 +106,9 @@ export const useKeyMapper = () => {
       isKeyActive(KeyBindings.MOVE_BACKWARD2),
     moveBackward: () =>
       isKeyActive(KeyBindings.MOVE_FORWARD) ||
-      isKeyActive(KeyBindings.MOVE_FORWARD2),
+      isKeyActive(KeyBindings.MOVE_FORWARD2) ||
+      (isKeyActive(KeyBindings.MOUSEDOWNLEFT) &&
+        isKeyActive(KeyBindings.MOUSEDOWNRIGHT)),
     strafeLeft: () =>
       isKeyActive(KeyBindings.STRAFE_RIGHT) ||
       isKeyActive(KeyBindings.STRAFE_RIGHT2),
