@@ -2,7 +2,15 @@ import { KeyMapperType } from "@/controllers/keys"
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
-type ActionName = "idle" | "run" | "dance" | "death" | "walk" | "attack"
+type ActionName =
+  | "idle"
+  | "run"
+  | "dance"
+  | "death"
+  | "walk"
+  | "attack"
+  | "turnLeft"
+  | "turnRight"
 
 export class Player extends THREE.Group {
   // Typed properties
@@ -21,6 +29,8 @@ export class Player extends THREE.Group {
     death: THREE.AnimationAction | null
     walk: THREE.AnimationAction | null
     attack: THREE.AnimationAction | null
+    turnLeft: THREE.AnimationAction | null
+    turnRight: THREE.AnimationAction | null
   }
   _activeActionName: ActionName
   movementSpeed: number
@@ -48,13 +58,16 @@ export class Player extends THREE.Group {
       death: null,
       walk: null,
       attack: null,
+      turnLeft: null,
+      turnRight: null,
     }
     this._activeActionName = "idle"
 
     // Load GLB model (guard.glb)
     const loader = new GLTFLoader()
-    const url = `${import.meta.env.BASE_URL
-      }not_my_resources/characters/guard.glb`
+    const url = `${
+      import.meta.env.BASE_URL
+    }not_my_resources/characters/guard.glb`
     loader.load(
       url,
       (gltf) => {
@@ -86,6 +99,12 @@ export class Player extends THREE.Group {
 
         // Animation setup: create mixer and prepare idle/run actions
         if (gltf.animations && gltf.animations.length > 0) {
+          // Log all available animations
+          console.log(
+            "Available animations:",
+            gltf.animations.map((a) => a.name),
+          )
+
           this.mixer = new THREE.AnimationMixer(model)
           const findClip = (re: RegExp) =>
             gltf.animations.find((a) => re.test(a.name))
@@ -99,6 +118,10 @@ export class Player extends THREE.Group {
           const deathClip = findClip(/death|die/i) || gltf.animations[0]
           const attackClip = findClip(/attack|hit/i) || gltf.animations[0]
           const walkClip = findClip(/walk/i) || gltf.animations[0]
+          const turnLeftClip =
+            findClip(/turn.*left|left.*turn/i) || gltf.animations[0]
+          const turnRightClip =
+            findClip(/turn.*right|right.*turn/i) || gltf.animations[0]
 
           this.actions.dance = danceClip
             ? this.mixer.clipAction(danceClip)
@@ -112,6 +135,12 @@ export class Player extends THREE.Group {
           this.actions.walk = walkClip ? this.mixer.clipAction(walkClip) : null
           this.actions.idle = idleClip ? this.mixer.clipAction(idleClip) : null
           this.actions.run = runClip ? this.mixer.clipAction(runClip) : null
+          this.actions.turnLeft = turnLeftClip
+            ? this.mixer.clipAction(turnLeftClip)
+            : null
+          this.actions.turnRight = turnRightClip
+            ? this.mixer.clipAction(turnRightClip)
+            : null
 
           // Ensure actions exist and are looped
           if (this.actions.idle) {
@@ -262,11 +291,7 @@ export class Player extends THREE.Group {
     // Move relative to the player's facing direction (rotation.y).
     const angle = this.rotation.y
 
-    const forward = new THREE.Vector3(
-      Math.sin(angle),
-      0,
-      Math.cos(angle),
-    )
+    const forward = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle))
     const right = new THREE.Vector3(
       Math.sin(angle - Math.PI / 2),
       0,
@@ -296,6 +321,13 @@ export class Player extends THREE.Group {
     // Apply rotation from axis.y (turn left/right)
     if (axis.y) {
       this.rotation.y += axis.y * this.turnSpeed * delta
+    }
+
+    // If only rotating (no forward/backward or left/right movement)
+    const isMoving = axis.x !== 0 || axis.z !== 0
+    if (!isMoving && axis.y) {
+      this.setAction(axis.y > 0 ? "turnRight" : "turnLeft")
+      return
     }
 
     // console.log(keyMapper.getActions())
