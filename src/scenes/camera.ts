@@ -81,8 +81,12 @@ export const useCamera = () => {
     orbit.radius = Math.max(2, Math.min(30, orbit.radius)) // Clamp zoom
   }
 
-  function onMouseMove(event: MouseEvent, mouseLeft: boolean) {
-    if (mouseLeft !== true) return
+  function onMouseMove(
+    event: MouseEvent,
+    mouseLeft: boolean,
+    mouseRight: boolean,
+  ) {
+    if (mouseLeft === false && mouseRight === false) return
 
     const rotateSpeed = 0.008
     orbit.azimuth -= event.movementX * rotateSpeed

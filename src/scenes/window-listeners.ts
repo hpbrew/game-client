@@ -9,7 +9,10 @@ export interface WindowListenerParams {
   renderer: WebGPURenderer
 }
 
-export const useWindowListeners = (params: WindowListenerParams, keyMapper: KeyMapperType) => {
+export const useWindowListeners = (
+  params: WindowListenerParams,
+  keyMapper: KeyMapperType,
+) => {
   // Window listeners setup code goes here
 
   const { scene, cameraViewer, renderer } = params
@@ -45,7 +48,8 @@ export const useWindowListeners = (params: WindowListenerParams, keyMapper: KeyM
 
   renderer.domElement.addEventListener("mousemove", (event: MouseEvent) => {
     // Implement mouse movement handling if needed
-    cameraViewer.onMouseMove(event, getActions().mouseLeft)
+    const actions = getActions()
+    cameraViewer.onMouseMove(event, actions.mouseLeft, actions.mouseRight)
   })
 
   // Mouse events
