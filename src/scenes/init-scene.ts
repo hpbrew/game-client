@@ -56,8 +56,12 @@ export const useScene = ({ renderer }: UseSceneParams) => {
     keyMapper: KeyMapperType,
   ) {
     // Run Updates
-    player.update(delta, keyMapper, (vector3: Vector3) =>
-      terrainChunkManager.getHeightAt(vector3.x, vector3.z),
+    player.update(
+      delta,
+      keyMapper,
+      (vector3: Vector3) =>
+        terrainChunkManager.getHeightAt(vector3.x, vector3.z),
+      CameraViewer.orbit.azimuth,
     )
 
     CameraViewer.updateCameraPosition(player.position, {

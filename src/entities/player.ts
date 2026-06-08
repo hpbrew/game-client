@@ -271,13 +271,14 @@ export class Player extends THREE.Group {
     positionHeightChecker: (position: THREE.Vector3) => number = (
       position: THREE.Vector3,
     ) => position.y,
+    cameraAzimuth?: number,
   ) {
     // update animation mixer if present
     if (this.mixer) {
       this.mixer.update(delta)
     }
 
-    this.onInputs(delta, keyMapper)
+    this.onInputs(delta, keyMapper, cameraAzimuth)
 
     const height = positionHeightChecker(this.position)
 
@@ -287,9 +288,13 @@ export class Player extends THREE.Group {
     // this.determineAnimationState()
   }
 
-  move(delta: number, x: number, z: number, speedMultiplier: number = 1) {
-    // Move relative to the player's facing direction (rotation.y).
-    const angle = this.rotation.y
+  move(
+    delta: number,
+    x: number,
+    z: number,
+    options: { angle?: number; speedMultiplier?: number } = {},
+  ) {
+    const { angle = 0, speedMultiplier = 1 } = options
 
     const forward = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle))
     const right = new THREE.Vector3(
@@ -310,10 +315,24 @@ export class Player extends THREE.Group {
       this.movementSpeed * speedMultiplier * delta,
     )
   }
-  onInputs(delta: number, keyMapper: KeyMapperType) {
+  onInputs(delta: number, keyMapper: KeyMapperType, cameraAzimuth?: number) {
     // This can be used to trigger immediate reactions to input changes if needed
 
-    const axis = keyMapper.getAxis()
+    const axis = keyMapper.getAxis(cameraAzimuth)
+    const actions = keyMapper.getActions()
+
+    // If both mouse buttons are down, point away from camera and run
+    if (
+      actions.mouseLeft &&
+      actions.mouseRight &&
+      cameraAzimuth !== undefined
+    ) {
+      // Immediately align the player with the camera and move forward
+      this.setAction("run")
+      this.rotation.y = cameraAzimuth
+      this.move(delta, axis.x, axis.z)
+      return
+    }
 
     // If no movement input, skip processing
     if (!axis.x && !axis.z && !axis.y) {
@@ -321,15 +340,17 @@ export class Player extends THREE.Group {
       return
     }
 
-    // Apply rotation from axis.y (turn left/right)
-    if (axis.y) {
+    if (axis.y !== 0) {
+      console.log("Turn input detected:", axis.y)
       this.rotation.y += axis.y * this.turnSpeed * delta
     }
 
     // If only rotating (no forward/backward or left/right movement)
     const isMoving = axis.x !== 0 || axis.z !== 0
+    console.log("Axis input:", axis, "Is moving:", isMoving)
     if (!isMoving && axis.y) {
       this.setAction(axis.y > 0 ? "turnRight" : "turnLeft")
+      this.move(delta, 0, 0, { angle: this.rotation.y }) // Rotate in place
       return
     }
 
@@ -337,14 +358,17 @@ export class Player extends THREE.Group {
     const isBackingUp = axis.z < 0
     if (isBackingUp) {
       this.setAction("walk")
-      this.move(delta, axis.x, axis.z, 0.6) // 60% of normal movement speed
+      this.move(delta, axis.x, axis.z, {
+        angle: this.rotation.y,
+        speedMultiplier: 0.6,
+      }) // 60% of normal movement speed
       return
     }
 
     // Moving forward
     // console.log(keyMapper.getActions())
     this.setAction("run")
-    this.move(delta, axis.x, axis.z)
+    this.move(delta, axis.x, axis.z, { angle: this.rotation.y })
 
     // if () {
     //   const angle = this.player.rotation.y

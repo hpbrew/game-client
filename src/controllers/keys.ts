@@ -106,9 +106,7 @@ export const useKeyMapper = () => {
       isKeyActive(KeyBindings.MOVE_BACKWARD2),
     moveBackward: () =>
       isKeyActive(KeyBindings.MOVE_FORWARD) ||
-      isKeyActive(KeyBindings.MOVE_FORWARD2) ||
-      (isKeyActive(KeyBindings.MOUSEDOWNLEFT) &&
-        isKeyActive(KeyBindings.MOUSEDOWNRIGHT)),
+      isKeyActive(KeyBindings.MOVE_FORWARD2),
     strafeLeft: () =>
       isKeyActive(KeyBindings.STRAFE_RIGHT) ||
       isKeyActive(KeyBindings.STRAFE_RIGHT2),
@@ -146,12 +144,27 @@ export const useKeyMapper = () => {
 
   /**
    * Determine movement axis based on current active keys
+   * @param cameraAzimuth - Optional camera azimuth for mouse button movement
    * @returns {x: number, z: number}
    */
-  function getAxis() {
+  function getAxis(cameraAzimuth?: number) {
     let x = 0
     let z = 0
     let y = 0
+
+    // If both mouse buttons are down, move in camera direction
+    if (
+      actions.mouseLeft() &&
+      actions.mouseRight() &&
+      cameraAzimuth !== undefined
+    ) {
+      // Add Math.PI to face the direction the camera is looking (opposite of camera position)
+      const lookDirection = cameraAzimuth
+      x = Math.sin(lookDirection) * -1 // Invert x to move in the direction the camera is looking
+      z = Math.cos(lookDirection)
+
+      return { x, z, y: lookDirection }
+    }
 
     if (actions.moveForward()) z -= 1
     if (actions.moveBackward()) z += 1
