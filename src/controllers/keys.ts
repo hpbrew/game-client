@@ -93,11 +93,11 @@ export const useKeyMapper = () => {
   }
 
   function keyUpHandler(event: KeyboardEvent) {
-    keyHandler(event, true)
+    keyHandler(event, false)
   }
 
   function keyDownHandler(event: KeyboardEvent) {
-    keyHandler(event, false)
+    keyHandler(event, true)
   }
 
   const actions = {

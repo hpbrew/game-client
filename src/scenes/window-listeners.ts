@@ -76,12 +76,4 @@ export const useWindowListeners = (
   window.addEventListener("pointerup", (event) => {
     mouseHandler(event as PointerEvent, false)
   })
-
-  window.addEventListener("keydown", (event) => {
-    keyUpHandler(event)
-  })
-
-  window.addEventListener("keyup", (event) => {
-    keyDownHandler(event)
-  })
 }

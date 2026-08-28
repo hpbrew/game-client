@@ -35,6 +35,7 @@ export class Player extends THREE.Group {
   _activeActionName: ActionName
   movementSpeed: number
   turnSpeed: number
+  jumpWasPressed: boolean
 
   constructor() {
     super()
@@ -42,9 +43,10 @@ export class Player extends THREE.Group {
     this.isJumping = false
     this.canDoubleJump = false
     this.jumpVelocity = 0
-    this.gravity = -0.01
+    this.gravity = -15
     this.movementSpeed = 5
     this.turnSpeed = 5
+    this.jumpWasPressed = false
     this.jumpHorizontal = { x: 0, z: 0 }
     this.movement = { x: 0, y: 0, z: 0 }
 
@@ -168,7 +170,7 @@ export class Player extends THREE.Group {
     if (!this.isJumping) {
       this.isJumping = true
       this.canDoubleJump = true
-      this.jumpVelocity = 0.2
+      this.jumpVelocity = 5
       this.jumpHorizontal.x =
         Math.sin(angle) * movement.z +
         Math.sin(angle - Math.PI / 2) * movement.x
@@ -176,7 +178,7 @@ export class Player extends THREE.Group {
         Math.cos(angle) * movement.z +
         Math.cos(angle - Math.PI / 2) * movement.x
     } else if (this.canDoubleJump) {
-      this.jumpVelocity = 0.2
+      this.jumpVelocity = 5
       this.jumpHorizontal.x =
         Math.sin(angle) * movement.z +
         Math.sin(angle - Math.PI / 2) * movement.x
@@ -282,8 +284,16 @@ export class Player extends THREE.Group {
 
     const height = positionHeightChecker(this.position)
 
-    // set player to this terrain height unless they are above it (jumping)
-    this.position.y = height
+    this.applyJump(delta)
+
+    if (this.isJumping) {
+      if (this.position.y <= height) {
+        this.position.y = height
+        this.resetJump()
+      }
+    } else {
+      this.position.y = height
+    }
 
     // this.determineAnimationState()
   }
@@ -320,6 +330,11 @@ export class Player extends THREE.Group {
 
     const axis = keyMapper.getAxis(cameraAzimuth)
     const actions = keyMapper.getActions()
+
+    if (actions.jump && !this.jumpWasPressed) {
+      this.startJump(this.rotation.y, axis)
+    }
+    this.jumpWasPressed = actions.jump
 
     // If both mouse buttons are down, point away from camera and run
     if (
