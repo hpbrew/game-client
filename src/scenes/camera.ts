@@ -2,6 +2,7 @@ import { Euler, PerspectiveCamera, Vector3 } from "three"
 
 export interface UpdateCameraPositionOptions {
   rotation?: Euler
+  syncRotation?: boolean
 }
 
 export const useCamera = () => {
@@ -67,12 +68,13 @@ export const useCamera = () => {
     camera.lookAt(target)
 
     // If player rotation is provided, apply it to the camera orbit
-    // if (options?.rotation) {
-    //   console.log("camera rotation", options.rotation.y)
-    //   const rotationDelta = options.rotation.y - previousRotationY
-    //   orbit.azimuth += rotationDelta
-    //   previousRotationY = options.rotation.y
-    // }
+    if (options?.rotation) {
+      const rotationDelta = options.rotation.y - previousRotationY
+      if (options.syncRotation !== false) {
+        orbit.azimuth += rotationDelta
+      }
+      previousRotationY = options.rotation.y
+    }
   }
 
   function onMouseWheel(event: WheelEvent) {

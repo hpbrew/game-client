@@ -55,6 +55,9 @@ export const useScene = ({ renderer }: UseSceneParams) => {
     CameraViewer: UseCameraType,
     keyMapper: KeyMapperType,
   ) {
+    const actions = keyMapper.getActions()
+    const axis = keyMapper.getAxis(CameraViewer.orbit.azimuth)
+
     // Run Updates
     player.update(
       delta,
@@ -66,6 +69,7 @@ export const useScene = ({ renderer }: UseSceneParams) => {
 
     CameraViewer.updateCameraPosition(player.position, {
       rotation: player.rotation,
+      syncRotation: !(actions.mouseLeft && actions.mouseRight),
     })
 
     updateScenery(delta)
