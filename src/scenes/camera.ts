@@ -89,7 +89,8 @@ export const useCamera = () => {
     mouseLeft: boolean,
     mouseRight: boolean,
   ) {
-    if (mouseLeft === false && mouseRight === false) return
+    // Either mouse button or both buttons orbit the camera.
+    if (!mouseLeft && !mouseRight) return
 
     const rotateSpeed = 0.008
     orbit.azimuth -= event.movementX * rotateSpeed

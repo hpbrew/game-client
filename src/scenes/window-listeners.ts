@@ -58,6 +58,10 @@ export const useWindowListeners = (
     mouseHandler(event, true)
   })
 
+  renderer.domElement.addEventListener("contextmenu", (event) => {
+    event.preventDefault()
+  })
+
   window.addEventListener("mouseup", (event) => {
     mouseHandler(event, false)
 
