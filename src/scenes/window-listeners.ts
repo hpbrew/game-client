@@ -1,12 +1,11 @@
-import { Camera, Scene } from "three"
+import { Camera, Scene, WebGLRenderer } from "three"
 import { UseCameraType } from "./camera"
 import { KeyMapperType, useKeyMapper } from "../controllers/keys"
-import { WebGPURenderer } from "three/webgpu"
 
 export interface WindowListenerParams {
   scene: Scene
   cameraViewer: UseCameraType
-  renderer: WebGPURenderer
+  renderer: WebGLRenderer
 }
 
 export const useWindowListeners = (

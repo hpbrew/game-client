@@ -1,20 +1,17 @@
 // This file initializes the Three.js scene, camera, and renderer, and starts the animation loop.
 // import Scene from "./scenes/scene"
-import { useWebGPURenderer } from './scenes/renderer'
-import { useCamera } from './scenes/camera'
-import { useWindowListeners, type WindowListenerParams } from './scenes/window-listeners'
-import { useScene } from './scenes/init-scene'
-import { useKeyMapper } from './controllers/keys'
+import { useWebGPURenderer } from "./scenes/renderer"
+import { useCamera } from "./scenes/camera"
+import {
+  useWindowListeners,
+  type WindowListenerParams,
+} from "./scenes/window-listeners"
+import { useScene } from "./scenes/init-scene"
+import { useKeyMapper } from "./controllers/keys"
 
 export async function init() {
   // Initialize renderer
   const rendererCreated = await useWebGPURenderer()
-
-  if (!rendererCreated) {
-    console.error("Failed to initialize renderer.")
-    alert("WebGPU not supported, WebGPU is required for this game")
-    return
-  }
 
   const { renderer } = rendererCreated
 
@@ -24,20 +21,18 @@ export async function init() {
 
   // Initialize scene
   const { scene, updateScene } = useScene({
-    renderer
+    renderer,
   })
-
 
   // Setup window listeners
   const listenerParams: WindowListenerParams = {
     scene,
     cameraViewer: CameraViewer,
-    renderer
+    renderer,
   }
 
   const keyMapper = useKeyMapper()
   useWindowListeners(listenerParams, keyMapper)
-
 
   // Animation loop
   let lastTime = performance.now()
@@ -53,5 +48,3 @@ export async function init() {
   }
   animate()
 }
-
-

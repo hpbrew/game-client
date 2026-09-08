@@ -1,5 +1,5 @@
-import { Vector3, WebGPURenderer } from "three/webgpu"
-import { Color, Scene } from "three"
+import { Vector3 } from "three"
+import { Color, Scene, WebGLRenderer } from "three"
 import { useGui } from "./gui"
 import { useBaseSkybox } from "./skybox"
 import { Player } from "../entities/player"
@@ -14,7 +14,7 @@ import { KeyMapperType } from "@/controllers/keys"
 import { useScenery } from "../entities/scenery/scenery"
 
 interface UseSceneParams {
-  renderer: WebGPURenderer
+  renderer: WebGLRenderer
 }
 
 export const useScene = ({ renderer }: UseSceneParams) => {

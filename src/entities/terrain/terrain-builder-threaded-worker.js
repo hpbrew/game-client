@@ -104,13 +104,13 @@ class _TerrainBuilderThreadedWorker {
       for (let j = 0; j < resolution; j++) {
         indices.push(
           i * (resolution + 1) + j,
-          (i + 1) * (resolution + 1) + j + 1,
           i * (resolution + 1) + j + 1,
+          (i + 1) * (resolution + 1) + j + 1,
         )
         indices.push(
           (i + 1) * (resolution + 1) + j,
-          (i + 1) * (resolution + 1) + j + 1,
           i * (resolution + 1) + j,
+          (i + 1) * (resolution + 1) + j + 1,
         )
       }
     }

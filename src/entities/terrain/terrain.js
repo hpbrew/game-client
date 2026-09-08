@@ -20,6 +20,7 @@ import { terrain_constants } from "@/shared/terrain-constants"
 import { HeightGenerator } from "@/shared/terrain-height"
 import { NoiseGenerator } from "@/shared/noise"
 import { terrain_builder_threaded } from "./terrain-builder-threaded.js"
+import { createTerrainMaterial } from "./terrain-material.js"
 
 export class TerrainChunkManager {
   constructor(params) {
@@ -65,11 +66,7 @@ export class TerrainChunkManager {
     //   "not_my_resources/terrain/bark1-normal3.jpg",
     // ])
 
-    this._material = new MeshStandardMaterial({
-      side: BackSide,
-      vertexColors: true,
-      wireframe: false,
-    })
+    this._material = createTerrainMaterial(loader, noiseTexture)
     // this._material.wireframe = false
     // this._material.onBeforeCompile = (s) => {
     //   let a = 0
@@ -180,16 +177,7 @@ export class TerrainChunkManager {
 
     const terrainRollup = params.gui.addFolder("Terrain")
     terrainRollup.add(params.guiParams.terrain, "wireframe").onChange(() => {
-      console.log(params.guiParams.terrain.wireframe)
       this._material.wireframe = params.guiParams.terrain.wireframe
-      if (!this._chunks) return
-      for (let k in this._chunks) {
-        this._chunks[k].chunk._plane.material = new MeshStandardMaterial({
-          side: BackSide,
-          vertexColors: true,
-          wireframe: params.guiParams.terrain.wireframe,
-        })
-      }
     })
 
     const onNoiseChanged = () => {
