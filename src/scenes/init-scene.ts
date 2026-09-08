@@ -69,7 +69,10 @@ export const useScene = ({ renderer }: UseSceneParams) => {
 
     CameraViewer.updateCameraPosition(player.position, {
       rotation: player.rotation,
-      syncRotation: !(actions.mouseLeft && actions.mouseRight),
+      syncRotation: !(
+        (actions.mouseLeft && actions.mouseRight) ||
+        (actions.autoRun && actions.mouseRight)
+      ),
     })
 
     updateScenery(delta)

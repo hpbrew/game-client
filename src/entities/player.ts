@@ -336,12 +336,13 @@ export class Player extends THREE.Group {
     }
     this.jumpWasPressed = actions.jump
 
-    // If both mouse buttons are down, point away from camera and run
-    if (
-      actions.mouseLeft &&
-      actions.mouseRight &&
-      cameraAzimuth !== undefined
-    ) {
+    const followCameraWhileMoving =
+      cameraAzimuth !== undefined &&
+      ((actions.mouseLeft && actions.mouseRight) ||
+        (actions.autoRun && actions.mouseRight))
+
+    // While moving with the right mouse button, face the camera direction.
+    if (followCameraWhileMoving) {
       // Immediately align the player with the camera and move forward
       this.setAction("run")
       this.rotation.y = cameraAzimuth

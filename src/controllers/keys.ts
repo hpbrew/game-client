@@ -28,6 +28,8 @@ export const useKeyMapper = () => {
   type KeyBindingCode = (typeof KeyBindings)[keyof typeof KeyBindings]
 
   const ActiveKeys: Map<KeyBindingCode, boolean> = new Map()
+  let autoRun = false
+
   function isKeyActive(key: KeyBindingCode): boolean {
     return ActiveKeys.get(key) || false
   }
@@ -36,6 +38,9 @@ export const useKeyMapper = () => {
     if (event.button === 0) {
       ActiveKeys.set(KeyBindings.MOUSEDOWNLEFT, state)
     } else if (event.button === 1) {
+      if (state && !isKeyActive(KeyBindings.MOUSEDOWNMIDDLE)) {
+        autoRun = !autoRun
+      }
       ActiveKeys.set(KeyBindings.MOUSEDOWNMIDDLE, state)
     } else if (event.button === 2) {
       ActiveKeys.set(KeyBindings.MOUSEDOWNRIGHT, state)
@@ -119,6 +124,7 @@ export const useKeyMapper = () => {
       isKeyActive(KeyBindings.TURN_RIGHT) ||
       isKeyActive(KeyBindings.TURN_RIGHT2),
     jump: () => isKeyActive(KeyBindings.JUMP),
+    autoRun: () => autoRun,
 
     mouseLeft: () => isKeyActive(KeyBindings.MOUSEDOWNLEFT),
     mouseRight: () => isKeyActive(KeyBindings.MOUSEDOWNRIGHT),
@@ -136,6 +142,7 @@ export const useKeyMapper = () => {
       strafeLeft: actions.strafeLeft(),
       strafeRight: actions.strafeRight(),
       jump: actions.jump(),
+      autoRun: actions.autoRun(),
 
       mouseLeft: actions.mouseLeft(),
       mouseRight: actions.mouseRight(),
@@ -152,12 +159,21 @@ export const useKeyMapper = () => {
     let z = 0
     let y = 0
 
+    const forwardPressed = actions.moveForward()
+    const backwardPressed = actions.moveBackward()
+
+    if (autoRun && (forwardPressed || backwardPressed)) {
+      autoRun = false
+    }
+
     // If both mouse buttons are down, move in camera direction
     if (
       actions.mouseLeft() &&
       actions.mouseRight() &&
       cameraAzimuth !== undefined
     ) {
+      autoRun = false
+
       // Add Math.PI to face the direction the camera is looking (opposite of camera position)
       const lookDirection = cameraAzimuth
       x = Math.sin(lookDirection) * -1 // Invert x to move in the direction the camera is looking
@@ -166,8 +182,10 @@ export const useKeyMapper = () => {
       return { x, z, y: lookDirection }
     }
 
-    if (actions.moveForward()) z -= 1
-    if (actions.moveBackward()) z += 1
+    if (autoRun) z += 1
+
+    if (forwardPressed) z -= 1
+    if (backwardPressed) z += 1
     if (actions.strafeLeft()) x += 1
     if (actions.strafeRight()) x -= 1
     if (actions.turnLeft()) y += 1
