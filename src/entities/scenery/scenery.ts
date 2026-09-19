@@ -1,6 +1,16 @@
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
+export interface SceneryCollisionRadii {
+  player: number
+  tree: number
+}
+
+export const sceneryCollisionRadii: SceneryCollisionRadii = {
+  player: 0.75,
+  tree: 1.25,
+}
+
 interface SceneryParams {
   scene: THREE.Scene
   terrainChunkManager: any // TODO: type properly
@@ -86,5 +96,36 @@ export function useScenery({
     })
   }
 
-  return { update }
+  function resolvePlayerCollision(
+    position: THREE.Vector3,
+    radii: SceneryCollisionRadii = sceneryCollisionRadii,
+  ) {
+    const collisionDistance = radii.player + radii.tree
+
+    // Resolve more than one tree so the player cannot get stuck between trunks.
+    for (let pass = 0; pass < 3; pass++) {
+      sceneryObjects.forEach((sceneryObject) => {
+        const offsetX = position.x - sceneryObject.position.x
+        const offsetZ = position.z - sceneryObject.position.z
+        const distanceSquared = offsetX * offsetX + offsetZ * offsetZ
+
+        if (distanceSquared >= collisionDistance * collisionDistance) return
+
+        if (distanceSquared === 0) {
+          position.x += collisionDistance
+          return
+        }
+
+        const distance = Math.sqrt(distanceSquared)
+        const pushDistance = collisionDistance - distance
+        position.x += (offsetX / distance) * pushDistance
+        position.z += (offsetZ / distance) * pushDistance
+      })
+    }
+  }
+
+  return {
+    update,
+    resolvePlayerCollision,
+  }
 }

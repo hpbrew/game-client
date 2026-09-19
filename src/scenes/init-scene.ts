@@ -40,7 +40,7 @@ export const useScene = ({ renderer }: UseSceneParams) => {
 
   player.sampleTerrainHeight(terrainChunkManager)
 
-  const { update: updateScenery } = useScenery({
+  const { update: updateScenery, resolvePlayerCollision } = useScenery({
     scene,
     terrainChunkManager,
     player,
@@ -76,6 +76,7 @@ export const useScene = ({ renderer }: UseSceneParams) => {
     })
 
     updateScenery(delta)
+    resolvePlayerCollision(player.position)
 
     if (
       terrainChunkManager &&
