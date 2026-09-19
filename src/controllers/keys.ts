@@ -174,12 +174,17 @@ export const useKeyMapper = () => {
     ) {
       autoRun = false
 
-      // Add Math.PI to face the direction the camera is looking (opposite of camera position)
-      const lookDirection = cameraAzimuth
-      x = Math.sin(lookDirection) * -1 // Invert x to move in the direction the camera is looking
-      z = Math.cos(lookDirection)
+      // Player rotation is aligned to the camera by the movement handler.
+      // Keep moving forward while allowing strafe and left/right keys to combine with it.
+      x = actions.strafeLeft() ? 1 : 0
+      x += actions.strafeRight() ? -1 : 0
+      x += actions.turnLeft() ? -1 : 0
+      x += actions.turnRight() ? 1 : 0
+      z = 1
+      if (forwardPressed) z -= 1
+      if (backwardPressed) z += 1
 
-      return { x, z, y: lookDirection }
+      return { x, z, y: cameraAzimuth }
     }
 
     if (autoRun) z += 1

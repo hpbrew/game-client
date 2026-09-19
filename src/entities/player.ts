@@ -343,10 +343,18 @@ export class Player extends THREE.Group {
 
     // While moving with the right mouse button, face the camera direction.
     if (followCameraWhileMoving) {
-      // Immediately align the player with the camera and move forward
-      this.setAction("run")
-      this.rotation.y = cameraAzimuth
-      this.move(delta, axis.x, axis.z)
+      // Face the combined movement direction while moving relative to the camera.
+      const movementAngle = cameraAzimuth + Math.atan2(-axis.x, axis.z || 0)
+      const targetRotation =
+        axis.x !== 0 || axis.z !== 0 ? movementAngle : cameraAzimuth
+      const rotationDelta = Math.atan2(
+        Math.sin(targetRotation - this.rotation.y),
+        Math.cos(targetRotation - this.rotation.y),
+      )
+      const rotationBlend = 1 - Math.exp(-this.turnSpeed * delta)
+      this.rotation.y += rotationDelta * rotationBlend
+      this.setAction(axis.x !== 0 || axis.z !== 0 ? "run" : "idle")
+      this.move(delta, axis.x, axis.z, { angle: cameraAzimuth })
       return
     }
 
