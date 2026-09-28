@@ -345,14 +345,8 @@ export class Player extends THREE.Group {
     if (followCameraWhileMoving) {
       // Face the combined movement direction while moving relative to the camera.
       const movementAngle = cameraAzimuth + Math.atan2(-axis.x, axis.z || 0)
-      const targetRotation =
+      this.rotation.y =
         axis.x !== 0 || axis.z !== 0 ? movementAngle : cameraAzimuth
-      const rotationDelta = Math.atan2(
-        Math.sin(targetRotation - this.rotation.y),
-        Math.cos(targetRotation - this.rotation.y),
-      )
-      const rotationBlend = 1 - Math.exp(-this.turnSpeed * delta)
-      this.rotation.y += rotationDelta * rotationBlend
       this.setAction(axis.x !== 0 || axis.z !== 0 ? "run" : "idle")
       this.move(delta, axis.x, axis.z, { angle: cameraAzimuth })
       return
@@ -369,6 +363,17 @@ export class Player extends THREE.Group {
       this.rotation.y += axis.y * this.turnSpeed * delta
     }
 
+    const movementAngle = this.rotation.y
+    if (axis.z > 0 && axis.x !== 0) {
+      const targetRotation = movementAngle + Math.atan2(-axis.x, axis.z)
+      const rotationDelta = Math.atan2(
+        Math.sin(targetRotation - this.rotation.y),
+        Math.cos(targetRotation - this.rotation.y),
+      )
+      const rotationBlend = 1 - Math.exp(-this.turnSpeed * delta)
+      this.rotation.y += rotationDelta * rotationBlend
+    }
+
     // If only rotating (no forward/backward or left/right movement)
     const isMoving = axis.x !== 0 || axis.z !== 0
     console.log("Axis input:", axis, "Is moving:", isMoving)
@@ -383,7 +388,7 @@ export class Player extends THREE.Group {
     if (isBackingUp) {
       this.setAction("walk")
       this.move(delta, axis.x, axis.z, {
-        angle: this.rotation.y,
+        angle: movementAngle,
         speedMultiplier: 0.6,
       }) // 60% of normal movement speed
       return
@@ -392,7 +397,7 @@ export class Player extends THREE.Group {
     // Moving forward
     // console.log(keyMapper.getActions())
     this.setAction("run")
-    this.move(delta, axis.x, axis.z, { angle: this.rotation.y })
+    this.move(delta, axis.x, axis.z, { angle: movementAngle })
 
     // if () {
     //   const angle = this.player.rotation.y
