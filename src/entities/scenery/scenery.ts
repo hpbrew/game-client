@@ -1,5 +1,8 @@
 import * as THREE from "three"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
+import { createProceduralTree } from "./procedural-tree"
+
+export type TreeSource = "model" | "procedural" | "mixed"
 
 export interface SceneryCollisionRadii {
   player: number
@@ -15,12 +18,14 @@ interface SceneryParams {
   scene: THREE.Scene
   terrainChunkManager: any // TODO: type properly
   player: THREE.Object3D
+  treeSource?: TreeSource
 }
 
 export function useScenery({
   scene,
   terrainChunkManager,
   player,
+  treeSource = "mixed",
 }: SceneryParams) {
   const loader = new GLTFLoader()
   const sceneryObjects: THREE.Object3D[] = []
@@ -41,32 +46,48 @@ export function useScenery({
 
   // Load the tree model once
   let treeModel: THREE.Object3D | null = null
-  const url = `${import.meta.env.BASE_URL}models/new/InitialTree.glb`
-  loader.load(
-    url,
-    (gltf) => {
-      treeModel = gltf.scene
-      console.log("Tree model loaded")
-    },
-    undefined,
-    (err) => {
-      console.error("Failed to load InitialTree.glb:", err)
-    },
-  )
+  let treeModelLoadFailed = false
+  if (treeSource !== "procedural") {
+    const url = `${import.meta.env.BASE_URL}models/new/InitialTree.glb`
+    loader.load(
+      url,
+      (gltf) => {
+        treeModel = gltf.scene
+        console.log("Tree model loaded")
+      },
+      undefined,
+      (err) => {
+        treeModelLoadFailed = true
+        console.error("Failed to load InitialTree.glb:", err)
+      },
+    )
+  }
+
+  function getTreeSeed(pos: THREE.Vector3) {
+    const value = Math.sin(pos.x * 12.9898 + pos.z * 78.233) * 43758.5453
+    return Math.floor(Math.abs(value))
+  }
 
   function loadScenery(pos: THREE.Vector3) {
-    if (!treeModel) return // Wait for model to load
+    const seed = getTreeSeed(pos)
+    const useModel =
+      treeSource === "model" ||
+      (treeSource === "mixed" && seed % 2 === 0 && !treeModelLoadFailed)
 
-    const model = treeModel.clone()
-    model.position.copy(pos)
-    model.traverse((child) => {
+    if (useModel && !treeModel) return // Wait for the model or its load failure.
+
+    const sceneryObject = useModel
+      ? treeModel!.clone(true)
+      : createProceduralTree(seed)
+    sceneryObject.position.copy(pos)
+    sceneryObject.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true
         child.receiveShadow = true
       }
     })
-    scene.add(model)
-    sceneryObjects.push(model)
+    scene.add(sceneryObject)
+    sceneryObjects.push(sceneryObject)
     loadedPositions.add(`${pos.x},${pos.y},${pos.z}`)
   }
 
